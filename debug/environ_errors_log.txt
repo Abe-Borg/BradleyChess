@@ -1,0 +1,6 @@
+<<<<<<< HEAD
+An error occurred at environ.load_chessboard() for Game 81967: illegal san: 'g5' in rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1, unable to load chessboard with g5========== End of Environ.load_chessboard ==========
+
+
+=======
+>>>>>>> 8c653dccda555e0ba3b936142680fd503fb43fa2
