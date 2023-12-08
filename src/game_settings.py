@@ -1,6 +1,7 @@
 import chess.engine
 import pandas as pd
 from pathlib import Path
+import chess
 
 base_directory = Path(__file__).parent
 

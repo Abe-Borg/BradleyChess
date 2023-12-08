@@ -3,59 +3,57 @@ import game_settings
 import pandas as pd
 import time
 import Bradley
+import chess
 
 # import logging
 # import log_config
 # logger = logging.getLogger(__name__)
-# training_chess_data = chess_data.sample(game_settings.training_sample_size)
-
  
 if __name__ == '__main__':
 
     # ========== GENERATE Q ESTIMATES ==========
-    # chess_data_file_path = game_settings.chess_pd_dataframe_file_path_part_1
-    # chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
-    # sample_chess_data = chess_data.sample(game_settings.training_sample_size)
-
-    # bradley = Bradley.Bradley(sample_chess_data)
-    
-    # start_time = time.time()
-
-    # try:
-    #     bradley.generate_Q_est_df() # this method closes the game engine
-    # except Exception as e:
-    #     print(f'geneate q est interrupted because of:  {e}')
-    #     quit()
-    
-    # end_time = time.time()
-    # total_time = end_time - start_time
-    # print('generate q est is complete')
-    # print(f'it took: {total_time} for {game_settings.training_sample_size} games\n')
-    
-
-    # ========== IDENTIFY AND REMOVE CORRUPTED GAMES FROM CHESS DATABASE ==========
-    chess_data_file_path = game_settings.chess_pd_dataframe_file_path_part_14_part_8
+    chess_data_file_path = game_settings.chess_pd_dataframe_file_path_part_1
 
     chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
-
     bradley = Bradley.Bradley(chess_data)
+    
     start_time = time.time()
 
     try:
-        bradley.identify_corrupted_games()
-        bradley.engine.quit()
-        
-        chess_data.drop(bradley.corrupted_games_list, inplace = True)
+        bradley.generate_Q_est_df() # this method closes the game engine
     except Exception as e:
-        print(f'corrupted games identification interrupted because of:  {e}')
+        print(f'geneate q est interrupted because of:  {e}')
         quit()
     
     end_time = time.time()
     total_time = end_time - start_time
-    print('corrupted games identification is complete')
+    print('generate q est is complete')
     print(f'it took: {total_time} seconds\n')
+    
 
-    chess_data.to_pickle(chess_data_file_path, compression = 'zip')
+    # ========== IDENTIFY AND REMOVE CORRUPTED GAMES FROM CHESS DATABASE ==========
+    # chess_data_file_path = game_settings.chess_pd_dataframe_file_path_part_14_part_8
+
+    # chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
+
+    # bradley = Bradley.Bradley(chess_data)
+    # start_time = time.time()
+
+    # try:
+    #     bradley.identify_corrupted_games()
+    #     bradley.engine.quit()
+        
+    #     chess_data.drop(bradley.corrupted_games_list, inplace = True)
+    # except Exception as e:
+    #     print(f'corrupted games identification interrupted because of:  {e}')
+    #     quit()
+    
+    # end_time = time.time()
+    # total_time = end_time - start_time
+    # print('corrupted games identification is complete')
+    # print(f'it took: {total_time} seconds\n')
+
+    # chess_data.to_pickle(chess_data_file_path, compression = 'zip')
 
 
     # # ========================= train new agents ========================= # 
