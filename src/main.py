@@ -3,6 +3,7 @@ import game_settings
 import pandas as pd
 import time
 import Bradley
+import chess
 
 # import logging
 # import log_config
@@ -12,7 +13,7 @@ if __name__ == '__main__':
 
     # ========== GENERATE Q ESTIMATES ==========
     chess_data_file_path = game_settings.chess_pd_dataframe_file_path_part_1
-    
+
     chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
     bradley = Bradley.Bradley(chess_data)
     
