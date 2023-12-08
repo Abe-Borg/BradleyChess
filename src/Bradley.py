@@ -20,7 +20,6 @@ class Bradley:
         engine (chess.engine.SimpleEngine): A Stockfish engine used to analyze positions during training.
     """
     def __init__(self, chess_data: pd.DataFrame):
-        self.q_est_log = open(game_settings.q_est_log_filepath, 'a')
         self.errors_file = open(game_settings.bradley_errors_filepath, 'a')
         self.initial_training_results = open(game_settings.initial_training_results_filepath, 'a')
         self.additional_training_results = open(game_settings.additional_training_results_filepath, 'a')
@@ -41,7 +40,6 @@ class Bradley:
         self.errors_file.close()
         self.initial_training_results.close()
         self.additional_training_results.close()
-        self.q_est_log.close()
     ### end of Bradley destructor ###
 
     def receive_opp_move(self, chess_move: str) -> bool:                                                                                 
@@ -589,9 +587,11 @@ class Bradley:
         ### END OF FOR LOOP THROUGH CHESS DB ###
     # end of identify_corrupted_games
 
-    def generate_Q_est_df(self) -> None:
+    def generate_Q_est_df(self, q_est_vals_file_path) -> None:
         """Generates a dataframe containing the estimated Q-values for each chess move in the chess database.
         """
+        q_est_vals_file = open(q_est_vals_file_path, 'a')
+
         try:
             ### FOR EACH GAME IN THE TRAINING SET ###
             for game_num_str in self.chess_data.index:
@@ -604,7 +604,7 @@ class Bradley:
                     self.errors_file.write(f'at: {game_num_str}\n')
                     break
                 
-                self.q_est_log.write(f'{game_num_str}\n')
+                q_est_vals_file.write(f'{game_num_str}\n')
 
                 ### LOOP PLAYS THROUGH ONE GAME ###
                 while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
@@ -643,7 +643,7 @@ class Bradley:
                     else: # current game continues
                         try:
                             W_est_Qval: int = self.find_estimated_Q_value()
-                            self.q_est_log.write(f'{curr_turn_for_q_est}, {W_est_Qval}\n')
+                            q_est_vals_file.write(f'{curr_turn_for_q_est}, {W_est_Qval}\n')
                         except Exception as e:
                             self.errors_file.write(f'An error occurred while retrieving W_est_Qval: {e}\n')
                             self.errors_file.write(f"at White turn, failed to find_estimated_Q_value\n")
@@ -686,7 +686,7 @@ class Bradley:
                     else: # current game continues
                         try:
                             B_est_Qval: int = self.find_estimated_Q_value()
-                            self.q_est_log.write(f'{curr_turn_for_q_est}, {B_est_Qval}\n') 
+                            q_est_vals_file.write(f'{curr_turn_for_q_est}, {B_est_Qval}\n') 
                         except Exception as e:
                             self.errors_file.write(f"at Black turn, failed to find_estimated_Qvalue because error: {e}\n")
                             self.errors_file.write(f'curr state is :{curr_state}\n')
