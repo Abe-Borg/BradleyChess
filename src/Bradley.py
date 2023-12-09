@@ -703,8 +703,7 @@ class Bradley:
                 ### END OF CURRENT GAME LOOP ###
 
                 # create a newline between games in the Q_est log file.
-                if game_settings.PRINT_Q_EST:
-                    self.q_est_log.write('\n')
+                q_est_vals_file.write('\n')
 
                 self.environ.reset_environ() # reset and go to next game in training set
         finally:
