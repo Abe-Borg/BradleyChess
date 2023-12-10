@@ -12,8 +12,8 @@ import chess
 if __name__ == '__main__':
 
     # ========== GENERATE Q ESTIMATES ==========
-    chess_data_file_path = game_settings.chess_pd_dataframe_file_path_part_2
-    est_q_vals_file_path = game_settings.est_q_vals_file_path_part_2
+    chess_data_file_path = game_settings.chess_pd_dataframe_file_path_part_3
+    est_q_vals_file_path = game_settings.est_q_vals_file_path_part_3
 
     chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
     bradley = Bradley.Bradley(chess_data)
