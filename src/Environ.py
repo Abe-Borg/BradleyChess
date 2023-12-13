@@ -1,5 +1,4 @@
 import game_settings
-import pandas as pd
 import chess
 
 class Environ:
