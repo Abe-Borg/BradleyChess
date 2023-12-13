@@ -23,7 +23,7 @@ if __name__ == '__main__':
     try:
         bradley.generate_Q_est_df(est_q_vals_file_path) # this method closes the game engine
     except Exception as e:
-        print(f'geneate q est interrupted because of:  {e}')
+        print(f'generate q est interrupted because of:  {e}')
         quit()
     
     end_time = time.time()
