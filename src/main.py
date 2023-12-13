@@ -3,7 +3,6 @@ import game_settings
 import pandas as pd
 import time
 import Bradley
-import chess
 
 # import logging
 # import log_config
