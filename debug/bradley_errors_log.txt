@@ -1,8 +1,0 @@
-at Bradley.rl_agent_plays_move. An error occurred at Game 15464: 
-failed to load_chessboard with move Qxg1
-An error occurred at rl_agent_plays_move: 
-at: Game 15464
-at Bradley.rl_agent_plays_move. An error occurred at Game 14817: 
-failed to load_chessboard with move Ke8
-An error occurred at rl_agent_plays_move: 
-at: Game 14817

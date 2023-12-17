@@ -1,6 +1,0 @@
-An error occurred at environ.load_chessboard() for Game 15464: illegal san: 'Qxg1' in rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1, unable to load chessboard with Qxg1========== End of Environ.load_chessboard ==========
-
-
-An error occurred at environ.load_chessboard() for Game 14817: illegal san: 'Ke8' in rnb1k2r/1p1nqppp/p2bp3/8/3N4/2N1B3/PPP1BPPP/R2Q1RK1 b kq - 3 10, unable to load chessboard with Ke8========== End of Environ.load_chessboard ==========
-
-
