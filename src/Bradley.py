@@ -604,7 +604,7 @@ class Bradley:
                     self.errors_file.write(f'at: {game_num_str}\n')
                     break
                 
-                q_est_vals_file.write(f'{game_num_str}, ')
+                q_est_vals_file.write(f'{game_num_str}\n')
 
                 ### LOOP PLAYS THROUGH ONE GAME ###
                 while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
