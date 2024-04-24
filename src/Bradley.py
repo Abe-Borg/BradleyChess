@@ -5,6 +5,7 @@ import chess
 import pandas as pd
 import re
 import copy
+import time
 
 class Bradley:
     """Acts as the single point of communication between the RL agent and the player.
@@ -505,12 +506,12 @@ class Bradley:
 
     def identify_corrupted_games(self) -> None:
         ### FOR EACH GAME IN THE CHESS DB ###
+        game_count = 0
         for game_num_str in self.chess_data.index:
+            start_time = time.time()
+
             num_chess_moves_curr_training_game: int = self.chess_data.at[game_num_str, 'PlyCount']
 
-            # Print progress notification every 1000 games
-            if int(game_num_str) % 1000 == 0:
-                print(f"Notification: Game {game_num_str} is done")
 
             try:
                 curr_state = self.environ.get_curr_state()
@@ -587,6 +588,13 @@ class Bradley:
 
             # this curr game is done, reset environ to prepare for the next game
             self.environ.reset_environ() # reset and go to next game in chess database
+            
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            # Print progress notification every 1000 games
+            if game_count % 1000 == 0:
+                print(f"Notification: Game {game_count} is done. Time elapsed: {elapsed_time:.2f} seconds.")
+            game_count += 1
         
         ### END OF FOR LOOP THROUGH CHESS DB ###
     # end of identify_corrupted_games
