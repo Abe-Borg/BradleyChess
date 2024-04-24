@@ -508,6 +508,10 @@ class Bradley:
         for game_num_str in self.chess_data.index:
             num_chess_moves_curr_training_game: int = self.chess_data.at[game_num_str, 'PlyCount']
 
+            # Print progress notification every 1000 games
+            if int(game_num_str) % 1000 == 0:
+                print(f"Notification: Game {game_num_str} is done")
+
             try:
                 curr_state = self.environ.get_curr_state()
             except Exception as e:
