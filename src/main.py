@@ -11,8 +11,8 @@ import Bradley
 if __name__ == '__main__':
 
     # ========== GENERATE Q ESTIMATES ==========
-    chess_data_file_path = game_settings.chess_games_filepath_part_40
-    est_q_vals_file_path = game_settings.est_q_vals_filepath_part_40
+    chess_data_file_path = game_settings.chess_games_filepath_part_50
+    est_q_vals_file_path = game_settings.est_q_vals_filepath_part_50
 
     chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
     chess_data = chess_data.head(game_settings.training_sample_size)
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     start_time = time.time()
 
     try:
-        bradley.generate_Q_est_df(est_q_vals_file_path) # this method closes the game engine
+        bradley.generate_q_est_vals(est_q_vals_file_path) # this method closes the game engine
     except Exception as e:
         print(f'generate q est interrupted because of:  {e}')
         quit()

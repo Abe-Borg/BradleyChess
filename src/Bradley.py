@@ -336,7 +336,7 @@ class Bradley:
             self.environ.update_curr_state()
         except Exception as e:
             self.errors_file.write(f'at Bradley.rl_agent_plays_move. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
-            self.errors_file.write(f'Current state is: {curr_state}\n')
+            self.errors_file.write(f'Current state is: {self.environ.get_curr_state()}\n')
             raise Exception from e
     # end of rl_agent_plays_move
 
