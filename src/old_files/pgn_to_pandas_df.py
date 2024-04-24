@@ -4,6 +4,36 @@ import game_settings
 import time
 
 def pgn_to_dataframe(input_file_path):
+    """
+        Converts a PGN (Portable Game Notation) file containing one or more chess games into a pandas DataFrame.
+
+        This function reads a PGN file specified by the input path. Each game is processed to extract key game details
+        and individual moves in standard algebraic notation. The result is structured into a DataFrame where each row represents
+        a single game, columns include move sequences, ply count, and game results. Rows are labeled from 'Game 1' onwards.
+        Games exceeding a specified number of turns can be filtered out based on `game_settings.max_num_turns_per_player`.
+
+        Parameters:
+        - input_file_path (str): The file path to the PGN file containing the chess games.
+
+        Returns:
+        - pd.DataFrame: A DataFrame where each row corresponds to a game. The DataFrame contains columns for each move (labeled as 'W1', 'B1', ..., indicating White or Black's moves),
+        the total ply count of the game, and the game's result. Moves are represented in standard algebraic notation. The DataFrame is filtered to exclude games
+        with a ply count outside the acceptable range (if `game_settings.max_num_turns_per_player` is defined).
+
+        Raises:
+        - FileNotFoundError: If the input file path does not point to an existing file.
+        - ValueError: If the file is not a valid PGN file or is incorrectly formatted.
+        - AttributeError: If `game_settings.max_num_turns_per_player` is not set when trying to filter games based on ply count.
+
+        Example:
+        >>> chess_df = pgn_to_dataframe("path/to/your/games.pgn")
+        >>> print(chess_df.head())
+        Outputs the first few rows of the DataFrame with game details and moves.
+
+        Note:
+        - The function depends on the `chess` module for reading PGN files and the `pandas` module for creating the DataFrame.
+        - It is assumed that the `game_settings.max_num_turns_per_player` is defined and accessible within the scope of this function.
+    """
     games_list = []
 
     with open(input_file_path, 'r', encoding='utf-8') as file:

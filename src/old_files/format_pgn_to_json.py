@@ -6,6 +6,7 @@ import json
 import game_settings
 import time
 
+# abandone this approach because it was too slow and the json files were too large
 
 def load_pgn_file(input_file_path):
     """Loads a PGN file and returns a list of games.

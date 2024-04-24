@@ -3,6 +3,8 @@ import json
 import time
 import game_settings
 
+# abandoned this approach because it was too slow and the json files were too large
+
 def convert_json_to_df(input_file_path, output_file_path):
     # Load and read the JSON file
     with open(input_file_path, 'r') as file:
