@@ -517,6 +517,8 @@ class Bradley:
                 self.errors_file.write(f'An error occurred at self.environ.get_curr_state: {e}\n')
                 self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
                 self.errors_file.write(f'at game: {game_num_str}\n')
+                self.corrupted_games_list.append(game_num_str)
+                self.errors.file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
                 break
 
             ### LOOP PLAYS THROUGH ONE GAME ###
@@ -527,6 +529,8 @@ class Bradley:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
                     self.errors_file.write(f'W_chess_move is empty at state: {curr_state}\n')
                     self.errors_file.write(f'at game: {game_num_str}\n')
+                    self.corrupted_games_list.append(game_num_str)
+                    self.errors.file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
                     break # and go to the next game. this game is over.
 
                 ### WHITE AGENT PLAYS THE SELECTED MOVE ###
@@ -535,6 +539,8 @@ class Bradley:
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.errors_file.write(f'at game: {game_num_str}\n')
+                    self.corrupted_games_list.append(game_num_str)
+                    self.errors.file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
                     break # and go to the next game. this game is over.
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
@@ -544,6 +550,8 @@ class Bradley:
                     self.errors_file.write(f'An error occurred at get_curr_state: {e}\n')
                     self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
                     self.errors_file.write(f'at game: {game_num_str}\n')
+                    self.corrupted_games_list.append(game_num_str)
+                    self.errors.file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
                 
                 if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
                     break # and go to next game
@@ -554,6 +562,8 @@ class Bradley:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
                     self.errors_file.write(f'B_chess_move is empty at state: {curr_state}\n')
                     self.errors_file.write(f'at: {game_num_str}\n')
+                    self.corrupted_games_list.append(game_num_str)
+                    self.errors.file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
                     break # game is over, go to next game.
 
                 ##### BLACK AGENT PLAYS SELECTED MOVE #####
@@ -562,6 +572,8 @@ class Bradley:
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.errors_file.write(f'at {game_num_str}\n')
+                    self.corrupted_games_list.append(game_num_str)
+                    self.errors.file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
                     break 
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
@@ -570,6 +582,8 @@ class Bradley:
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at environ.get_curr_state: {e}\n')
                     self.errors_file.write(f'at: {game_num_str}\n')
+                    self.corrupted_games_list.append(game_num_str)
+                    self.errors.file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
                     break
 
                 if self.environ.board.is_game_over() or not curr_state['legal_moves']:
@@ -581,6 +595,8 @@ class Bradley:
                     self.errors_file.write(f'An error occurred: {e}\n')
                     self.errors_file.write("failed to get_curr_state\n") 
                     self.errors_file.write(f'at: {game_num_str}\n')
+                    self.corrupted_games_list.append(game_num_str)
+                    self.errors.file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
                     break
             ### END OF CURRENT GAME LOOP ###
 
