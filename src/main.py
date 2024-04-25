@@ -53,6 +53,8 @@ if __name__ == '__main__':
     total_time = end_time - start_time
     print('corrupted games identification is complete')
     print(f'it took: {total_time} seconds\n')
+    print(f'number of corrupted games: {len(bradley.corrupted_games_list)}')
+    print(f'corrupted games: {bradley.corrupted_games_list}\n')
 
     chess_data.to_pickle(chess_data_file_path, compression = 'zip')
 
