@@ -509,9 +509,7 @@ class Bradley:
         game_count = 0
         for game_num_str in self.chess_data.index:
             start_time = time.time()
-
             num_chess_moves_curr_training_game: int = self.chess_data.at[game_num_str, 'PlyCount']
-
 
             try:
                 curr_state = self.environ.get_curr_state()
