@@ -330,7 +330,7 @@ class Bradley:
         except Exception as e:
             self.errors_file.write(f'at Bradley.rl_agent_plays_move. An error occurred at {curr_game}: {e}\n')
             self.errors_file.write(f"failed to load_chessboard with move {chess_move}\n")
-            self.corrupted_games_list.append(curr_game)
+            # self.corrupted_games_list.append(curr_game)
             raise Exception from e
 
         try:
