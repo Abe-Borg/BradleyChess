@@ -44,7 +44,7 @@ if __name__ == '__main__':
         bradley.identify_corrupted_games()
         bradley.engine.quit()
         
-        chess_data.drop(bradley.corrupted_games_list, inplace = True)
+        # chess_data.drop(bradley.corrupted_games_list, inplace = True)
     except Exception as e:
         print(f'corrupted games identification interrupted because of:  {e}')
         quit()
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     print(f'number of corrupted games: {len(bradley.corrupted_games_list)}')
     print(f'corrupted games: {bradley.corrupted_games_list}\n')
 
-    chess_data.to_pickle(chess_data_file_path, compression = 'zip')
+    # chess_data.to_pickle(chess_data_file_path, compression = 'zip')
 
 
     # # ========================= train new agents ========================= # 
