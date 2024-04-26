@@ -34,17 +34,18 @@ if __name__ == '__main__':
 
     # ========== IDENTIFY AND REMOVE CORRUPTED GAMES FROM CHESS DATABASE ==========
     chess_data_file_path = game_settings.chess_games_filepath_part_1
-
     chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
+    print(f'Total number of rows before cleanup: {chess_data.shape[0]}')
 
     bradley = Bradley.Bradley(chess_data)
     start_time = time.time()
 
     try:
         bradley.identify_corrupted_games()
-        bradley.engine.quit()
-        
-        # chess_data.drop(bradley.corrupted_games_list, inplace = True)
+        bradley.engine.quit()    
+        chess_data.drop(bradley.corrupted_games_list, inplace = True)
+        print(f'Total number of rows after cleanup: {chess_data.shape[0]}')
+
     except Exception as e:
         print(f'corrupted games identification interrupted because of:  {e}')
         quit()
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     print(f'number of corrupted games: {len(bradley.corrupted_games_list)}')
     print(f'corrupted games: {bradley.corrupted_games_list}\n')
 
-    # chess_data.to_pickle(chess_data_file_path, compression = 'zip')
+    chess_data.to_pickle(chess_data_file_path, compression = 'zip')
 
 
     # # ========================= train new agents ========================= # 
