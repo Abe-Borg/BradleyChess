@@ -33,7 +33,8 @@ if __name__ == '__main__':
     
 
     # ========== IDENTIFY AND REMOVE CORRUPTED GAMES FROM CHESS DATABASE ==========
-    chess_data_file_path = game_settings.chess_games_filepath_part_1
+    chess_data_file_path = game_settings.chess_games_filepath_part_10
+
     chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
     print(f'Total number of rows before cleanup: {chess_data.shape[0]}')
 
