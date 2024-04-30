@@ -33,9 +33,11 @@ if __name__ == '__main__':
     
 
     # ========== IDENTIFY AND REMOVE CORRUPTED GAMES FROM CHESS DATABASE ==========
-    chess_data_file_path = game_settings.chess_games_filepath_part_20
+    chess_data_file_path = game_settings.chess_games_filepath_part_26
 
     chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
+    chess_data.drop(chess_data[chess_data['PlyCount'] < 24].index, inplace = True)
+    
     print(f'Total number of rows before cleanup: {chess_data.shape[0]}')
 
     bradley = Bradley.Bradley(chess_data)
