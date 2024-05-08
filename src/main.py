@@ -33,7 +33,7 @@ if __name__ == '__main__':
     
 
     # ========== IDENTIFY AND REMOVE CORRUPTED GAMES FROM CHESS DATABASE ==========
-    chess_data_file_path = game_settings.chess_games_filepath_part_40
+    chess_data_file_path = game_settings.chess_games_filepath_part_50
 
     chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
     chess_data.drop(chess_data[chess_data['PlyCount'] < 24].index, inplace = True)
