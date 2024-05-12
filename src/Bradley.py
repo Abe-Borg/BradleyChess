@@ -286,6 +286,7 @@ class Bradley:
         """ continues to train the agent, this time the agents make their own decisions instead 
             of playing through the database.
         """ 
+        ### placeholder, will implement this function later.
     ### end of continue_training_rl_agents
     
     def assign_points_to_Q_table(self, chess_move: str, curr_turn: str, curr_Qval: int, rl_agent_color: str) -> None:
