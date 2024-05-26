@@ -10,6 +10,8 @@ class Environ:
             board (chess.Board): An object representing the chessboard.
             turn_list (list[str]): A list that is utilized to keep track of the current turn (W1, B1 ... Wn, Bn).
             turn_index (int): An integer that is incremented as each player makes a move.
+            max_turns (int): An integer that represents the maximum number of turns in a game.
+            errors_file (file): A file object that is used to log errors.
         """
         self.errors_file = open(game_settings.environ_errors_filepath, 'a')
         self.board: chess.Board = chess.Board()
