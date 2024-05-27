@@ -25,15 +25,25 @@ class Bradley:
         corrupted_games_list (list): A list of games that are corrupted and cannot be used for training.
     """
     def __init__(self, chess_data: pd.DataFrame):
+        """
+        Initializes a Bradley object with chess data, environment, agents, and a chess engine.
+        This method initializes a Bradley object by setting the chess data, creating an environment, creating two 
+        agents (one for white and one for black), and starting a chess engine. It also opens the errors file and 
+        the training results files in append mode, and initializes an empty list for corrupted games.
+
+        Side Effects:
+            Opens the errors file, the initial training results file, and the additional training results file in 
+            append mode.
+            Modifies the chess_data, environ, W_rl_agent, B_rl_agent, corrupted_games_list, and engine attributes.
+        """
+
         self.errors_file = open(game_settings.bradley_errors_filepath, 'a')
         self.initial_training_results = open(game_settings.initial_training_results_filepath, 'a')
         self.additional_training_results = open(game_settings.additional_training_results_filepath, 'a')
-        
         self.chess_data = chess_data
         self.environ = Environ.Environ()
         self.W_rl_agent = Agent.Agent('W', self.chess_data)
         self.B_rl_agent = Agent.Agent('B', self.chess_data)
-
         self.corrupted_games_list = [] # list of games that are corrupted and cannot be used for training
 
         # stockfish is used to analyze positions during training this is how we estimate the q value 
@@ -48,14 +58,31 @@ class Bradley:
     ### end of Bradley destructor ###
 
     def receive_opp_move(self, chess_move: str) -> bool:                                                                                 
-        """Receives the opponent's chess move and loads it onto the chessboard.
+        """
+        Receives the opponent's chess move and updates the environment.
+
+        This method receives the opponent's chess move, loads it onto the chessboard, and updates the current state 
+        of the environment. If an error occurs while loading the chessboard or updating the current state, an error 
+        message is written to the errors file and an exception is raised.
+
         Args:
             chess_move (str): A string representing the opponent's chess move, such as 'Nf3'.
+
         Returns:
-            bool: A boolean value indicating whether the move was successfully loaded.
+            bool: A boolean value indicating whether the move was successfully loaded and the current state was 
+            successfully updated. Returns False if an error occurred while loading the chessboard, and does not 
+            attempt to update the current state.
+
         Raises:
-            Exception: An exception is raised if the chessboard fails to load the move.
+            Exception: An exception is raised if the chessboard fails to load the move or if the current state fails 
+            to update. The original exception is included in the raised exception.
+
+        Side Effects:
+            Modifies the chessboard and the current state of the environment by loading the chess move and updating 
+            the current state.
+            Writes to the errors file if an error occurs.
         """
+    
         try:
             self.environ.load_chessboard(chess_move)
         except Exception as e:
@@ -73,18 +100,31 @@ class Bradley:
     ### end of receive_opp_move ###
 
     def rl_agent_selects_chess_move(self, rl_agent_color: str) -> str:
-        """The Agent selects a chess move and loads it onto the chessboard.
-        This method assumes that the agents have already been trained. This 
-        method is used during the actual game play between the computer and the user. 
-        It is not used during training.
-    
+        """
+        The Agent selects a chess move and loads it onto the chessboard.
+        This method allows the Reinforcement Learning (RL) agent to select a chess move and load it onto the 
+        chessboard. It is used during actual gameplay between the computer and the user, not during training. The 
+        method first gets the current state of the environment. If the list of legal moves is empty, an exception 
+        is raised. Depending on the color of the RL agent, the appropriate agent selects a move. The selected move 
+        is then loaded onto the chessboard and the current state of the environment is updated.
+
         Args:
             rl_agent_color (str): A string indicating the color of the RL agent, either 'W' or 'B'.
+
         Returns:
-            dict[str]: A dictionary containing the selected chess move string.
+            str: A string representing the selected chess move.
+
         Raises:
-            Exception: An exception is raised if the current state is not valid or if the legal moves are empty.
+            Exception: An exception is raised if the current state is not valid, if the list of legal moves is 
+            empty, if the chessboard fails to load the move, or if the current state fails to update. The original 
+            exception is included in the raised exception.
+
+        Side Effects:
+            Modifies the chessboard and the current state of the environment by loading the chess move and updating 
+            the current state.
+            Writes to the errors file if an error occurs.
         """
+
         try:
             curr_state = self.environ.get_curr_state()
         except Exception as e:
@@ -119,9 +159,21 @@ class Bradley:
     ### end of rl_agent_selects_chess_move
 
     def is_game_over(self) -> bool:
-        """Determines whether the game is still ongoing. this is used only
-        during phase 2 of training and also during human vs agent play.
         """
+        Determines whether the game is over.
+        This method determines whether the game is over based on three conditions: if the game is over according to 
+        the chessboard, if the current turn index has reached the maximum turn index defined in the game settings, 
+        or if there are no legal moves left. This method is used during phase 2 of training and also during human 
+        vs agent play.
+
+        Returns:
+            bool: A boolean value indicating whether the game is over. Returns True if any of the three conditions 
+            are met, and False otherwise.
+
+        Side Effects:
+            None.
+        """
+
         if self.environ.board.is_game_over() or (self.environ.turn_index >= game_settings.max_turn_index) or not self.environ.get_legal_moves():
             return True
         else:
@@ -129,13 +181,27 @@ class Bradley:
     ### end of is_game_over
         
     def get_game_outcome(self) -> str:
-        """ Returns the outcome of the chess game.
-        Returns:
-            chess.Outcome or str: An instance of the `chess.Outcome` class with a `result()` 
-            method that returns the outcome of the game
-        Raises:
-            AttributeError: An AttributeError is raised if the game outcome cannot be determined.
         """
+        Returns the outcome of the chess game.
+        This method returns the outcome of the chess game. It calls the `outcome` method on the chessboard, which 
+        returns an instance of the `chess.Outcome` class, and then calls the `result` method on this instance to 
+        get the outcome of the game. If an error occurs while getting the game outcome, an error message is 
+        returned.
+
+        Returns:
+            str: A string representing the outcome of the game. The outcome is a string in the format '1-0', '0-1', 
+            or '1/2-1/2', representing a win for white, a win for black, or a draw, respectively. If an error 
+            occurred while getting the game outcome, the returned string starts with 'error at get_game_outcome: ' 
+            and includes the error message.
+
+        Raises:
+            AttributeError: An AttributeError is raised if the game outcome cannot be determined. The original 
+            exception is included in the raised exception.
+
+        Side Effects:
+            None.
+        """
+
         try:
             game_outcome = self.environ.board.outcome().result()
             return game_outcome
@@ -144,10 +210,27 @@ class Bradley:
     ### end of get_game_outcome
     
     def get_game_termination_reason(self) -> str:
-        """returns a string that describes the reason for the game ending.
-        Raises:
-            AttributeError: An AttributeError is raised if the game termination reason cannot be determined.
         """
+        Returns a string that describes the reason for the game ending.
+        This method returns a string that describes the reason for the game ending. It calls the `outcome` method 
+        on the chessboard, which returns an instance of the `chess.Outcome` class, and then gets the termination 
+        reason from this instance. If an error occurs while getting the termination reason, an error message is 
+        returned.
+
+        Returns:
+            str: A string representing the reason for the game ending. The termination reason is one of the 
+            following: 'normal', 'abandoned', 'death', 'emergency', 'rules infraction', 'time forfeit', or 'unknown'. 
+            If an error occurred while getting the termination reason, the returned string starts with 'error at 
+            get_game_termination_reason: ' and includes the error message.
+
+        Raises:
+            AttributeError: An AttributeError is raised if the termination reason cannot be determined. The original 
+            exception is included in the raised exception.
+
+        Side Effects:
+            None.
+        """
+
         try:
             termination_reason = str(self.environ.board.outcome().termination)
             return termination_reason
@@ -156,9 +239,36 @@ class Bradley:
     ### end of get_game_termination_reason
     
     def train_rl_agents(self, est_q_val_table: pd.DataFrame) -> None:
-        """Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
-        Two rl agents train each other by playing games from a database exactly as shown, and learning from that.
-        """ 
+        """
+        Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
+
+        This method trains two RL agents by having them play games from a database exactly as shown, and learning from that. 
+        The training process involves the following steps:
+
+        1. For each game in the training set, the method initializes the Q values for the white and black agents.
+        2. It then enters a loop that continues until the current turn index reaches the number of moves in the current training game.
+        3. On each turn, the agent chooses an action based on the current state and the policy. If an error occurs while choosing an action, the method writes an error message to the errors file and moves on to the next game.
+        4. The method then assigns points to the Q table for the agent based on the chosen action, the current turn, and the current Q value.
+        5. The agent then plays the chosen move. If an error occurs while playing the move, the method writes an error message to the errors file and moves on to the next game.
+        6. The method then gets the reward for the move and updates the current state.
+        7. If the game is not over, the method finds the estimated Q value for the agent and calculates the next Q value using the SARSA algorithm.
+        8. The method then updates the current Q value to the next Q value and gets the latest current state.
+        9. After all turns in the current game have been played, the method resets the environment to prepare for the next game.
+        10. Once all games in the training set have been played, the method sets the `is_trained` flag of the agents to True.
+
+        Args:
+            est_q_val_table (pd.DataFrame): A DataFrame containing the estimated Q values for each game in the training set.
+
+        Raises:
+            Exception: An exception is raised if an error occurs while getting the current state, choosing an action, playing a move, or getting the latest current state. The exception is written to the errors file.
+
+        Side Effects:
+            Modifies the Q tables of the RL agents and sets their `is_trained` flag to True.
+            Writes the start and end of each game, any errors that occur, and the final state of the chessboard to the initial training results file.
+            Writes any errors that occur to the errors file.
+            Resets the environment at the end of each game.
+        """
+
         ### FOR EACH GAME IN THE TRAINING SET ###
         for game_num_str in self.chess_data.index:
             num_chess_moves_curr_training_game: int = self.chess_data.at[game_num_str, 'PlyCount']
@@ -291,7 +401,6 @@ class Bradley:
         # training is complete, all games in database have been processed
         self.W_rl_agent.is_trained = True
         self.B_rl_agent.is_trained = True
-        
     ### end of train_rl_agents
 
     def continue_training_rl_agents(self, num_games_to_play: int) -> None:
@@ -302,13 +411,29 @@ class Bradley:
     ### end of continue_training_rl_agents
     
     def assign_points_to_Q_table(self, chess_move: str, curr_turn: str, curr_Qval: int, rl_agent_color: str) -> None:
-        """ Assigns points to the Q table for the given chess move, current turn, current Q value, and RL agent color.
+        """
+        Assigns points to the Q table for the given chess move, current turn, current Q value, and RL agent color.
+        This method assigns points to the Q table for the RL agent of the given color. It calls the 
+        `change_Q_table_pts` method on the RL agent, passing in the chess move, the current turn, and the current Q 
+        value. If a KeyError is raised because the chess move is not represented in the Q table, the method writes 
+        an error message to the errors file, updates the Q table to include the chess move, and tries to assign 
+        points to the Q table again.
+
         Args:
             chess_move (str): The chess move to assign points to in the Q table.
             curr_turn (str): The current turn of the game.
             curr_Qval (int): The current Q value for the given chess move.
             rl_agent_color (str): The color of the RL agent making the move.
+
+        Raises:
+            KeyError: A KeyError is raised if the chess move is not represented in the Q table. The exception is 
+            written to the errors file.
+
+        Side Effects:
+            Modifies the Q table of the RL agent by assigning points to the given chess move.
+            Writes to the errors file if a KeyError is raised.
         """
+
         if rl_agent_color == 'W':
             try:
                 self.W_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
@@ -332,12 +457,27 @@ class Bradley:
     # enf of assign_points_to_Q_table
 
     def rl_agent_plays_move(self, chess_move: str, curr_game) -> None:
-        """ This method is used during training and is responsible for:
-                1. Loading the chessboard with the given move.
-                2. Updating the current state of the environment.
+        """
+        Loads the chessboard with the given move and updates the current state of the environment.
+        This method is used during training. It first attempts to load the chessboard with the given move. If an 
+        error occurs while loading the chessboard, it writes an error message to the errors file and raises an 
+        exception. It then attempts to update the current state of the environment. If an error occurs while 
+        updating the current state, it writes an error message to the errors file and raises an exception.
+
         Args:
             chess_move (str): A string representing the chess move in standard algebraic notation.
+            curr_game: The current game being played during training.
+
+        Raises:
+            Exception: An exception is raised if an error occurs while loading the chessboard or updating the 
+            current state. The original exception is included in the raised exception.
+
+        Side Effects:
+            Modifies the chessboard and the current state of the environment by loading the chess move and updating 
+            the current state.
+            Writes to the errors file if an error occurs.
         """
+
         try:
             self.environ.load_chessboard(chess_move, curr_game)
         except Exception as e:
@@ -355,24 +495,36 @@ class Bradley:
     # end of rl_agent_plays_move
 
     def find_estimated_Q_value(self) -> int:
-        """ Estimates the Q-value for the RL agent's next action without actually playing the move.
+        """
+        Estimates the Q-value for the RL agent's next action without actually playing the move.
         This method simulates the agent's next action and the anticipated response from the opposing agent 
-        to estimate the Q-value.
-        The method:
+        to estimate the Q-value. The steps are as follows:
+
         1. Observes the next state of the chessboard after the agent's move.
         2. Analyzes the current state of the board to predict the opposing agent's response.
         3. Loads the board with the anticipated move of the opposing agent.
         4. Estimates the Q-value based on the anticipated state of the board.
-    
+
         The estimation of the Q-value is derived from analyzing the board state with the help of a chess engine 
         (like Stockfish). If there's no impending checkmate, the estimated Q-value is the centipawn score of 
         the board state. Otherwise, it's computed based on the impending checkmate turns multiplied by a predefined 
         mate score reward.
+
         After estimating the Q-value, the method reverts the board state to its original state before the simulation.
-        
+
         Returns:
             int: The estimated Q-value for the agent's next action.
+
+        Raises:
+            Exception: An exception is raised if an error occurs while analyzing the board state, loading the 
+            chessboard, popping the chessboard, or analyzing the board state for the estimated Q-value. The original 
+            exception is included in the raised exception.
+
+        Side Effects:
+            Modifies the state of the chessboard by loading and popping moves.
+            Writes to the errors file if an error occurs.
         """
+
         # RL agent just played a move. the board has changed, if stockfish analyzes the board, 
         # it will give points for the agent, based on the agent's latest move.
         # We also need the points for the ANTICIPATED next state, 
@@ -430,29 +582,72 @@ class Bradley:
 
     def find_next_Qval(self, curr_Qval: int, learn_rate: float, reward: int, discount_factor: float, est_Qval: int) -> int:
         """
-        Calculates the next Q-value
+        Calculates the next Q-value using the SARSA (State-Action-Reward-State-Action) algorithm.
+
+        This method calculates the next Q-value based on the current Q-value, the learning rate, the reward, the 
+        discount factor, and the estimated Q-value for the next state-action pair. The formula used is:
+
+            next_Qval = curr_Qval + learn_rate * (reward + (discount_factor * est_Qval) - curr_Qval)
+
+        This formula is derived from the SARSA algorithm, which is a model-free reinforcement learning method used 
+        to estimate the Q-values for state-action pairs in an environment.
+
         Args:
-            curr_Qval (int)
-            learn_rate (float): The learning rate, a value between 0 and 1.
+            curr_Qval (int): The current Q-value for the state-action pair.
+            learn_rate (float): The learning rate, a value between 0 and 1. This parameter controls how much the 
+            Q-value is updated on each iteration.
             reward (int): The reward obtained from the current action.
-            discount_factor (float): The discount factor to consider future rewards, a value between 0 and 1.
+            discount_factor (float): The discount factor, a value between 0 and 1. This parameter determines the 
+            importance of future rewards.
             est_Qval (int): The estimated Q-value for the next state-action pair.
+
         Returns:
-            int: The next Q-value.
+            int: The next Q-value, calculated using the SARSA algorithm.
+
+        Raises:
+            None.
+
+        Side Effects:
+            None.
         """
+
         next_Qval = int(curr_Qval + learn_rate * (reward + ((discount_factor * est_Qval) - curr_Qval)))
         return next_Qval
     # end of find_next_Qval
     
     def analyze_board_state(self, board: chess.Board) -> dict:
         """
-        Analyzes the current state of the chessboard using the Stockfish engine.
-        The analysis results include the mate score and centipawn score.
+        Analyzes the current state of the chessboard using the Stockfish engine and returns the analysis results.
+
+        This method uses the Stockfish engine to analyze the current state of the chessboard. The analysis results 
+        include the mate score, the centipawn score, and the anticipated next move. The method first checks if the 
+        board is in a valid state. If it's not, it writes an error message to the errors file and raises a ValueError.
+
+        The method then tries to analyze the board using the Stockfish engine. If an error occurs during the analysis, 
+        it writes an error message to the errors file and raises an Exception.
+
+        The method then tries to extract the mate score and the centipawn score from the analysis results. If an error 
+        occurs while extracting the scores, it writes an error message to the errors file and raises an Exception.
+
+        Finally, the method tries to extract the anticipated next move from the analysis results. If an error occurs 
+        while extracting the anticipated next move, it writes an error message to the errors file and raises an Exception.
+
         Args:
             board (chess.Board): The current state of the chessboard to analyze.
+
         Returns:
-            dict: Analysis results, including the mate score, centipawn score, and the anticipated next move. 
+            dict: A dictionary containing the analysis results. The dictionary includes the mate score, the centipawn 
+            score, and the anticipated next move.
+
+        Raises:
+            ValueError: A ValueError is raised if the board is in an invalid state.
+            Exception: An Exception is raised if an error occurs during the analysis, while extracting the scores, or 
+            while extracting the anticipated next move. The original exception is included in the raised exception.
+
+        Side Effects:
+            Writes to the errors file if an error occurs.
         """
+
         if not self.environ.board.is_valid():
             self.errors_file.write(f'at Bradley.analyze_board_state. Board is in invalid state\n')
             raise ValueError(f'at Bradley.analyze_board_state. Board is in invalid state\n')
@@ -496,12 +691,34 @@ class Bradley:
     ### end of analyze_board_state
  
     def get_reward(self, chess_move: str) -> int:
-        """Calculates the reward for a given chess move.
-        Args:
-            chess_move (str): A string representing the selected chess move.
-        Returns:
-            int: The reward based on the type of move as an integer.
         """
+        Calculates the reward for a given chess move based on the type of move.
+
+        This method calculates the reward for a given chess move by checking for specific patterns in the move string 
+        that correspond to different types of moves. The reward is calculated as follows:
+
+        1. If the move involves the development of a piece (N, R, B, Q), the reward is increased by the value 
+        associated with 'piece_development' in the game settings.
+        2. If the move involves a capture (indicated by 'x' in the move string), the reward is increased by the value 
+        associated with 'capture' in the game settings.
+        3. If the move involves a promotion (indicated by '=' in the move string), the reward is increased by the value 
+        associated with 'promotion' in the game settings. If the promotion is to a queen (indicated by '=Q' in the 
+        move string), the reward is further increased by the value associated with 'promotion_queen' in the game 
+        settings.
+
+        Args:
+            chess_move (str): A string representing the selected chess move in standard algebraic notation.
+
+        Returns:
+            int: The total reward for the given chess move, calculated based on the type of move.
+
+        Raises:
+            None.
+
+        Side Effects:
+            None.
+        """
+
         total_reward = 0
         # Check for piece development (N, R, B, Q)
         if re.search(r'[NRBQ]', chess_move):
@@ -518,6 +735,45 @@ class Bradley:
     ## end of get_reward
 
     def identify_corrupted_games(self) -> None:
+        """
+        Identifies corrupted games in the chess database and logs them in the errors file.
+
+        This method iterates over each game in the chess database and tries to play through the game using the 
+        reinforcement learning agents. If an error occurs at any point during the game, the game number is added to 
+        the list of corrupted games and the error is logged in the errors file.
+
+        The method first tries to get the current state of the game. If an error occurs, it logs the error and the 
+        current board state in the errors file, adds the game number to the list of corrupted games, and moves on to 
+        the next game.
+
+        The method then enters a loop where it alternates between the white and black agents choosing and playing 
+        moves. If an error occurs while choosing or playing a move, the method logs the error and the current state 
+        in the errors file, adds the game number to the list of corrupted games, and breaks out of the loop to move 
+        on to the next game.
+
+        After each move, the method tries to get the latest state of the game. If an error occurs, it logs the error 
+        and the current board state in the errors file, adds the game number to the list of corrupted games, and 
+        breaks out of the loop to move on to the next game.
+
+        The loop continues until the game is over, there are no more legal moves, or the maximum number of moves for 
+        the current training game has been reached.
+
+        After each game, the method resets the environment to prepare for the next game. It also prints a progress 
+        notification every 1000 games.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+
+        Side Effects:
+            Modifies the list of corrupted games and writes to the errors file if an error occurs.
+        """
+
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
         for game_num_str in self.chess_data.index:
@@ -627,8 +883,47 @@ class Bradley:
     # end of identify_corrupted_games
 
     def generate_Q_est_df(self, q_est_vals_file_path) -> None:
-        """Generates a dataframe containing the estimated Q-values for each chess move in the chess database.
         """
+        Generates a dataframe containing the estimated Q-values for each chess move in the chess database.
+
+        This method iterates over each game in the chess database and plays through the game using the reinforcement 
+        learning agents. For each move, it calculates the estimated Q-value and writes it to a file.
+
+        The method first tries to get the current state of the game. If an error occurs, it logs the error and the 
+        current board state in the errors file and moves on to the next game.
+
+        The method then enters a loop where it alternates between the white and black agents choosing and playing 
+        moves. If an error occurs while choosing or playing a move, the method logs the error and the current state 
+        in the errors file and breaks out of the loop to move on to the next game.
+
+        After each move, the method tries to get the latest state of the game. If an error occurs, it logs the error 
+        and the current board state in the errors file and breaks out of the loop to move on to the next game.
+
+        If the game is not over and there are still legal moves, the method tries to find the estimated Q-value for 
+        the current move and writes it to the file. If an error occurs while finding the estimated Q-value, the 
+        method logs the error and the current state in the errors file and breaks out of the loop to move on to the 
+        next game.
+
+        The loop continues until the game is over, there are no more legal moves, or the maximum number of moves for 
+        the current training game has been reached.
+
+        After each game, the method resets the environment to prepare for the next game.
+
+        Args:
+            q_est_vals_file_path (str): The path to the file where the estimated Q-values will be written.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+
+        Side Effects:
+            Writes to the errors file if an error occurs.
+            Writes to the Q-values file.
+            Modifies the current state of the environment.
+        """
+        
         q_est_vals_file = open(q_est_vals_file_path, 'a')
 
         try:

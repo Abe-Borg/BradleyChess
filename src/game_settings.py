@@ -20,7 +20,6 @@ CHESS_MOVE_VALUES: dict[str, int] = {
         'mate_score': 1_000
     }
 
-
 training_sample_size = 50_000
 
 max_num_turns_per_player = 200

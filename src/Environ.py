@@ -65,12 +65,11 @@ class Environ:
         Side Effects:
             Writes into the errors file if an IndexError is encountered.
         """
-
         try:
             curr_turn = self.get_curr_turn()
         except IndexError as e:
             self.errors_file.write(f'An error at get_curr_state occurred: {e}, unable to get current turn')
-            raise IndexError from e
+            raise IndexError(e) from e
 
         return {'turn_index': self.turn_index, 'curr_turn': curr_turn, 'legal_moves': self.get_legal_moves()}
     ### end of get_curr_state
@@ -91,7 +90,6 @@ class Environ:
             Modifies the turn index by incrementing it by one.
             Writes into the errors file if the maximum turn index is reached or exceeded.
         """
-
         if self.turn_index < game_settings.max_turn_index:
             self.turn_index += 1
         else:
@@ -117,13 +115,12 @@ class Environ:
         Side Effects:
             Writes into the errors file if an IndexError is encountered.
         """
-
         try: 
             curr_turn = self.turn_list[self.turn_index]
             return curr_turn
         except IndexError as e:
             self.errors_file.write(f'at get_curr_turn, list index out of range, turn index is {self.turn_index}, error desc is: {e}')
-            raise IndexError from e
+            raise IndexError(e) from e
     ### end of get_curr_turn
     
     def load_chessboard(self, chess_move_str: str, curr_game = 'Game 1') -> None:
@@ -147,13 +144,12 @@ class Environ:
             Modifies the chessboard's state by applying the provided move.
             Writes into the errors file if a ValueError is encountered.
         """
-
         try:
             self.board.push_san(chess_move_str)
         except ValueError as e:
             self.errors_file.write(f'An error occurred at environ.load_chessboard() for {curr_game}: {e}, unable to load chessboard with {chess_move_str}')
             self.errors_file.write(f'========== End of Environ.load_chessboard ==========\n\n\n')
-            raise ValueError from e        
+            raise ValueError(e) from e        
     ### end of load_chessboard    
 
     def pop_chessboard(self) -> None:
@@ -171,7 +167,6 @@ class Environ:
             Modifies the board's state by undoing the last move.
             Writes into the errors file if an IndexError is encountered.
         """
-
         try:
             self.board.pop()
         except IndexError as e:
@@ -199,7 +194,7 @@ class Environ:
         except IndexError as e:
             self.errors_file.write(f'at, undo_move, An error occurred: {e}, unable to undo move')
             self.errors_file.write(f'turn index: {self.turn_index}\n')
-            raise IndexError from e
+            raise IndexError(e) from e
     ### end of undo_move
 
     def load_chessboard_for_Q_est(self, analysis_results: list[dict]) -> None:
@@ -230,7 +225,7 @@ class Environ:
             self.board.push(anticipated_chess_move)
         except ValueError as e:
             self.errors_file.write(f'at, load_chessboard_for_Q_est, An error occurred: {e}, unable to load chessboard with {anticipated_chess_move}')
-            raise ValueError from e
+            raise ValueError(e) from e
     ### end of load_chessboard_for_Q_est
 
     def reset_environ(self) -> None:
