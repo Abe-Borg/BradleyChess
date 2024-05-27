@@ -86,8 +86,9 @@ if __name__ == '__main__':
     # print('training is complete')
     # print(f'it took: {total_time} for {game_settings.training_sample_size} games\n')
     # quit()
+    
 
-    # # # # # ========================= bootstrap and continue training agents ========================= #
+    # # ========================= bootstrap and continue training agents ========================= #
     # bradley = helper_methods.init_bradley(training_chess_data)    # the size of the training set in this step doesnt matter. It's just for initializing the object.
     # helper_methods.bootstrap_agent(bradley, 'W', game_settings.bradley_agent_q_table_path)
     # helper_methods.bootstrap_agent(bradley, 'B', game_settings.imman_agent_q_table_path)

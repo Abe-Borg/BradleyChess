@@ -65,12 +65,12 @@ class Environ:
         Side Effects:
             Writes into the errors file if an IndexError is encountered.
         """
-        try:
-            curr_turn = self.get_curr_turn()
-        except IndexError as e:
-            self.errors_file.write(f'An error at get_curr_state occurred: {e}, unable to get current turn')
-            raise IndexError(e) from e
 
+        if not (0 <= self.turn_index < len(self.turn_list)):
+            self.errors_file.write(f'ERROR: Turn index out of range: {self.turn_index}\n')
+            raise IndexError(f'Turn index out of range: {self.turn_index}')
+    
+        curr_turn = self.get_curr_turn()
         return {'turn_index': self.turn_index, 'curr_turn': curr_turn, 'legal_moves': self.get_legal_moves()}
     ### end of get_curr_state
     
@@ -90,11 +90,16 @@ class Environ:
             Modifies the turn index by incrementing it by one.
             Writes into the errors file if the maximum turn index is reached or exceeded.
         """
-        if self.turn_index < game_settings.max_turn_index:
-            self.turn_index += 1
-        else:
+        
+        if self.turn_index >= game_settings.max_turn_index:
             self.errors_file.write(f'ERROR: max_turn_index reached: {self.turn_index} >= {game_settings.max_turn_index}\n')
             raise IndexError(f"Maximum turn index ({game_settings.max_turn_index}) reached!")
+    
+        if self.turn_index >= len(self.turn_list):
+            self.errors_file.write(f'ERROR: turn index out of bounds: {self.turn_index} >= {len(self.turn_list)}\n')
+            raise IndexError(f"Turn index out of bounds: {self.turn_index}")
+    
+        self.turn_index += 1
     ### end of update_curr_state
     
     def get_curr_turn(self) -> str:                        
@@ -115,13 +120,12 @@ class Environ:
         Side Effects:
             Writes into the errors file if an IndexError is encountered.
         """
-        try: 
-            curr_turn = self.turn_list[self.turn_index]
-            return curr_turn
-        except IndexError as e:
-            self.errors_file.write(f'at get_curr_turn, list index out of range, turn index is {self.turn_index}, error desc is: {e}')
-            raise IndexError(e) from e
-    ### end of get_curr_turn
+        if not (0 <= self.turn_index < len(self.turn_list)):
+            self.errors_file.write(f'ERROR: Turn index out of range: {self.turn_index}\n')
+            raise IndexError(f'Turn index out of range: {self.turn_index}')
+        
+        return self.turn_list[self.turn_index]
+        ### end of get_curr_turn
     
     def load_chessboard(self, chess_move_str: str, curr_game = 'Game 1') -> None:
         """
@@ -222,7 +226,8 @@ class Environ:
         # this is the anticipated chess move due to opponent's previous chess move. so if White plays Ne4, what is Black like to play?
         anticipated_chess_move = analysis_results['anticipated_next_move']  # this has the form like this, Move.from_uci('e4f6')
         try:
-            self.board.push(anticipated_chess_move)
+            move = chess.Move.from_uci(anticipated_chess_move)
+            self.board.push(move)
         except ValueError as e:
             self.errors_file.write(f'at, load_chessboard_for_Q_est, An error occurred: {e}, unable to load chessboard with {anticipated_chess_move}')
             raise ValueError(e) from e

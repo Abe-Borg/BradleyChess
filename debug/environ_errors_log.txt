@@ -148,3 +148,73 @@ An error occurred at environ.load_chessboard() for Game 53736: illegal san: 'Bh7
 An error occurred at environ.load_chessboard() for Game 53737: illegal san: 'Nb3' in rnbqkbnr/ppppp1pp/8/5p2/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2, unable to load chessboard with Nb3========== End of Environ.load_chessboard ==========
 
 
+An error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+ERROR: max_turn_index reached: 5 >= 5
+at, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+An error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+ERROR: max_turn_index reached: 5 >= 5
+at, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: Invalid move, unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardERROR: max_turn_index reached: 5 >= 5
+at, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: Invalid move, unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: illegal san: 'e5' in rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1, unable to load chessboard with e5========== End of Environ.load_chessboard ==========
+
+
+An error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardERROR: max_turn_index reached: 5 >= 5
+at, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: Invalid move, unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: illegal san: 'e5' in rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1, unable to load chessboard with e5========== End of Environ.load_chessboard ==========
+
+
+An error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: Invalid move, unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: Invalid move, unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: Invalid move, unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: Invalid move, unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: expected uci string to be of length 4 or 5: 'invalid', unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: expected uci string to be of length 4 or 5: 'invalid', unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: expected uci string to be of length 4 or 5: 'invalid', unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: expected uci string to be of length 4 or 5: 'invalid', unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: expected uci string to be of length 4 or 5: 'invalid', unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
+at, load_chessboard_for_Q_est, An error occurred: expected uci string to be of length 4 or 5: 'invalid', unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
+
+
+An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
