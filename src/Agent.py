@@ -24,6 +24,15 @@ class Agent:
         - Q_table (pd.DataFrame): A Pandas DataFrame containing the Q-values for the agent.
     """
     def __init__(self, color: str, chess_data: pd.DataFrame, learn_rate = 0.6, discount_factor = 0.35):
+        """
+        Initializes an Agent object with a color, chess data, a learning rate, a discount factor, and an errors file.
+        This method initializes an Agent object by setting the color, the chess data, the learning rate, and the 
+        discount factor. It also opens the errors file in append mode and initializes the Q-table.
+        
+        Side Effects:
+        Opens the errors file in append mode.
+        Modifies the learn_rate, discount_factor, color, chess_data, is_trained, and Q_table attributes.
+        """
         self.errors_file = open(game_settings.agent_errors_filepath, 'a')
         # too high num here means too focused on recent knowledge, 
         self.learn_rate = learn_rate
@@ -40,13 +49,30 @@ class Agent:
     ### end of __del__ ###
 
     def choose_action(self, environ_state: dict[str, str, list[str]], curr_game: str = 'Game 1') -> str:
-        """Chooses the next chess move for the agent based on the current state.
-        Args:
-            environ_state (dict): A dictionary containing the current state.
-            curr_game (str): A string indicating the current game being played. 
-        Returns:
-            str: A string representing the chess move chosen by the agent.
         """
+        Chooses the next chess move for the agent based on the current state.
+        This method chooses the next chess move for the agent based on the current state of the environment. If 
+        there are no legal moves, it logs an error and returns an empty string. If there are legal moves that are 
+        not in the Q-table, it updates the Q-table with these moves. Depending on whether the agent is trained, it 
+        uses either the game mode policy or the training mode policy to choose the next move.
+
+        Args:
+            environ_state (dict[str, str, list[str]]): A dictionary representing the current state of the 
+            environment. The dictionary has the following keys:
+                - 'turn_index': The current turn index.
+                - 'curr_turn': The current turn, represented as a string.
+                - 'legal_moves': A list of strings, where each string is a legal move at the current turn.
+            curr_game (str, optional): A string representing the current game being played. Defaults to 'Game 1'.
+
+        Returns:
+            str: A string representing the chess move chosen by the agent. If there are no legal moves, returns an 
+            empty string.
+
+        Side Effects:
+            Modifies the Q-table if there are legal moves that are not in the Q-table.
+            Writes into the errors file if there are no legal moves.
+        """
+
         if environ_state['legal_moves'] == []:
             self.errors_file.write(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}\n')
             return ''
@@ -64,25 +90,44 @@ class Agent:
     ### end of choose_action ###
     
     def policy_training_mode(self, curr_game: str, curr_turn: str) -> str:
-        """Determines how the agents choose a move at each turn during training.
+        """
+        Determines how the agent chooses a move at each turn during training.
+        This method determines how the agent chooses a move at each turn during training. It retrieves the move 
+        corresponding to the current game and turn from the chess data.
+
         Args:
-            curr_game: A string representing the current game being played.
-            curr_turn: A string representing the current turn, e.g. 'W1'.
+            curr_game (str): A string representing the current game being played.
+            curr_turn (str): A string representing the current turn, e.g. 'W1'.
+
         Returns:
-            str: A string representing the chess move chosen by the agent.
+            str: A string representing the chess move chosen by the agent. The move is retrieved from the chess 
+            data based on the current game and turn.
+
+        Side Effects:
+            None.
         """
         return self.chess_data.at[curr_game, curr_turn]
     ### end of policy_training_mode ###
 
     def policy_game_mode(self, legal_moves: list[str], curr_turn: str) -> str:
-        """Determines how the agent chooses a move during a game between a human player and the agent.
-        The agent searches its Q table to find the moves with the highest Q values at each turn. 
-        sometimes the agent will pick a random move. 
+        """
+        Determines how the agent chooses a move during a game between a human player and the agent.
+        This method determines how the agent chooses a move during a game between a human player and the agent. 
+        The agent searches its Q-table to find the moves with the highest Q-values at each turn. Sometimes, based 
+        on a probability defined in the game settings, the agent will pick a random move from the Q-table instead 
+        of the move with the highest Q-value.
 
         Args:
-            legal_moves: A list of strings representing the legal moves for the current turn.
+            legal_moves (list[str]): A list of strings representing the legal moves for the current turn.
+            curr_turn (str): A string representing the current turn, e.g. 'W1'.
+
         Returns:
-            str: A string representing the chess move chosen by the agent.
+            str: A string representing the chess move chosen by the agent. The move is either the one with the 
+            highest Q-value or a random move from the Q-table, depending on a probability defined in the game 
+            settings.
+
+        Side Effects:
+            None.
         """
         dice_roll = helper_methods.get_number_with_probability(game_settings.chance_for_random_move)
         legal_moves_in_q_table = self.Q_table[curr_turn].loc[self.Q_table[curr_turn].index.intersection(legal_moves)]
@@ -95,14 +140,24 @@ class Agent:
     ### end of policy_game_mode ###
 
     def init_Q_table(self, chess_data: pd.DataFrame) -> pd.DataFrame:
-        """Creates the Q table so the agent can be trained.
-        The Q table index represents unique moves across all games in the database for all turns.
-        Columns are the turns, 'W1' to 'BN' where N is determined by max number of turns per player.
-        Args:
-            chess_data: A pandas dataframe containing chess data.
-        Returns:
-            A pandas dataframe representing the Q table.
         """
+        Initializes the Q-table for the agent.
+        This method initializes the Q-table for the agent. The Q-table is a DataFrame where the index represents 
+        unique moves across all games in the chess data for all turns, and the columns represent the turns. The 
+        turns are represented as strings in the format 'Wn' or 'Bn', where 'W' and 'B' represent white and black 
+        players respectively, and 'n' is the turn number. The turn number is determined by the maximum number of 
+        turns per player defined in the game settings.
+
+        Args:
+            chess_data (pd.DataFrame): A DataFrame containing the chess data.
+
+        Returns:
+            pd.DataFrame: A DataFrame representing the Q-table. The Q-table is initialized with 0 for all Q-values.
+
+        Side Effects:
+            None.
+        """
+
         # Generate the list of turns (columns) W1, W2, ..., W100 or B1, B2, ..., n
         turns_list = [f'{self.color}{i + 1}' for i in range(game_settings.max_num_turns_per_player)]
 
@@ -118,20 +173,37 @@ class Agent:
     ### end of init_Q_table ###
     
     def change_Q_table_pts(self, chess_move: str, curr_turn: str, pts: int) -> None:
-        """Adds points to a cell in the Q table.
+        """
+        Adds points to a cell in the Q-table.
+        This method adds points to a cell in the Q-table. The cell is determined by the chess move and the current 
+        turn. The points are added to the existing Q-value of the cell.
+
         Args:
-            chess_move (str): A string representing the chess move, e.g. 'e4'.
-            curr_turn (str): A string representing the turn number, e.g. 'W10'.
-            pts (int): An integer representing the number of points to add to the Q table cell.
+            chess_move (str): A string representing the chess move, e.g. 'e4'. This determines the row of the cell 
+            in the Q-table.
+            curr_turn (str): A string representing the current turn, e.g. 'W10'. This determines the column of the 
+            cell in the Q-table.
+            pts (int): An integer representing the number of points to add to the Q-table cell.
+
+        Side Effects:
+            Modifies the Q-table by adding points to the cell determined by the chess move and the current turn.
         """
         self.Q_table.at[chess_move, curr_turn] += pts
     ### end of change_Q_table_pts ###
 
     def update_Q_table(self, new_chess_moves: list[str]) -> None:
-        """Updates the Q table with new chess moves.
-        This method creates a new DataFrame with the new chess moves, and appends it to the Q table. 
+        """
+        Updates the Q-table with new chess moves.
+        This method updates the Q-table with new chess moves. It creates a new DataFrame with the new chess moves 
+        and the same columns as the Q-table, and appends this DataFrame to the Q-table. The new chess moves are 
+        added as new rows in the Q-table, and the Q-values for these moves are initialized to 0.
+
         Args:
-            new_chess_moves (list[str]): A list of chess moves (strings) that are not already in the Q table.
+            new_chess_moves (list[str]): A list of strings representing the new chess moves. These moves are not 
+            already in the Q-table.
+
+        Side Effects:
+            Modifies the Q-table by appending a new DataFrame with the new chess moves.
         """
         q_table_new_values: pd.DataFrame = pd.DataFrame(0, index = new_chess_moves, columns = self.Q_table.columns, dtype = np.int64)
         self.Q_table = pd.concat([self.Q_table, q_table_new_values])
