@@ -1,35 +1,37 @@
 import sys
 import os
-print(sys.path)
+import unittest
+from unittest.mock import patch, PropertyMock
+import chess
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(script_dir)
 sys.path.insert(0, project_root)
 sys.path.insert(0, os.path.join(project_root, 'src'))
 
-import unittest
-from unittest.mock import patch, Mock
 from src.Environ import Environ
-import chess
-import src.game_settings
+
+max_num_turns_per_player = 200
+max_turn_index = max_num_turns_per_player * 2 - 1
 
 class TestEnviron(unittest.TestCase):
+    def test_init(self):
+        env = Environ()
+        self.assertIsInstance(env.board, chess.Board)
+        self.assertEqual(env.turn_index, 0)
 
-    @patch('src.game_settings.max_turn_index', 5)  # Mock the max_turn_index setting
     def test_update_curr_state_within_bounds(self):
         env = Environ()
         env.turn_index = 3  # Set an initial turn index
         env.update_curr_state()
         self.assertEqual(env.turn_index, 4)  # Check if the turn index increased
 
-    @patch('src.game_settings.max_turn_index', 5)
     def test_update_curr_state_raises_error(self):
         env = Environ()
-        env.turn_index = 5  # Set the turn index to the maximum
+        env.turn_index = max_turn_index
         with self.assertRaises(IndexError):
             env.update_curr_state()
 
-    @patch('src.game_settings.max_turn_index', 5)
     def test_get_curr_state(self):
         env = Environ()
         env.turn_index = 2
@@ -40,23 +42,20 @@ class TestEnviron(unittest.TestCase):
                 self.assertEqual(state['curr_turn'], 'W3')
                 self.assertEqual(state['legal_moves'], ['e4', 'Nf3'])
 
-    @patch('src.game_settings.max_turn_index', 5)
     def test_get_curr_state_index_error(self):
         env = Environ()
-        env.turn_index = 10 # Out of bounds
+        env.turn_index = max_turn_index + 1  # Out of bounds
         with self.assertRaises(IndexError):
             env.get_curr_state()
 
-    @patch('src.game_settings.max_turn_index', 5)
     def test_get_curr_turn_valid(self):
         env = Environ()
         env.turn_index = 1
         self.assertEqual(env.get_curr_turn(), 'B1')
 
-    @patch('src.game_settings.max_turn_index', 5)
     def test_get_curr_turn_invalid(self):
         env = Environ()
-        env.turn_index = 10  # Out of bounds
+        env.turn_index = max_turn_index + 1  # Out of bounds
         with self.assertRaises(IndexError):
             env.get_curr_turn() 
 
@@ -87,7 +86,6 @@ class TestEnviron(unittest.TestCase):
             env.pop_chessboard()
     
     @patch('chess.Board.pop')
-    @patch('src.game_settings.max_turn_index', 5)
     def test_undo_move(self, mock_pop):
         env = Environ()
         env.turn_index = 2
@@ -96,7 +94,6 @@ class TestEnviron(unittest.TestCase):
         self.assertEqual(env.turn_index, 1)
 
     @patch('chess.Board.pop')
-    @patch('src.game_settings.max_turn_index', 5)
     def test_undo_move_error(self, mock_pop):
         mock_pop.side_effect = IndexError('Index out of range')
         env = Environ()
@@ -107,16 +104,15 @@ class TestEnviron(unittest.TestCase):
     def test_load_chessboard_for_q_est_valid(self, mock_push):
         env = Environ()
         env.load_chessboard("e4")
-        analysis_results = {'anticipated_next_move': 'e5'}
-        
+        analysis_results = {'anticipated_next_move': 'e7e5'}
         expected_uci_move = chess.Move.from_uci("e7e5")
 
-        with patch.object(chess.Board, 'legal_moves', new_callable=property):
-            chess.Board.legal_moves.fget = lambda self: iter([expected_uci_move])
+        with patch('chess.Board.legal_moves', new_callable=PropertyMock) as mock_legal_moves:
+            mock_legal_moves.return_value = iter([expected_uci_move])
             env.load_chessboard_for_Q_est(analysis_results)
-            
-        mock_push.assert_called_once_with(expected_uci_move)
 
+        calls = [unittest.mock.call(chess.Move.from_uci("e2e4")), unittest.mock.call(expected_uci_move)]
+        mock_push.assert_has_calls(calls, any_order=False)
 
     @patch('chess.Board.push')
     def test_load_chessboard_for_q_est_invalid(self, mock_push):
