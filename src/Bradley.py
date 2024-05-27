@@ -19,6 +19,10 @@ class Bradley:
         W_rl_agent (Agent.Agent): A white RL Agent object.
         B_rl_agent (Agent.Agent): A black RL Agent object.
         engine (chess.engine.SimpleEngine): A Stockfish engine used to analyze positions during training.
+        errors_file (file): A file object to log errors.
+        initial_training_results (file): A file object to log initial training results.
+        additional_training_results (file): A file object to log additional training results.
+        corrupted_games_list (list): A list of games that are corrupted and cannot be used for training.
     """
     def __init__(self, chess_data: pd.DataFrame):
         self.errors_file = open(game_settings.bradley_errors_filepath, 'a')
@@ -49,6 +53,8 @@ class Bradley:
             chess_move (str): A string representing the opponent's chess move, such as 'Nf3'.
         Returns:
             bool: A boolean value indicating whether the move was successfully loaded.
+        Raises:
+            Exception: An exception is raised if the chessboard fails to load the move.
         """
         try:
             self.environ.load_chessboard(chess_move)
@@ -76,6 +82,8 @@ class Bradley:
             rl_agent_color (str): A string indicating the color of the RL agent, either 'W' or 'B'.
         Returns:
             dict[str]: A dictionary containing the selected chess move string.
+        Raises:
+            Exception: An exception is raised if the current state is not valid or if the legal moves are empty.
         """
         try:
             curr_state = self.environ.get_curr_state()
@@ -125,6 +133,8 @@ class Bradley:
         Returns:
             chess.Outcome or str: An instance of the `chess.Outcome` class with a `result()` 
             method that returns the outcome of the game
+        Raises:
+            AttributeError: An AttributeError is raised if the game outcome cannot be determined.
         """
         try:
             game_outcome = self.environ.board.outcome().result()
@@ -135,6 +145,8 @@ class Bradley:
     
     def get_game_termination_reason(self) -> str:
         """returns a string that describes the reason for the game ending.
+        Raises:
+            AttributeError: An AttributeError is raised if the game termination reason cannot be determined.
         """
         try:
             termination_reason = str(self.environ.board.outcome().termination)

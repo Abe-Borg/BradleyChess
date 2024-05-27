@@ -137,7 +137,6 @@ class Agent:
         self.Q_table = pd.concat([self.Q_table, q_table_new_values])
     ### update_Q_table ###
 
-    # @log_config.log_execution_time_every_N()        
     def reset_Q_table(self) -> None:
         """Resets the Q table to all zeros.
         """

@@ -14,7 +14,7 @@ class Environ:
             errors_file (file): A file object that is used to log errors.
         """
         self.errors_file = open(game_settings.environ_errors_filepath, 'a')
-        self.board: chess.Board = chess.Board()
+        self._board: chess.Board = chess.Board()
 
         # turn_list and turn_index work together to track the current turn (a string like this, 'W1')
         max_turns = game_settings.max_num_turns_per_player * 2
@@ -30,6 +30,8 @@ class Environ:
         """Returns a dictionary that describes the current state of the chessboard and the current turn.
         Returns:
             dict[str, str, list[str]]: A dictionary that defines the current state that an agent will act on.
+        Raises:
+            IndexError: If the turn index is out of range.
         """
         try:
             curr_turn = self.get_curr_turn()
@@ -44,6 +46,8 @@ class Environ:
         """Updates the current state of the chessboard.
         The state is updated each time a chess move is loaded to the chessboard. 
         Only the index needs to be updated here. The board is updated by other methods.
+        Raises:
+            IndexError: If the turn index is out of range.
         """
         if self.turn_index < game_settings.max_turn_index:
             self.turn_index += 1
@@ -73,9 +77,11 @@ class Environ:
             chess_move_str (str): A string representing the chess move, such as 'Nf3'.
         Returns:
             bool: A boolean value indicating whether the move was successfully loaded.
+        Raises:
+            ValueError: If the move is invalid.
         """
         try:
-            self.board.push_san(chess_move_str)
+            self._board.push_san(chess_move_str)
         except ValueError as e:
             self.errors_file.write(f'An error occurred at environ.load_chessboard() for {curr_game}: {e}, unable to load chessboard with {chess_move_str}')
             self.errors_file.write(f'========== End of Environ.load_chessboard ==========\n\n\n')
@@ -88,7 +94,7 @@ class Environ:
             IndexError: If the move stack is empty.
         """
         try:
-            self.board.pop()
+            self._board.pop()
         except IndexError as e:
             self.errors_file.write(f'An error occurred: {e}, unable to pop chessboard')
             raise IndexError(f"An error occurred: {e}, unable to pop chessboard'")
@@ -100,7 +106,7 @@ class Environ:
             IndexError: If the move stack is empty.
         """
         try:
-            self.board.pop()
+            self._board.pop()
             self.turn_index -= 1
         except IndexError as e:
             self.errors_file.write(f'at, undo_move, An error occurred: {e}, unable to undo move')
@@ -117,18 +123,22 @@ class Environ:
             analysis_results (list[dict]): A list of dictionaries containing the analysis results.
                 Each dictionary has the form {'mate_score': <some score>, 'centipawn_score': <some score>,
                 'anticipated_next_move': <move>}.
+        Raises:
+            ValueError: If the move is invalid.
         """
         # this is the anticipated chess move due to opponent's previous chess move. so if White plays Ne4, what is Black like to play?
         anticipated_chess_move = analysis_results['anticipated_next_move']  # this has the form like this, Move.from_uci('e4f6')
         try:
-            self.board.push(anticipated_chess_move)
+            self._board.push(anticipated_chess_move)
         except ValueError as e:
             self.errors_file.write(f'at, load_chessboard_for_Q_est, An error occurred: {e}, unable to load chessboard with {anticipated_chess_move}')
             raise ValueError from e
     ### end of load_chessboard_for_Q_est
 
     def reset_environ(self) -> None:
-        self.board.reset()
+        """Resets the chessboard and the turn index.
+        """
+        self._board.reset()
         self.turn_index = 0
     ### end of reset_environ
     
@@ -137,7 +147,7 @@ class Environ:
         Returns:
             list[str]: A list of strings representing the legal moves at the current turn, given the board state.
         """
-        legal_moves = [self.board.san(move) for move in self.board.legal_moves]    
+        legal_moves = [self._board.san(move) for move in self._board.legal_moves]    
         return legal_moves
     ### end of get_legal_moves
     
