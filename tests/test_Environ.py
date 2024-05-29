@@ -331,6 +331,60 @@ class TestEnviron(unittest.TestCase):
         self.assertEqual(env.turn_index, 0)
         self.assertEqual(env.board.fen(), chess.STARTING_FEN)
 
+    def test_load_and_pop_moves(self):
+        """
+        Load the board with many moves, then pop them off to ensure the board returns to the starting position.
+
+        This test loads a series of valid moves, then undoes them all to check the board state.
+        """
+        env = Environ()
+        moves = ['e4', 'c6', 'd3', 'd5', 'Nf3', 'dxe4', 'Nfd2', 'exd3', 'Bxd3', 'Nf6']
+        for move in moves:
+            env.load_chessboard(move)
+            env.update_curr_state()
+        
+        for _ in moves:
+            env.undo_move()
+        
+        self.assertEqual(env.turn_index, 0)
+        self.assertEqual(env.board.fen(), chess.STARTING_FEN)
+
+    def test_load_and_pop_all_but_one(self):
+        """
+        Load some number of moves, then pop all but one and check that the board is not at the starting position.
+
+        This test loads a series of moves, undoes all but the last move, and verifies the board state.
+        """
+        env = Environ()
+        moves = ['e4', 'c6', 'd3', 'd5', 'Nf3', 'dxe4', 'Nfd2', 'exd3', 'Bxd3', 'Nf6']
+        for move in moves:
+            env.load_chessboard(move)
+            env.update_curr_state()
+        
+        for _ in range(len(moves) - 1):
+            env.undo_move()
+        
+        self.assertEqual(env.turn_index, 1)
+        self.assertNotEqual(env.board.fen(), chess.STARTING_FEN)
+
+    def test_pop_too_many_times(self):
+        """
+        Load moves, pop them off, then pop one too many times to ensure proper error handling.
+
+        This test loads a series of moves, undoes them all, and attempts one extra undo to check error handling.
+        """
+        env = Environ()
+        moves = ['e4', 'c6', 'd3', 'd5', 'Nf3']
+        for move in moves:
+            env.load_chessboard(move)
+            env.update_curr_state()
+        
+        for _ in moves:
+            env.undo_move()
+        
+        with self.assertRaises(IndexError):
+            env.undo_move()
+
 
 if __name__ == '__main__':
     unittest.main()
