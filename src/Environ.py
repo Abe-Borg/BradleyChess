@@ -191,8 +191,9 @@ class Environ:
                 Writes into the errors file if an IndexError is encountered.
         """
         try:
-            self.board.pop() # this raises an IndexError if the move stack is empty
-            self.turn_index -= 1
+            self.board.pop()
+            if self.turn_index > 0:
+                self.turn_index -= 1
         except IndexError as e:
             self.errors_file.write(f'at, undo_move, An error occurred: {e}, unable to undo move')
             self.errors_file.write(f'turn index: {self.turn_index}\n')

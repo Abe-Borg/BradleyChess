@@ -326,10 +326,10 @@ class TestEnviron(unittest.TestCase):
         env = Environ()
         for _ in range(50):
             env.load_chessboard('e4')
+            env.update_curr_state()
             env.undo_move()
         self.assertEqual(env.turn_index, 0)
         self.assertEqual(env.board.fen(), chess.STARTING_FEN)
-
 
 
 if __name__ == '__main__':
