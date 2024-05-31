@@ -1,9 +1,7 @@
 import unittest
 import pandas as pd
+import numpy as np
 from unittest.mock import MagicMock, patch
-from src.Environ import Environ
-from src.Agent import Agent
-from src import game_settings
 import sys
 import os
 
@@ -15,7 +13,10 @@ project_root = os.path.dirname(script_dir)
 sys.path.insert(0, project_root)
 sys.path.insert(0, os.path.join(project_root, 'src'))
 
-# Insert the project root and 'src' directory into the system path
+from src.Agent import Agent
+from src import game_settings
+from src.Environ import Environ
+
 chess_data = pd.read_pickle(game_settings.chess_games_filepath_part_100, compression = 'zip')
 chess_data = chess_data.head(5)
 
