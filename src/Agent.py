@@ -72,7 +72,6 @@ class Agent:
             Modifies the Q-table if there are legal moves that are not in the Q-table.
             Writes into the errors file if there are no legal moves.
         """
-
         if environ_state['legal_moves'] == []:
             self.errors_file.write(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}\n')
             return ''
@@ -157,7 +156,6 @@ class Agent:
         Side Effects:
             None.
         """
-
         # Generate the list of turns (columns) W1, W2, ..., W100 or B1, B2, ..., n
         turns_list = [f'{self.color}{i + 1}' for i in range(game_settings.max_num_turns_per_player)]
 
