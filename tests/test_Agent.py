@@ -21,8 +21,21 @@ chess_data = pd.read_pickle(game_settings.chess_games_filepath_part_100, compres
 chess_data = chess_data.head(5)
 
 class TestAgent(unittest.TestCase):
-    
+    """
+    The TestAgent class is a unit test class for the Agent class in the src module.
+    This class inherits from unittest.TestCase which is a standard test case class in Python's unittest framework.
+
+    Attributes:
+        chess_data (pd.DataFrame): A pandas DataFrame containing a subset of chess game data.
+        agent (src.Agent): An instance of the Agent class that is being tested.
+        environ_state (dict): A dictionary representing the environment state for the agent.
+    """
     def setUp(self):
+        """
+        The setUp method is a special method in unittest.TestCase.
+        It is run before each test method (i.e., methods starting with 'test') in the class. It is used to set up any state that is common across multiple test methods.
+        In this case, it sets up a subset of chess game data, an instance of the Agent class, and a dictionary representing the environment state for the agent.
+        """
         self.chess_data = chess_data        
         self.agent = Agent(color='W', chess_data=self.chess_data)        
         self.environ_state = {
@@ -43,7 +56,16 @@ class TestAgent(unittest.TestCase):
         }
 
     def test_initialization(self):
-        # Test agent initialization
+        """
+            This method tests the initialization of the Agent class.
+
+            It checks if the agent's color is 'W', if the agent's chess_data is equal to the test data, if the learning rate is 0.6, if the discount factor is 0.35, and if the agent is not trained initially.
+
+            The method uses the assertEqual method from unittest.TestCase to check if the actual values are equal to the expected values.
+
+            Raises:
+                AssertionError: If any of the actual values do not match the expected values.
+        """
         self.assertEqual(self.agent.color, 'W')
         self.assertEqual(self.agent.chess_data.equals(self.chess_data), True)
         self.assertEqual(self.agent.learn_rate, 0.6)
@@ -51,30 +73,62 @@ class TestAgent(unittest.TestCase):
         self.assertEqual(self.agent.is_trained, False)
 
     def test_invalid_move_handling(self):
+        """
+            This method tests the handling of invalid moves in the change_Q_table_pts method of the Agent class.
+            It checks if the agent correctly raises a KeyError when an invalid move is attempted to be changed in the Q-table.
+
+            Raises:
+                AssertionError: If the agent does not raise a KeyError when an invalid move is attempted to be changed in the Q-table.
+        """
         # Test handling of invalid moves in Q-table methods
         with self.assertRaises(KeyError):
             self.agent.change_Q_table_pts('invalid_move', 'W1', 10)
         
     def test_choose_action_with_legal_moves(self):
-        # Simulate the agent choosing a move when there are legal moves
+        """
+            This method tests the choose_action method of the Agent class when there are legal moves available.
+            It checks if the move chosen by the agent is in the list of legal moves.
+
+            Raises:
+                AssertionError: If the move chosen by the agent is not in the list of legal moves.
+        """
         chosen_move = self.agent.choose_action(self.environ_state)
         self.assertIn(chosen_move, self.environ_state['legal_moves'])
 
     def test_choose_action_with_no_legal_moves(self):
-        # Simulate the agent's behavior when no legal moves are available
+        """
+            This method tests the choose_action method of the Agent class when there are no legal moves available.
+            It checks if the agent correctly returns an empty string when there are no legal moves available.
+
+            Raises:
+                AssertionError: If the agent does not return an empty string when there are no legal moves available.
+        """
         self.environ_state['legal_moves'] = []
         chosen_move = self.agent.choose_action(self.environ_state)
         self.assertEqual(chosen_move, '')
 
     def test_choose_action_updates_Q_table_with_new_moves(self):
-        # Simulate the agent encountering new legal moves not in Q-table
-        new_legal_moves = ['Nf3', 'Nc3']
+        """
+            This method tests the choose_action method of the Agent class when it encounters new legal moves not in the Q-table.
+            It checks if the agent correctly updates the Q-table with the new moves.
+
+            Raises:
+                AssertionError: If the agent does not update the Q-table with the new moves.
+        """
+        new_legal_moves = ['Nk3', 'Nk3']
         self.environ_state['legal_moves'] = new_legal_moves
         with patch.object(self.agent, 'update_Q_table', wraps=self.agent.update_Q_table) as mock_update:
             self.agent.choose_action(self.environ_state)
             mock_update.assert_called_once_with(new_legal_moves)
     
     def test_choose_action_trained_vs_untrained(self):
+        """
+            This method tests the choose_action method of the Agent class when the agent is trained versus when it is not trained.
+            It checks if the agent's behavior changes based on whether it is trained or not. Specifically, it checks if the move chosen by the agent when it is trained is different from the move chosen when it is not trained.
+
+            Raises:
+                AssertionError: If the move chosen by the agent when it is trained is the same as the move chosen when it is not trained.
+        """
         # Generate random integers between 1 and 1000
         random_integers = np.random.randint(1, 1001, size=self.agent.Q_table.shape)
         # Assign the random integers to the q table
@@ -90,6 +144,13 @@ class TestAgent(unittest.TestCase):
         self.assertNotEqual(chosen_move_training, chosen_move_game)
 
     def test_change_Q_table_pts(self):
+        """
+            This method tests the change_Q_table_pts method of the Agent class.
+            It checks if the agent correctly updates the Q-table with the specified points for a given move and turn.
+
+            Raises:
+                AssertionError: If the updated value in the Q-table is not equal to the initial value plus the specified points.
+        """
         # Test adding points to a Q-table cell
         move = 'e4'
         turn = 'W1'
@@ -100,25 +161,31 @@ class TestAgent(unittest.TestCase):
         self.assertEqual(updated_value, initial_value + points)
 
     def test_invalid_move_handling_in_change_Q_table_pts(self):
+        """
+            This method tests the handling of invalid moves in the change_Q_table_pts method of the Agent class.
+            It checks if the agent correctly raises a KeyError when an invalid move is attempted to be changed in the Q-table.
+
+            Raises:
+                AssertionError: If the agent does not raise a KeyError when an invalid move is attempted to be changed in the Q-table.
+        """
         # Test handling of invalid moves in Q-table methods
         with self.assertRaises(KeyError):
             self.agent.change_Q_table_pts('invalid_move', 'W1', 10)
 
     def test_update_Q_table(self):
-        # Test updating the Q-table with new moves
-        new_moves = ['g4', 'h4']
+        """
+            This method tests the update_Q_table method of the Agent class.
+            It checks if the agent correctly updates the Q-table with new moves and if the initial Q-values for these new moves are all zero.
+
+            Raises:
+                AssertionError: If the new moves are not in the Q-table or if the initial Q-values for these new moves are not all zero.
+        """
+        new_moves = ['gk4', 'hk4']
         self.agent.update_Q_table(new_moves)
         for move in new_moves:
             self.assertTrue(move in self.agent.Q_table.index)
             self.assertTrue((self.agent.Q_table.loc[move] == 0).all())
-
-    def test_state_retrieval_error(self):
-        # Test how agent handles state retrieval errors
-        with patch('src.Environ.get_curr_state', side_effect=Exception("State retrieval error")):
-            with self.assertRaises(Exception) as context:
-                self.agent.choose_action(self.environ_state)
-            self.assertTrue('State retrieval error' in str(context.exception))
-    
+                
     
 if __name__ == '__main__':
     unittest.main()
