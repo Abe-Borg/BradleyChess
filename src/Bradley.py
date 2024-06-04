@@ -718,7 +718,6 @@ class Bradley:
         Side Effects:
             None.
         """
-
         total_reward = 0
         # Check for piece development (N, R, B, Q)
         if re.search(r'[NRBQ]', chess_move):
@@ -763,17 +762,14 @@ class Bradley:
 
         Args:
             None.
-
         Returns:
             None.
-
         Raises:
             None.
 
         Side Effects:
             Modifies the list of corrupted games and writes to the errors file if an error occurs.
         """
-
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
         for game_num_str in self.chess_data.index:
@@ -923,7 +919,6 @@ class Bradley:
             Writes to the Q-values file.
             Modifies the current state of the environment.
         """
-        
         q_est_vals_file = open(q_est_vals_file_path, 'a')
 
         try:
