@@ -412,28 +412,27 @@ class Bradley:
     
     def assign_points_to_Q_table(self, chess_move: str, curr_turn: str, curr_Qval: int, rl_agent_color: str) -> None:
         """
-        Assigns points to the Q table for the given chess move, current turn, current Q value, and RL agent color.
-        This method assigns points to the Q table for the RL agent of the given color. It calls the 
-        `change_Q_table_pts` method on the RL agent, passing in the chess move, the current turn, and the current Q 
-        value. If a KeyError is raised because the chess move is not represented in the Q table, the method writes 
-        an error message to the errors file, updates the Q table to include the chess move, and tries to assign 
-        points to the Q table again.
+            Assigns points to the Q table for the given chess move, current turn, current Q value, and RL agent color.
+            This method assigns points to the Q table for the RL agent of the given color. It calls the 
+            `change_Q_table_pts` method on the RL agent, passing in the chess move, the current turn, and the current Q 
+            value. If a KeyError is raised because the chess move is not represented in the Q table, the method writes 
+            an error message to the errors file, updates the Q table to include the chess move, and tries to assign 
+            points to the Q table again.
 
-        Args:
-            chess_move (str): The chess move to assign points to in the Q table.
-            curr_turn (str): The current turn of the game.
-            curr_Qval (int): The current Q value for the given chess move.
-            rl_agent_color (str): The color of the RL agent making the move.
+            Args:
+                chess_move (str): The chess move to assign points to in the Q table.
+                curr_turn (str): The current turn of the game.
+                curr_Qval (int): The current Q value for the given chess move.
+                rl_agent_color (str): The color of the RL agent making the move.
 
-        Raises:
-            KeyError: A KeyError is raised if the chess move is not represented in the Q table. The exception is 
-            written to the errors file.
+            Raises:
+                KeyError: A KeyError is raised if the chess move is not represented in the Q table. The exception is 
+                written to the errors file.
 
-        Side Effects:
-            Modifies the Q table of the RL agent by assigning points to the given chess move.
-            Writes to the errors file if a KeyError is raised.
+            Side Effects:
+                Modifies the Q table of the RL agent by assigning points to the given chess move.
+                Writes to the errors file if a KeyError is raised.
         """
-
         if rl_agent_color == 'W':
             try:
                 self.W_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
@@ -617,37 +616,36 @@ class Bradley:
     
     def analyze_board_state(self, board: chess.Board) -> dict:
         """
-        Analyzes the current state of the chessboard using the Stockfish engine and returns the analysis results.
+            Analyzes the current state of the chessboard using the Stockfish engine and returns the analysis results.
 
-        This method uses the Stockfish engine to analyze the current state of the chessboard. The analysis results 
-        include the mate score, the centipawn score, and the anticipated next move. The method first checks if the 
-        board is in a valid state. If it's not, it writes an error message to the errors file and raises a ValueError.
+            This method uses the Stockfish engine to analyze the current state of the chessboard. The analysis results 
+            include the mate score, the centipawn score, and the anticipated next move. The method first checks if the 
+            board is in a valid state. If it's not, it writes an error message to the errors file and raises a ValueError.
 
-        The method then tries to analyze the board using the Stockfish engine. If an error occurs during the analysis, 
-        it writes an error message to the errors file and raises an Exception.
+            The method then tries to analyze the board using the Stockfish engine. If an error occurs during the analysis, 
+            it writes an error message to the errors file and raises an Exception.
 
-        The method then tries to extract the mate score and the centipawn score from the analysis results. If an error 
-        occurs while extracting the scores, it writes an error message to the errors file and raises an Exception.
+            The method then tries to extract the mate score and the centipawn score from the analysis results. If an error 
+            occurs while extracting the scores, it writes an error message to the errors file and raises an Exception.
 
-        Finally, the method tries to extract the anticipated next move from the analysis results. If an error occurs 
-        while extracting the anticipated next move, it writes an error message to the errors file and raises an Exception.
+            Finally, the method tries to extract the anticipated next move from the analysis results. If an error occurs 
+            while extracting the anticipated next move, it writes an error message to the errors file and raises an Exception.
 
-        Args:
-            board (chess.Board): The current state of the chessboard to analyze.
+            Args:
+                board (chess.Board): The current state of the chessboard to analyze.
 
-        Returns:
-            dict: A dictionary containing the analysis results. The dictionary includes the mate score, the centipawn 
-            score, and the anticipated next move.
+            Returns:
+                dict: A dictionary containing the analysis results. The dictionary includes the mate score, the centipawn 
+                score, and the anticipated next move.
 
-        Raises:
-            ValueError: A ValueError is raised if the board is in an invalid state.
-            Exception: An Exception is raised if an error occurs during the analysis, while extracting the scores, or 
-            while extracting the anticipated next move. The original exception is included in the raised exception.
+            Raises:
+                ValueError: A ValueError is raised if the board is in an invalid state.
+                Exception: An Exception is raised if an error occurs during the analysis, while extracting the scores, or 
+                while extracting the anticipated next move. The original exception is included in the raised exception.
 
-        Side Effects:
-            Writes to the errors file if an error occurs.
+            Side Effects:
+                Writes to the errors file if an error occurs.
         """
-
         if not self.environ.board.is_valid():
             self.errors_file.write(f'at Bradley.analyze_board_state. Board is in invalid state\n')
             raise ValueError(f'at Bradley.analyze_board_state. Board is in invalid state\n')

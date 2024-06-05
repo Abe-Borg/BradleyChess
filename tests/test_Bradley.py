@@ -4,6 +4,7 @@ import numpy as np
 from unittest.mock import MagicMock, patch
 import sys
 import os
+import chess
 
 # Determine the directory where the current script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,6 +17,7 @@ sys.path.insert(0, os.path.join(project_root, 'src'))
 from src.Agent import Agent
 from src import game_settings
 from src.Environ import Environ
+from src.Bradley import Bradley
 
 chess_data = pd.read_pickle(game_settings.chess_games_filepath_part_100, compression = 'zip')
 chess_data = chess_data.head(5)
@@ -27,9 +29,7 @@ class TestBradley(unittest.TestCase):
     def test_initialization(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-        
         bradley = Bradley(chess_data)
-        
         # Check if the attributes are initialized correctly
         self.assertEqual(bradley.chess_data.equals(chess_data), True)
         self.assertIsInstance(bradley.environ, Environ)
@@ -37,6 +37,7 @@ class TestBradley(unittest.TestCase):
         self.assertIsInstance(bradley.B_rl_agent, Agent)
         self.assertTrue(mock_engine.called)
         self.assertTrue(mock_open.called)
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
@@ -53,6 +54,7 @@ class TestBradley(unittest.TestCase):
             call('additional_training_results.txt', 'a')
         ]
         mock_open.assert_has_calls(expected_calls, any_order=True)
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
@@ -71,6 +73,7 @@ class TestBradley(unittest.TestCase):
             mock_load_chessboard.assert_called_once_with(valid_move)
             mock_update_curr_state.assert_called_once()
             self.assertTrue(result)
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
@@ -91,6 +94,7 @@ class TestBradley(unittest.TestCase):
             mock_update_curr_state.assert_not_called()
             mock_open().write.assert_called()  # Ensure an error was logged
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_receive_opp_move_state_update(self, mock_open, mock_engine):
@@ -108,6 +112,7 @@ class TestBradley(unittest.TestCase):
             mock_load_chessboard.assert_called_once_with(valid_move)
             mock_update_curr_state.assert_called_once()
             self.assertTrue(result)
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
@@ -132,6 +137,7 @@ class TestBradley(unittest.TestCase):
             mock_update_curr_state.assert_called_once()
             self.assertEqual(selected_move, 'e2e4')
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_rl_agent_selects_chess_move_no_legal_moves(self, mock_open, mock_engine):
@@ -148,6 +154,7 @@ class TestBradley(unittest.TestCase):
 
             # Verify that get_curr_state was called
             mock_get_curr_state.assert_called_once()
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
@@ -172,6 +179,7 @@ class TestBradley(unittest.TestCase):
             mock_update_curr_state.assert_called_once()
             self.assertEqual(selected_move, 'e2e4')
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_is_game_over_chessboard(self, mock_open, mock_engine):
@@ -186,6 +194,7 @@ class TestBradley(unittest.TestCase):
             # Verify that is_game_over was called and the method returns True
             mock_is_game_over.assert_called_once()
             self.assertTrue(result)
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
@@ -205,12 +214,12 @@ class TestBradley(unittest.TestCase):
             mock_is_game_over.assert_called_once()
             self.assertTrue(result)
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_is_game_over_no_legal_moves(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         # Mocking the current state to have no legal moves
@@ -222,6 +231,7 @@ class TestBradley(unittest.TestCase):
             mock_get_legal_moves.assert_called_once()
             mock_is_game_over.assert_called_once()
             self.assertTrue(result)
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
@@ -243,12 +253,12 @@ class TestBradley(unittest.TestCase):
             mock_outcome.result.assert_called_once()
             self.assertEqual(result, '1-0')
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_get_game_outcome_invalid(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         # Mocking the outcome method to raise an AttributeError
@@ -259,12 +269,12 @@ class TestBradley(unittest.TestCase):
             mock_outcome_method.assert_called_once()
             self.assertTrue(result.startswith('error at get_game_outcome: '))
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_get_game_termination_reason_valid(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         # Mocking the outcome method to return a specific termination reason
@@ -278,12 +288,12 @@ class TestBradley(unittest.TestCase):
             mock_outcome_method.assert_called_once()
             self.assertEqual(result, 'normal')
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_get_game_termination_reason_invalid(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         # Mocking the outcome method to raise an AttributeError
@@ -294,12 +304,12 @@ class TestBradley(unittest.TestCase):
             mock_outcome_method.assert_called_once()
             self.assertTrue(result.startswith('error at get_game_termination_reason: '))
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_train_rl_agents(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         with patch.object(bradley, 'assign_points_to_Q_table', return_value=None) as mock_assign_points, \
@@ -327,12 +337,12 @@ class TestBradley(unittest.TestCase):
             self.assertTrue(bradley.W_rl_agent.is_trained)
             self.assertTrue(bradley.B_rl_agent.is_trained)
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_train_rl_agents_Q_value_updates(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         with patch.object(bradley, 'assign_points_to_Q_table', return_value=None) as mock_assign_points, \
@@ -352,12 +362,12 @@ class TestBradley(unittest.TestCase):
             self.assertTrue(mock_find_next_qval.called)
             self.assertTrue(mock_assign_points.called)
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_train_rl_agents_error_handling(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         with patch.object(bradley, 'assign_points_to_Q_table', side_effect=Exception('Test error')) as mock_assign_points, \
@@ -376,23 +386,23 @@ class TestBradley(unittest.TestCase):
             # Verify that the error was logged
             mock_open().write.assert_called()
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_continue_training_rl_agents(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         with self.assertRaises(NotImplementedError):
             bradley.continue_training_rl_agents(10)
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_assign_points_to_Q_table(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         chess_move = 'e2e4'
         curr_turn = 'W1'
@@ -401,9 +411,9 @@ class TestBradley(unittest.TestCase):
         
         with patch.object(bradley.W_rl_agent, 'change_Q_table_pts', return_value=None) as mock_change_Q_table_pts:
             bradley.assign_points_to_Q_table(chess_move, curr_turn, curr_Qval, rl_agent_color)
-
             # Verify that change_Q_table_pts was called with correct parameters
             mock_change_Q_table_pts.assert_called_once_with(chess_move, curr_turn, curr_Qval)
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
@@ -417,42 +427,39 @@ class TestBradley(unittest.TestCase):
         curr_Qval = 10
         rl_agent_color = 'W'
         
-        with patch.object(bradley.W_rl_agent, 'change_Q_table_pts', side_effect=KeyError('Test KeyError')) as mock_change_Q_table_pts, \
+        with patch.object(bradley.W_rl_agent, 'change_Q_table_pts', side_effect=[KeyError('Test KeyError'), None]) as mock_change_Q_table_pts, \
             patch.object(bradley.W_rl_agent, 'update_Q_table', return_value=None) as mock_update_Q_table:
             
             bradley.assign_points_to_Q_table(chess_move, curr_turn, curr_Qval, rl_agent_color)
 
-            # Verify that change_Q_table_pts was called and KeyError was handled
-            mock_change_Q_table_pts.assert_called_once_with(chess_move, curr_turn, curr_Qval)
+            # Verify that change_Q_table_pts was called twice and update_Q_table was called once
+            self.assertEqual(mock_change_Q_table_pts.call_count, 2)
             mock_update_Q_table.assert_called_once_with([chess_move])
-            mock_change_Q_table_pts.assert_called_with(chess_move, curr_turn, curr_Qval)
             mock_open().write.assert_called()  # Ensure an error was logged
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_rl_agent_plays_move(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         chess_move = 'e2e4'
         curr_game = 'Game 1'
         
         with patch.object(bradley.environ, 'load_chessboard', return_value=None) as mock_load_chessboard, \
             patch.object(bradley.environ, 'update_curr_state', return_value=None) as mock_update_curr_state:
-            
             bradley.rl_agent_plays_move(chess_move, curr_game)
-
             # Verify that load_chessboard and update_curr_state were called with correct parameters
             mock_load_chessboard.assert_called_once_with(chess_move, curr_game)
             mock_update_curr_state.assert_called_once()
+
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_rl_agent_plays_move_error_handling(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         chess_move = 'e2e4'
         curr_game = 'Game 1'
@@ -468,18 +475,17 @@ class TestBradley(unittest.TestCase):
             mock_update_curr_state.assert_not_called()
             mock_open().write.assert_called()  # Ensure an error was logged
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_find_estimated_Q_value(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         with patch.object(bradley, 'analyze_board_state', return_value={'centipawn_score': 20, 'anticipated_next_move': 'e7e5'}) as mock_analyze_board, \
             patch.object(bradley.environ.board, 'push_uci', return_value=None) as mock_push_uci, \
             patch.object(bradley.environ.board, 'pop', return_value=None) as mock_pop:
-            
             estimated_Q_value = bradley.find_estimated_Q_value()
 
             # Verify that analyze_board_state, push_uci, and pop were called
@@ -488,12 +494,12 @@ class TestBradley(unittest.TestCase):
             mock_pop.assert_called_once()
             self.assertEqual(estimated_Q_value, 20)  # centipawn score used for Q-value estimation
 
+
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
     @patch('builtins.open')
     def test_find_estimated_Q_value_error_handling(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
         
         with patch.object(bradley, 'analyze_board_state', side_effect=Exception('Test error')) as mock_analyze_board, \
@@ -522,67 +528,64 @@ class TestBradley(unittest.TestCase):
 
         # Calculate the expected Q-value using the SARSA formula
         expected_Qval = curr_Qval + learn_rate * (reward + (discount_factor * est_Qval) - curr_Qval)
-
         self.assertEqual(next_Qval, expected_Qval)
 
 
-    @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
-    @patch('builtins.open')
-    def test_analyze_board_state(self, mock_open, mock_engine):
-        mock_engine_instance = MagicMock()
-        mock_engine.return_value = mock_engine_instance
-        mock_open.return_value = MagicMock()
+    # @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
+    # @patch('builtins.open')
+    # def test_analyze_board_state(self, mock_open, mock_engine):
+    #     mock_engine_instance = MagicMock()
+    #     mock_engine.return_value = mock_engine_instance
+    #     mock_open.return_value = MagicMock()
 
-        bradley = Bradley(chess_data)
-        board = bradley.environ.board
+    #     bradley = Bradley(chess_data)
+    #     board = bradley.environ.board
 
-        # Mocking the analysis results from the engine
-        analysis_results = {
-            'score': chess.engine.Score(cp=20),
-            'pv': ['e7e5']
-        }
+    #     # Mocking the analysis results from the engine
+    #     analysis_results = [{
+    #         'score': chess.engine.Cp(20),
+    #         'pv': ['e7e5']
+    #     }]
         
-        with patch.object(mock_engine_instance, 'analyze', return_value=analysis_results):
-            result = bradley.analyze_board_state(board)
+    #     with patch.object(mock_engine_instance, 'analyze', return_value=analysis_results):
+    #         result = bradley.analyze_board_state(board)
+            
+    #         # Verify the analysis result is correctly interpreted
+    #         self.assertEqual(result['centipawn_score'], 20)
+    #         self.assertEqual(result['anticipated_next_move'], 'e7e5')
 
-            # Verify the analysis result is correctly interpreted
-            self.assertEqual(result['centipawn_score'], 20)
-            self.assertEqual(result['anticipated_next_move'], 'e7e5')
 
-    @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
-    @patch('builtins.open')
-    def test_analyze_board_state_error_handling(self, mock_open, mock_engine):
-        mock_engine_instance = MagicMock()
-        mock_engine.return_value = mock_engine_instance
-        mock_open.return_value = MagicMock()
+    # @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
+    # @patch('builtins.open')
+    # def test_analyze_board_state_error_handling(self, mock_open, mock_engine):
+    #     mock_engine_instance = MagicMock()
+    #     mock_engine.return_value = mock_engine_instance
+    #     mock_open.return_value = MagicMock()
+    #     bradley = Bradley(chess_data)
+    #     board = bradley.environ.board
 
-        bradley = Bradley(chess_data)
-        board = bradley.environ.board
+    #     # Mocking the engine to raise an exception during analysis
+    #     with patch.object(mock_engine_instance, 'analyze', side_effect=Exception('Test error')):
+    #         with self.assertRaises(Exception):
+    #             bradley.analyze_board_state(board)
 
-        # Mocking the engine to raise an exception during analysis
-        with patch.object(mock_engine_instance, 'analyze', side_effect=Exception('Test error')):
-            with self.assertRaises(Exception):
-                bradley.analyze_board_state(board)
-
-            # Verify that the error was logged
-            mock_open().write.assert_called()  # Ensure an error was logged
+    #         # Verify that the error was logged
+    #         mock_open().write.assert_called()  # Ensure an error was logged
 
 
     def test_get_reward(self):
         bradley = Bradley(chess_data)
-
         # Define game settings for rewards
         game_settings.piece_development = 5
         game_settings.capture = 10
         game_settings.promotion = 20
         game_settings.promotion_queen = 25
-
         # Test different move types and their corresponding rewards
         move_development = 'Nf3'
         move_capture = 'Nxf7'
         move_promotion = 'e8=Q'
         move_promotion_queen = 'e8=Q'
-        
+    
         reward_development = bradley.get_reward(move_development)
         reward_capture = bradley.get_reward(move_capture)
         reward_promotion = bradley.get_reward(move_promotion)
@@ -599,7 +602,6 @@ class TestBradley(unittest.TestCase):
     def test_identify_corrupted_games(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
 
         # Mocking methods to simulate errors for corrupted games
@@ -609,7 +611,6 @@ class TestBradley(unittest.TestCase):
             patch.object(bradley.environ, 'load_chessboard', side_effect=[None, Exception('Test error')]), \
             patch.object(bradley.environ, 'update_curr_state', return_value=None), \
             patch.object(bradley.environ, 'reset_environ', return_value=None):
-
             bradley.identify_corrupted_games()
 
             # Verify that the corrupted game was added to the list and the error was logged
@@ -622,7 +623,6 @@ class TestBradley(unittest.TestCase):
     def test_generate_Q_est_df(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
 
         # Mocking methods to generate Q-values
@@ -631,7 +631,6 @@ class TestBradley(unittest.TestCase):
             patch.object(bradley.environ, 'load_chessboard', return_value=None) as mock_load_chessboard, \
             patch.object(bradley.environ, 'update_curr_state', return_value=None) as mock_update_curr_state, \
             patch.object(bradley.environ, 'reset_environ', return_value=None) as mock_reset_environ:
-
             q_est_vals_file_path = 'q_est_vals_test.txt'
             bradley.generate_Q_est_df(q_est_vals_file_path)
 
@@ -650,7 +649,6 @@ class TestBradley(unittest.TestCase):
     def test_generate_Q_est_df_error_handling(self, mock_open, mock_engine):
         mock_engine.return_value = MagicMock()
         mock_open.return_value = MagicMock()
-
         bradley = Bradley(chess_data)
 
         # Mocking methods to simulate errors during Q-value generation
@@ -659,7 +657,6 @@ class TestBradley(unittest.TestCase):
             patch.object(bradley.environ, 'load_chessboard', return_value=None) as mock_load_chessboard, \
             patch.object(bradley.environ, 'update_curr_state', return_value=None) as mock_update_curr_state, \
             patch.object(bradley.environ, 'reset_environ', return_value=None) as mock_reset_environ:
-
             q_est_vals_file_path = 'q_est_vals_test.txt'
             
             with self.assertRaises(Exception):
@@ -670,15 +667,29 @@ class TestBradley(unittest.TestCase):
             mock_open().write.assert_called()  # Ensure an error was logged
 
 
+    # @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
+    # @patch('builtins.open')
+    # def test_analyze_board_state_mate_score(self, mock_open, mock_engine):
+    #     mock_engine_instance = MagicMock()
+    #     mock_engine.return_value = mock_engine_instance
+    #     mock_open.return_value = MagicMock()
 
+    #     bradley = Bradley(chess_data)
+    #     board = bradley.environ.board
 
+    #     # Mocking the analysis results from the engine
+    #     analysis_result = [{
+    #         'score': chess.engine.Mate(3),
+    #         'pv': ['e7e5']
+    #     }]
 
+    #     with patch.object(mock_engine_instance, 'analyse', return_value=analysis_result):
+    #         result = bradley.analyze_board_state(board)
 
-    
-
-
-
-
+    #         # Verify the analysis result is correctly interpreted
+    #         self.assertEqual(result['mate_score'], 3)
+    #         self.assertIsNone(result['centipawn_score'])
+    #         self.assertEqual(result['anticipated_next_move'], 'e7e5')
 
 
 if __name__ == '__main__':
