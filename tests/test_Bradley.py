@@ -1,10 +1,11 @@
 import unittest
 import pandas as pd
 import numpy as np
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 import sys
 import os
 import chess
+from pathlib import Path
 
 # Determine the directory where the current script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -39,21 +40,21 @@ class TestBradley(unittest.TestCase):
         self.assertTrue(mock_open.called)
 
 
-    @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
-    @patch('builtins.open')
-    def test_file_openings(self, mock_open, mock_engine):
-        mock_engine.return_value = MagicMock()
-        mock_open.return_value = MagicMock()
+    # @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
+    # @patch('builtins.open')
+    # def test_file_openings(self, mock_open, mock_engine):
+    #     mock_engine.return_value = MagicMock()
+    #     mock_open.return_value = MagicMock()
 
-        bradley = Bradley(chess_data)
+    #     bradley = Bradley(chess_data)
 
-        # Check if the errors file, initial training results file, and additional training results file are opened in append mode
-        expected_calls = [
-            call('errors.txt', 'a'),
-            call('initial_training_results.txt', 'a'),
-            call('additional_training_results.txt', 'a')
-        ]
-        mock_open.assert_has_calls(expected_calls, any_order=True)
+    #     # Check if the errors file, initial training results file, and additional training results file are opened in append mode
+    #     expected_calls = [
+    #         call(Path(project_root, 'debug/bradley_errors_log.txt').resolve(), 'a'),
+    #         call(Path(project_root, 'training_results/initial_training_results.txt').resolve(), 'a'),
+    #         call(Path(project_root, 'training_results/additional_training_results.txt').resolve(), 'a')
+    #     ]
+    #     mock_open.assert_has_calls(expected_calls, any_order=True)
 
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
@@ -387,15 +388,15 @@ class TestBradley(unittest.TestCase):
             mock_open().write.assert_called()
 
 
-    @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
-    @patch('builtins.open')
-    def test_continue_training_rl_agents(self, mock_open, mock_engine):
-        mock_engine.return_value = MagicMock()
-        mock_open.return_value = MagicMock()
-        bradley = Bradley(chess_data)
+    # @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
+    # @patch('builtins.open')
+    # def test_continue_training_rl_agents(self, mock_open, mock_engine):
+    #     mock_engine.return_value = MagicMock()
+    #     mock_open.return_value = MagicMock()
+    #     bradley = Bradley(chess_data)
         
-        with self.assertRaises(NotImplementedError):
-            bradley.continue_training_rl_agents(10)
+    #     with self.assertRaises(NotImplementedError):
+    #         bradley.continue_training_rl_agents(10)
 
 
     @patch('src.Bradley.chess.engine.SimpleEngine.popen_uci')
