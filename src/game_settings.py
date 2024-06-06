@@ -47,6 +47,10 @@ agent_errors_filepath = base_directory / ".." / "debug" / "agent_errors_log.txt"
 bradley_errors_filepath = base_directory / ".." / "debug" / "bradley_errors_log.txt"
 environ_errors_filepath = base_directory / ".." / "debug" / "environ_errors_log.txt"
 
+agent_step_by_step_filepath = base_directory / ".." / "debug" / "agent_step_by_step_log.txt"
+bradley_step_by_step_filepath = base_directory / ".." / "debug" / "bradley_step_by_step_log.txt"
+environ_step_by_step_filepath = base_directory / ".." / "debug" / "environ_step_by_step_log.txt"
+
 initial_training_results_filepath = base_directory / ".." / "training_results" / "initial_training_results.txt"
 additional_training_results_filepath = base_directory / ".." / "training_results" / "additional_training_results.txt"
 agent_vs_agent_filepath = base_directory / ".." / "training_results" / "agent_vs_agent_games.txt"

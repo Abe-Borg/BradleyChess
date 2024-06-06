@@ -1035,3 +1035,91 @@ class Bradley:
                 self.environ.reset_environ() # reset and go to next game in training set
         finally:
             self.engine.quit()
+
+
+    def simply_play_games(self) -> None:
+        """
+            -
+        """
+        ### FOR EACH GAME IN THE CHESS DB ###
+        game_count = 0
+        for game_num_str in self.chess_data.index:
+            num_chess_moves_curr_training_game: int = self.chess_data.at[game_num_str, 'PlyCount']
+
+            try:
+                curr_state = self.environ.get_curr_state()
+            except Exception as e:
+                self.errors_file.write(f'An error occurred at self.environ.get_curr_state: {e}\n')
+                self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
+                self.errors_file.write(f'at game: {game_num_str}\n')
+                break
+
+            ### LOOP PLAYS THROUGH ONE GAME ###
+            while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
+                ##################### WHITE'S TURN ####################
+                W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
+                if not W_chess_move:
+                    self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
+                    self.errors_file.write(f'W_chess_move is empty at state: {curr_state}\n')
+                    self.errors_file.write(f'at game: {game_num_str}\n')
+                    break # and go to the next game. this game is over.
+
+                ### WHITE AGENT PLAYS THE SELECTED MOVE ###
+                try:
+                    self.rl_agent_plays_move(W_chess_move, game_num_str)
+                except Exception as e:
+                    self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
+                    self.errors_file.write(f'at game: {game_num_str}\n')
+                    break # and go to the next game. this game is over.
+
+                # get latest curr_state since self.rl_agent_plays_move updated the chessboard
+                try:
+                    curr_state = self.environ.get_curr_state()
+                except Exception as e:
+                    self.errors_file.write(f'An error occurred at get_curr_state: {e}\n')
+                    self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
+                    self.errors_file.write(f'at game: {game_num_str}\n')
+                
+                if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
+                    break # and go to next game
+
+                ##################### BLACK'S TURN ####################
+                B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
+                if not B_chess_move:
+                    self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
+                    self.errors_file.write(f'B_chess_move is empty at state: {curr_state}\n')
+                    self.errors_file.write(f'at: {game_num_str}\n')
+                    break # game is over, go to next game.
+
+                ##### BLACK AGENT PLAYS SELECTED MOVE #####
+                try:
+                    self.rl_agent_plays_move(B_chess_move, game_num_str)
+                except Exception as e:
+                    self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
+                    self.errors_file.write(f'at {game_num_str}\n')
+                    break 
+
+                # get latest curr_state since self.rl_agent_plays_move updated the chessboard
+                try:
+                    curr_state = self.environ.get_curr_state()
+                except Exception as e:
+                    self.errors_file.write(f'An error occurred at environ.get_curr_state: {e}\n')
+                    self.errors_file.write(f'at: {game_num_str}\n')
+                    break
+
+                if self.environ.board.is_game_over() or not curr_state['legal_moves']:
+                    break # and go to next game
+
+                try:
+                    curr_state = self.environ.get_curr_state()
+                except Exception as e:
+                    self.errors_file.write(f'An error occurred: {e}\n')
+                    self.errors_file.write("failed to get_curr_state\n") 
+                    self.errors_file.write(f'at: {game_num_str}\n')
+                    break
+            ### END OF CURRENT GAME LOOP ###
+
+            # this curr game is done, reset environ to prepare for the next game
+            self.environ.reset_environ() # reset and go to next game in chess database
+            game_count += 1
+        ### END OF FOR LOOP THROUGH CHESS DB ###
