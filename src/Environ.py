@@ -223,6 +223,7 @@ class Environ:
         """
         # this is the anticipated chess move due to opponent's previous chess move. so if White plays Ne4, what is Black likely to play according to the engine?
         anticipated_chess_move = analysis_results['anticipated_next_move']  # this has the form like this, Move.from_uci('e4f6')
+        
         try:
             move = chess.Move.from_uci(anticipated_chess_move)
             self.board.push(move) # the actual push method doesn't check for the legality of the move. the board breaks if the move is illegal and raise an exception

@@ -24,3 +24,7 @@ Some players might prefer longer, strategic battles, while others might excel at
 
 Historical Trend Analysis: By analyzing chess data over time, you can identify trends in 
 popularity and success rates of different openings, strategies, or endgames.
+
+1. after I have formatted all chess data, and then trained the agents on all games, the Q table can be repurposed. 
+I can zero out the values, and then count how many time one of the unique chess moves is played across all games 
+in the db. other analysis is possible, but it will be great to have that blank table (unique values vs turn numbers.)
