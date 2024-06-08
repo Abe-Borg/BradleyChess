@@ -1,0 +1,12 @@
+An error occurred at self.environ.get_curr_state: name 'legal_moves' is not defined
+curr board is:
+r n b q k b n r
+p p p p p p p p
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+P P P P P P P P
+R N B Q K B N R
+
+at game: Game 1

@@ -35,17 +35,10 @@ class Environ:
         self.step_by_step_file = open(game_settings.environ_step_by_step_filepath, 'a')
         self.board: chess.Board = chess.Board()
         
-        self.step_by_step_file.write(f'========== Start of Environ constructor ==========\n')
-        self.step_by_step_file.write(f'board\n: {self.board}\n\n')
-
         # turn_list and turn_index work together to track the current turn (a string like this, 'W1')
         max_turns = game_settings.max_num_turns_per_player * 2
         self.turn_list: list[str] = [f'{"W" if i % 2 == 0 else "B"}{i // 2 + 1}' for i in range(max_turns)]
         self.turn_index: int = 0
-
-        self.step_by_step_file.write(f'turn_list: {self.turn_list}\n')
-        self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
-        self.step_by_step_file.write(f'========== End of Environ constructor ==========\n\n\n')
     ### end of constructor
 
     def __del__(self):
@@ -77,21 +70,26 @@ class Environ:
         self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
         self.step_by_step_file.write(f'turn_list: {self.turn_list}\n')
         self.step_by_step_file.write(f'board\n: {self.board}\n\n')
-        self.step_by_step_file.write(f'length of turn_list: {len(self.turn_list)}\n\n')
 
         if not (0 <= self.turn_index < len(self.turn_list)):
             self.errors_file.write(f'ERROR: Turn index out of range: {self.turn_index}\n')
             raise IndexError(f'Turn index out of range: {self.turn_index}')
     
+        self.step_by_step_file.write(f'we are about to call environ.get_curr_turn()\n')
         curr_turn = self.get_curr_turn()
 
         self.step_by_step_file.write(f'we are back from environ.get_curr_turn()\n')
-
         self.step_by_step_file.write(f'curr_turn: {curr_turn}\n')
-        self.step_by_step_file.write(f'legal_moves: {self.get_legal_moves()}\n')
+
+        self.step_by_step_file.write(f'we are about to call environ.get_legal_moves()\n')
+
+        lagal_moves = self.get_legal_moves()
+        
+        self.step_by_step_file.write(f'we are back from environ.get_legal_moves()\n')
+        self.step_by_step_file.write(f'legal_moves: {legal_moves}\n')
         self.step_by_step_file.write(f'========== End of Environ.get_curr_state ==========\n\n\n')
 
-        return {'turn_index': self.turn_index, 'curr_turn': curr_turn, 'legal_moves': self.get_legal_moves()}
+        return {'turn_index': self.turn_index, 'curr_turn': curr_turn, 'legal_moves': legal_moves}
     ### end of get_curr_state
     
     def update_curr_state(self) -> None:
@@ -111,7 +109,7 @@ class Environ:
                 Writes into the errors file if the maximum turn index is reached or exceeded.
         """
         self.step_by_step_file.write(f'========== Start of Environ.update_curr_state ==========\n')
-        self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
+        self.step_by_step_file.write(f'current turn_index: {self.turn_index}\n')
         
         if self.turn_index >= game_settings.max_turn_index:
             self.errors_file.write(f'ERROR: max_turn_index reached: {self.turn_index} >= {game_settings.max_turn_index}\n')
@@ -122,7 +120,7 @@ class Environ:
             raise IndexError(f"Turn index out of bounds: {self.turn_index}")
     
         self.turn_index += 1
-        self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
+        self.step_by_step_file.write(f'updated turn_index: {self.turn_index}\n')
         self.step_by_step_file.write(f'========== End of Environ.update_curr_state ==========\n\n\n')
     ### end of update_curr_state
     
@@ -145,7 +143,7 @@ class Environ:
                 Writes into the errors file if an IndexError is encountered.
         """
         self.step_by_step_file.write(f'========== Start of Environ.get_curr_turn ==========\n')
-        self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
+        self.step_by_step_file.write(f'current turn_index: {self.turn_index}\n')
 
         if not (0 <= self.turn_index < len(self.turn_list)):
             self.errors_file.write(f'ERROR: Turn index out of range: {self.turn_index}\n')
@@ -179,12 +177,12 @@ class Environ:
         """
         self.step_by_step_file.write(f'========== Start of Environ.load_chessboard ==========\n')
         self.step_by_step_file.write(f'board\n: {self.board}\n\n')
-        self.step_by_step_file.write(f'chess_move_str: {chess_move_str}\n')
-        self.step_by_step_file.write(f'curr_game: {curr_game}\n')
+        self.step_by_step_file.write(f'chess move to play: {chess_move_str}\n')
+        self.step_by_step_file.write(f'current game: {curr_game}\n')
 
         try:
             self.board.push_san(chess_move_str)
-            self.step_by_step_file.write(f'move {chess_move_str} applied to board\n')
+            self.step_by_step_file.write(f'move {chess_move_str} applied to board successfully\n')
             self.step_by_step_file.write(f'board\n: {self.board}\n\n')
         except ValueError as e:
             self.errors_file.write(f'An error occurred at environ.load_chessboard() for {curr_game}: {e}, unable to load chessboard with {chess_move_str}')
@@ -241,7 +239,7 @@ class Environ:
         self.step_by_step_file.write(f'========== Start of Environ.undo_move ==========\n')
         self.step_by_step_file.write(f'board before undo\n')
         self.step_by_step_file.write(f'board\n: {self.board}\n\n')
-        self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
+        self.step_by_step_file.write(f'current turn_index: {self.turn_index}\n')
 
         try:
             self.board.pop()
