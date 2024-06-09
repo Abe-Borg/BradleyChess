@@ -4,39 +4,39 @@ import numpy as np
 import helper_methods
 
 class Agent:
-    """The `Agent` class is responsible for deciding what chess move to play 
-    based on the current state. The state is passed to the agent by 
-    the `Environ` class.
+    """
+        The `Agent` class is responsible for deciding what chess move to play 
+        based on the current state. The state is passed to the agent by 
+        the `Environ` class.
 
-    Args:
-        - color (str): A string indicating the color of the agent, either 'W' or 'B'.
-        - chess_data (pd.DataFrame): A Pandas DataFrame containing the chess data 
-          used for training the agent.
-        - learn_rate (float): A float between 0 and 1 that represents the learning rate.
-        - discount_factor (float): A float between 0 and 1 that represents the discount factor.
-    Attributes:
-        - color (str): A string indicating the color of the agent, either 'W' or 'B'.
-        - chess_data (pd.DataFrame): A Pandas DataFrame containing the chess data 
-        used for training the agent.
-        - learn_rate (float): A float between 0 and 1 that represents the learning rate.
-        - discount_factor (float): A float between 0 and 1 that represents the discount factor.
-        - is_trained (bool): A boolean indicating whether the agent has been trained.
-        - Q_table (pd.DataFrame): A Pandas DataFrame containing the Q-values for the agent.
+        Args:
+            - color (str): A string indicating the color of the agent, either 'W' or 'B'.
+            - chess_data (pd.DataFrame): A Pandas DataFrame containing the chess data 
+            used for training the agent.
+            - learn_rate (float): A float between 0 and 1 that represents the learning rate.
+            - discount_factor (float): A float between 0 and 1 that represents the discount factor.
+        Attributes:
+            - color (str): A string indicating the color of the agent, either 'W' or 'B'.
+            - chess_data (pd.DataFrame): A Pandas DataFrame containing the chess data 
+            used for training the agent.
+            - learn_rate (float): A float between 0 and 1 that represents the learning rate.
+            - discount_factor (float): A float between 0 and 1 that represents the discount factor.
+            - is_trained (bool): A boolean indicating whether the agent has been trained.
+            - Q_table (pd.DataFrame): A Pandas DataFrame containing the Q-values for the agent.
     """
     def __init__(self, color: str, chess_data: pd.DataFrame, learn_rate = 0.6, discount_factor = 0.35):
         """
-        Initializes an Agent object with a color, chess data, a learning rate, a discount factor, and an errors file.
-        This method initializes an Agent object by setting the color, the chess data, the learning rate, and the 
-        discount factor. It also opens the errors file in append mode and initializes the Q-table.
-        
-        Side Effects:
-        Opens the errors file in append mode.
-        Modifies the learn_rate, discount_factor, color, chess_data, is_trained, and Q_table attributes.
+            Initializes an Agent object with a color, chess data, a learning rate, a discount factor, and an errors file.
+            This method initializes an Agent object by setting the color, the chess data, the learning rate, and the 
+            discount factor. It also opens the errors file in append mode and initializes the Q-table.
+            
+            Side Effects:
+            Opens the errors file in append mode.
+            Modifies the learn_rate, discount_factor, color, chess_data, is_trained, and Q_table attributes.
         """
         self.errors_file = open(game_settings.agent_errors_filepath, 'a')
-        # too high num here means too focused on recent knowledge, 
+        self.step_by_step_file = open(game_settings.agent_step_by_step_filepath, 'a')
         self.learn_rate = learn_rate
-        # lower discount_factor number means more opportunistic, but not good long term planning
         self.discount_factor = discount_factor
         self.color = color
         self.chess_data = chess_data
