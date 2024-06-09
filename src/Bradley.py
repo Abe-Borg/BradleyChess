@@ -12,9 +12,8 @@ class Bradley:
     This class trains the agent and helps to manage the chessboard during play between the computer and the user.
 
     Args:
-        chess_data (pd.DataFrame): A Pandas DataFrame containing the chess data.
+        none
     Attributes:
-        chess_data (pd.DataFrame): A Pandas DataFrame containing the chess data.
         environ (Environ.Environ): An Environ object representing the chessboard environment.
         W_rl_agent (Agent.Agent): A white RL Agent object.
         B_rl_agent (Agent.Agent): A black RL Agent object.
@@ -24,27 +23,25 @@ class Bradley:
         additional_training_results (file): A file object to log additional training results.
         corrupted_games_list (list): A list of games that are corrupted and cannot be used for training.
     """
-    def __init__(self, chess_data: pd.DataFrame):
+    def __init__(self):
         """
-        Initializes a Bradley object with chess data, environment, agents, and a chess engine.
-        This method initializes a Bradley object by setting the chess data, creating an environment, creating two 
+        Initializes a Bradley object with environment, agents, and a chess engine.
+        This method initializes a Bradley object by creating an environment, creating two 
         agents (one for white and one for black), and starting a chess engine. It also opens the errors file and 
         the training results files in append mode, and initializes an empty list for corrupted games.
 
         Side Effects:
             Opens the errors file, the initial training results file, and the additional training results file in 
             append mode.
-            Modifies the chess_data, environ, W_rl_agent, B_rl_agent, corrupted_games_list, and engine attributes.
         """
 
         self.errors_file = open(game_settings.bradley_errors_filepath, 'a')
         self.initial_training_results = open(game_settings.initial_training_results_filepath, 'a')
         self.additional_training_results = open(game_settings.additional_training_results_filepath, 'a')
-        self.chess_data = chess_data
         self.environ = Environ.Environ()
-        self.W_rl_agent = Agent.Agent('W', self.chess_data)
-        self.B_rl_agent = Agent.Agent('B', self.chess_data)
-        self.corrupted_games_list = [] # list of games that are corrupted and cannot be used for training
+        self.W_rl_agent = Agent.Agent('W')
+        self.B_rl_agent = Agent.Agent('B')
+        self.corrupted_games_list = []
 
         # stockfish is used to analyze positions during training this is how we estimate the q value 
         # at each position, and also for anticipated next position
@@ -268,10 +265,11 @@ class Bradley:
             Writes any errors that occur to the errors file.
             Resets the environment at the end of each game.
         """
+        global chess_data
 
         ### FOR EACH GAME IN THE TRAINING SET ###
-        for game_num_str in self.chess_data.index:
-            num_chess_moves_curr_training_game: int = self.chess_data.at[game_num_str, 'PlyCount']
+        for game_num_str in chess_data.index:
+            num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
 
             W_curr_Qval: int = game_settings.initial_q_val
             B_curr_Qval: int = game_settings.initial_q_val
@@ -394,7 +392,7 @@ class Bradley:
                 self.initial_training_results.write(f'\n{self.environ.board}\n\n')
                 self.initial_training_results.write(f'Game result is: {self.get_game_outcome()}\n')    
                 self.initial_training_results.write(f'The game ended because of: {self.get_game_termination_reason()}\n')
-                self.initial_training_results.write(f'DB shows game ended b/c: {self.chess_data.at[game_num_str, "Result"]}\n')
+                self.initial_training_results.write(f'DB shows game ended b/c: {chess_data.at[game_num_str, "Result"]}\n')
 
             self.environ.reset_environ() # reset and go to next game in training set
         
@@ -768,11 +766,13 @@ class Bradley:
         Side Effects:
             Modifies the list of corrupted games and writes to the errors file if an error occurs.
         """
+        global chess_data
+
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
-        for game_num_str in self.chess_data.index:
+        for game_num_str in chess_data.index:
             start_time = time.time()
-            num_chess_moves_curr_training_game: int = self.chess_data.at[game_num_str, 'PlyCount']
+            num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
 
             try:
                 curr_state = self.environ.get_curr_state()
@@ -918,11 +918,12 @@ class Bradley:
             Modifies the current state of the environment.
         """
         q_est_vals_file = open(q_est_vals_file_path, 'a')
+        global chess_data
 
         try:
             ### FOR EACH GAME IN THE TRAINING SET ###
-            for game_num_str in self.chess_data.index:
-                num_chess_moves_curr_training_game: int = self.chess_data.at[game_num_str, 'PlyCount']
+            for game_num_str in chess_data.index:
+                num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
 
                 try:
                     curr_state = self.environ.get_curr_state()
@@ -1041,10 +1042,12 @@ class Bradley:
         """
             -
         """
+        global chess_data
+
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
-        for game_num_str in self.chess_data.index:
-            num_chess_moves_curr_training_game: int = self.chess_data.at[game_num_str, 'PlyCount']
+        for game_num_str in chess_data.index:
+            num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
 
             try:
                 curr_state = self.environ.get_curr_state()

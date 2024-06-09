@@ -3,10 +3,9 @@ import pandas as pd
 from pathlib import Path
 import chess
 
+CHESS_DATA = None
 base_directory = Path(__file__).parent
-
 pd.set_option('display.max_columns', None)
-
 PRINT_TRAINING_RESULTS = False
 
 # the following numbers are based on centipawn scores
@@ -21,7 +20,6 @@ CHESS_MOVE_VALUES: dict[str, int] = {
     }
 
 training_sample_size = 50_000
-
 max_num_turns_per_player = 200
 max_turn_index = max_num_turns_per_player * 2 - 1
 

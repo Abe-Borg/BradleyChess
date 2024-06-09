@@ -2,9 +2,6 @@ import Bradley
 import pandas as pd
 import game_settings
 import random
-# import logging
-# import log_config
-# logger = logging.getLogger(__name__)
 
 def play_game(bubs: Bradley.Bradley, rl_agent_color: str) -> None:
     def handle_move(player_color):
