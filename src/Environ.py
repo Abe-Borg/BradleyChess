@@ -68,8 +68,7 @@ class Environ:
         """
         self.step_by_step_file.write(f'========== Start of Environ.get_curr_state ==========\n')
         self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
-        self.step_by_step_file.write(f'turn_list: {self.turn_list}\n')
-        self.step_by_step_file.write(f'board\n: {self.board}\n\n')
+        self.step_by_step_file.write(f'board: \n{self.board}\n\n')
 
         if not (0 <= self.turn_index < len(self.turn_list)):
             self.errors_file.write(f'ERROR: Turn index out of range: {self.turn_index}\n')
@@ -83,7 +82,7 @@ class Environ:
 
         self.step_by_step_file.write(f'we are about to call environ.get_legal_moves()\n')
 
-        lagal_moves = self.get_legal_moves()
+        legal_moves = self.get_legal_moves()
         
         self.step_by_step_file.write(f'we are back from environ.get_legal_moves()\n')
         self.step_by_step_file.write(f'legal_moves: {legal_moves}\n')
@@ -176,14 +175,14 @@ class Environ:
                 Writes into the errors file if a ValueError is encountered.
         """
         self.step_by_step_file.write(f'========== Start of Environ.load_chessboard ==========\n')
-        self.step_by_step_file.write(f'board\n: {self.board}\n\n')
+        self.step_by_step_file.write(f'board: \n{self.board}\n\n')
         self.step_by_step_file.write(f'chess move to play: {chess_move_str}\n')
         self.step_by_step_file.write(f'current game: {curr_game}\n')
 
         try:
             self.board.push_san(chess_move_str)
             self.step_by_step_file.write(f'move {chess_move_str} applied to board successfully\n')
-            self.step_by_step_file.write(f'board\n: {self.board}\n\n')
+            self.step_by_step_file.write(f'board: \n{self.board}\n\n')
         except ValueError as e:
             self.errors_file.write(f'An error occurred at environ.load_chessboard() for {curr_game}: {e}, unable to load chessboard with {chess_move_str}')
             self.errors_file.write(f'========== End of Environ.load_chessboard ==========\n\n\n')
@@ -306,12 +305,12 @@ class Environ:
         """
         self.step_by_step_file.write(f'========== Start of Environ.reset_environ ==========\n')
         self.step_by_step_file.write(f'board before reset\n')
-        self.step_by_step_file.write(f'board\n: {self.board}\n\n')
+        self.step_by_step_file.write(f'board: \n{self.board}\n\n')
         self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
         self.board.reset()
         self.turn_index = 0
         self.step_by_step_file.write(f'board after reset\n')
-        self.step_by_step_file.write(f'board\n: {self.board}\n\n')
+        self.step_by_step_file.write(f'board: \n{self.board}\n\n')
         self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
         self.step_by_step_file.write(f'========== End of Environ.reset_environ ==========\n\n\n')
 
@@ -332,8 +331,7 @@ class Environ:
                 from g1 to f3, the returned list would be ['e4', 'Nf3'].
         """
         self.step_by_step_file.write(f'========== Start of Environ.get_legal_moves ==========\n')
-        self.step_by_step_file.write(f'board\n: {self.board}\n\n')
-
+        self.step_by_step_file.write(f'board: \n{self.board}\n\n')
 
         legal_moves = [self.board.san(move) for move in self.board.legal_moves] 
         self.step_by_step_file.write(f'legal_moves: {legal_moves}\n')

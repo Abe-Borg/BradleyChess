@@ -10,7 +10,7 @@ import Agent
  
 if __name__ == '__main__':
 
-    chess_data_file_path = game_settings.chess_games_filepath_part_100
+    chess_data_file_path = game_settings.chess_games_filepath_part_10
 
     chess_data = pd.read_pickle(chess_data_file_path, compression = 'zip')
     game = chess_data.head(1)    
