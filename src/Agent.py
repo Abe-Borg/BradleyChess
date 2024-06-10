@@ -20,24 +20,22 @@ class Agent:
             - is_trained (bool): A boolean indicating whether the agent has been trained.
             - Q_table (pd.DataFrame): A Pandas DataFrame containing the Q-values for the agent.
     """
-    def __init__(self, color: str, chess_data: pd.DataFrame, learn_rate = 0.6, discount_factor = 0.35):
+    def __init__(self, color: str, learn_rate = 0.6, discount_factor = 0.35):
         """
-            Initializes an Agent object with a color, chess data, a learning rate, a discount factor, and an errors file.
-            This method initializes an Agent object by setting the color, the chess data, the learning rate, and the 
+            Initializes an Agent object with a color, a learning rate, a discount factor, and an errors file.
+            This method initializes an Agent object by setting the color, the learning rate, and the 
             discount factor. It also opens the errors file in append mode and initializes the Q-table.
             
             Side Effects:
             Opens the errors file in append mode.
-            Modifies the learn_rate, discount_factor, color, chess_data, is_trained, and Q_table attributes.
+            Modifies the learn_rate, discount_factor, color, is_trained, and Q_table attributes.
         """
         self.errors_file = open(game_settings.agent_errors_filepath, 'a')
         self.step_by_step_file = open(game_settings.agent_step_by_step_filepath, 'a')
         self.learn_rate = learn_rate
         self.discount_factor = discount_factor
         self.color = color
-        self.chess_data = chess_data
         self.is_trained: bool = False
-        self.Q_table: pd.DataFrame = self.init_Q_table(self.chess_data)
     ### end of __init__ ###
 
     def __del__(self):
@@ -101,7 +99,7 @@ class Agent:
         Side Effects:
             None.
         """
-        return self.chess_data.at[curr_game, curr_turn]
+        return game_settings.CHESS_DATA.at[curr_game, curr_turn]
     ### end of policy_training_mode ###
 
     def policy_game_mode(self, legal_moves: list[str], curr_turn: str) -> str:

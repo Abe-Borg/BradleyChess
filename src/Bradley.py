@@ -265,11 +265,10 @@ class Bradley:
             Writes any errors that occur to the errors file.
             Resets the environment at the end of each game.
         """
-        global chess_data
 
         ### FOR EACH GAME IN THE TRAINING SET ###
-        for game_num_str in chess_data.index:
-            num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
+        for game_num_str in game_settings.CHESS_DATA.index:
+            num_chess_moves_curr_training_game: int = game_settings.CHESS_DATA.at[game_num_str, 'PlyCount']
 
             W_curr_Qval: int = game_settings.initial_q_val
             B_curr_Qval: int = game_settings.initial_q_val
@@ -392,7 +391,7 @@ class Bradley:
                 self.initial_training_results.write(f'\n{self.environ.board}\n\n')
                 self.initial_training_results.write(f'Game result is: {self.get_game_outcome()}\n')    
                 self.initial_training_results.write(f'The game ended because of: {self.get_game_termination_reason()}\n')
-                self.initial_training_results.write(f'DB shows game ended b/c: {chess_data.at[game_num_str, "Result"]}\n')
+                self.initial_training_results.write(f'DB shows game ended b/c: {game_settings.CHESS_DATA.at[game_num_str, "Result"]}\n')
 
             self.environ.reset_environ() # reset and go to next game in training set
         
@@ -766,13 +765,11 @@ class Bradley:
         Side Effects:
             Modifies the list of corrupted games and writes to the errors file if an error occurs.
         """
-        global chess_data
-
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
-        for game_num_str in chess_data.index:
+        for game_num_str in game_settings.CHESS_DATA.index:
             start_time = time.time()
-            num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
+            num_chess_moves_curr_training_game: int = game_settings.CHESS_DATA.at[game_num_str, 'PlyCount']
 
             try:
                 curr_state = self.environ.get_curr_state()
@@ -918,12 +915,11 @@ class Bradley:
             Modifies the current state of the environment.
         """
         q_est_vals_file = open(q_est_vals_file_path, 'a')
-        global chess_data
 
         try:
             ### FOR EACH GAME IN THE TRAINING SET ###
-            for game_num_str in chess_data.index:
-                num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
+            for game_num_str in game_settings.CHESS_DATA.index:
+                num_chess_moves_curr_training_game: int = game_settings.CHESS_DATA.at[game_num_str, 'PlyCount']
 
                 try:
                     curr_state = self.environ.get_curr_state()
@@ -1042,12 +1038,10 @@ class Bradley:
         """
             -
         """
-        global chess_data
-
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
-        for game_num_str in chess_data.index:
-            num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
+        for game_num_str in game_settings.CHESS_DATA.index:
+            num_chess_moves_curr_training_game: int = game_settings.CHESS_DATA.at[game_num_str, 'PlyCount']
 
             try:
                 curr_state = self.environ.get_curr_state()
