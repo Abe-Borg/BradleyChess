@@ -3,8 +3,6 @@ import pandas as pd
 from pathlib import Path
 import chess
 
-CHESS_DATA = None
-
 base_directory = Path(__file__).parent
 
 pd.set_option('display.max_columns', None)
@@ -276,3 +274,6 @@ chess_games_filepath_part_98 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_99 = base_directory / ".." / "chess_data" / "chess_games_part_99.pkl"
 chess_games_filepath_part_100 = base_directory / ".." / "chess_data" / "chess_games_part_100.pkl"
 
+############################################################################################################
+
+CHESS_DATA = pd.read_pickle(chess_games_filepath_part_100, compression = 'zip')

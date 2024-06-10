@@ -15,10 +15,6 @@ sys.path.insert(0, os.path.join(project_root, 'src'))
 
 from src.Agent import Agent
 from src import game_settings
-from src.Environ import Environ
-
-chess_data = pd.read_pickle(game_settings.chess_games_filepath_part_100, compression = 'zip')
-chess_data = chess_data.head(5)
 
 class TestAgent(unittest.TestCase):
     """
@@ -26,7 +22,6 @@ class TestAgent(unittest.TestCase):
     This class inherits from unittest.TestCase which is a standard test case class in Python's unittest framework.
 
     Attributes:
-        chess_data (pd.DataFrame): A pandas DataFrame containing a subset of chess game data.
         agent (src.Agent): An instance of the Agent class that is being tested.
         environ_state (dict): A dictionary representing the environment state for the agent.
     """
@@ -35,9 +30,9 @@ class TestAgent(unittest.TestCase):
         The setUp method is a special method in unittest.TestCase.
         It is run before each test method (i.e., methods starting with 'test') in the class. It is used to set up any state that is common across multiple test methods.
         In this case, it sets up a subset of chess game data, an instance of the Agent class, and a dictionary representing the environment state for the agent.
-        """
-        self.chess_data = chess_data        
-        self.agent = Agent(color='W', chess_data=self.chess_data)        
+        """        
+        self.agent = Agent(color='W')
+        self.agent.Q_table = pd.read_pickle(game_settings.bradley_agent_q_table_path, compression = 'zip')
         self.environ_state = {
             'turn_index': 0,
             'curr_turn': 'W1',
@@ -58,19 +53,18 @@ class TestAgent(unittest.TestCase):
     def test_initialization(self):
         """
             This method tests the initialization of the Agent class.
-
-            It checks if the agent's color is 'W', if the agent's chess_data is equal to the test data, if the learning rate is 0.6, if the discount factor is 0.35, and if the agent is not trained initially.
-
+            It checks if the agent's color is 'W', if the learning rate is 0.6, if the discount factor is 0.35, and if the agent is not trained initially.
             The method uses the assertEqual method from unittest.TestCase to check if the actual values are equal to the expected values.
 
             Raises:
                 AssertionError: If any of the actual values do not match the expected values.
         """
         self.assertEqual(self.agent.color, 'W')
-        self.assertEqual(self.agent.chess_data.equals(self.chess_data), True)
         self.assertEqual(self.agent.learn_rate, 0.6)
         self.assertEqual(self.agent.discount_factor, 0.35)
         self.assertEqual(self.agent.is_trained, False)
+        # assert that q_table was assigned and is not None
+        self.assertIsNotNone(self.agent.Q_table)
 
     def test_invalid_move_handling(self):
         """
