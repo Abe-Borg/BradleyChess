@@ -8,36 +8,38 @@ import copy
 import time
 
 class Bradley:
-    """Acts as the single point of communication between the RL agent and the player.
-    This class trains the agent and helps to manage the chessboard during play between the computer and the user.
+    """
+        Acts as the single point of communication between the RL agent and the player.
+        This class trains the agent and helps to manage the chessboard during play between the computer and the user.
 
-    Args:
-        none
-    Attributes:
-        environ (Environ.Environ): An Environ object representing the chessboard environment.
-        W_rl_agent (Agent.Agent): A white RL Agent object.
-        B_rl_agent (Agent.Agent): A black RL Agent object.
-        engine (chess.engine.SimpleEngine): A Stockfish engine used to analyze positions during training.
-        errors_file (file): A file object to log errors.
-        initial_training_results (file): A file object to log initial training results.
-        additional_training_results (file): A file object to log additional training results.
-        corrupted_games_list (list): A list of games that are corrupted and cannot be used for training.
+        Args:
+            none
+        Attributes:
+            environ (Environ.Environ): An Environ object representing the chessboard environment.
+            W_rl_agent (Agent.Agent): A white RL Agent object.
+            B_rl_agent (Agent.Agent): A black RL Agent object.
+            engine (chess.engine.SimpleEngine): A Stockfish engine used to analyze positions during training.
+            errors_file (file): A file object to log errors.
+            initial_training_results (file): A file object to log initial training results.
+            additional_training_results (file): A file object to log additional training results.
+            corrupted_games_list (list): A list of games that are corrupted and cannot be used for training.
     """
     def __init__(self):
         """
-        Initializes a Bradley object with environment, agents, and a chess engine.
-        This method initializes a Bradley object by creating an environment, creating two 
-        agents (one for white and one for black), and starting a chess engine. It also opens the errors file and 
-        the training results files in append mode, and initializes an empty list for corrupted games.
+            Initializes a Bradley object with environment, agents, and a chess engine.
+            This method initializes a Bradley object by creating an environment, creating two 
+            agents (one for white and one for black), and starting a chess engine. It also opens the errors file and 
+            the training results files in append mode, and initializes an empty list for corrupted games.
 
-        Side Effects:
-            Opens the errors file, the initial training results file, and the additional training results file in 
-            append mode.
+            Side Effects:
+                Opens the errors file, the initial training results file, and the additional training results file in 
+                append mode.
         """
-
         self.errors_file = open(game_settings.bradley_errors_filepath, 'a')
         self.initial_training_results = open(game_settings.initial_training_results_filepath, 'a')
         self.additional_training_results = open(game_settings.additional_training_results_filepath, 'a')
+        self.step_by_step_file = open(game_settings.bradley_step_by_step_filepath, 'a')
+
         self.environ = Environ.Environ()
         self.W_rl_agent = Agent.Agent('W')
         self.B_rl_agent = Agent.Agent('B')
@@ -46,38 +48,42 @@ class Bradley:
         # stockfish is used to analyze positions during training this is how we estimate the q value 
         # at each position, and also for anticipated next position
         self.engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
+
+        self.step_by_step_file.write(f'Bradley.__init__: hi and bye from Bradley.__init__\n')
     ### end of Bradley constructor ###
 
     def __del__(self):
+        self.step_by_step_file.write('hi and bye from Bradley.__del__\n')
         self.errors_file.close()
         self.initial_training_results.close()
         self.additional_training_results.close()
+        self.step_by_step_file.close()
     ### end of Bradley destructor ###
 
     def receive_opp_move(self, chess_move: str) -> bool:                                                                                 
         """
-        Receives the opponent's chess move and updates the environment.
+            Receives the opponent's chess move and updates the environment.
 
-        This method receives the opponent's chess move, loads it onto the chessboard, and updates the current state 
-        of the environment. If an error occurs while loading the chessboard or updating the current state, an error 
-        message is written to the errors file and an exception is raised.
+            This method receives the opponent's chess move, loads it onto the chessboard, and updates the current state 
+            of the environment. If an error occurs while loading the chessboard or updating the current state, an error 
+            message is written to the errors file and an exception is raised.
 
-        Args:
-            chess_move (str): A string representing the opponent's chess move, such as 'Nf3'.
+            Args:
+                chess_move (str): A string representing the opponent's chess move, such as 'Nf3'.
 
-        Returns:
-            bool: A boolean value indicating whether the move was successfully loaded and the current state was 
-            successfully updated. Returns False if an error occurred while loading the chessboard, and does not 
-            attempt to update the current state.
+            Returns:
+                bool: A boolean value indicating whether the move was successfully loaded and the current state was 
+                successfully updated. Returns False if an error occurred while loading the chessboard, and does not 
+                attempt to update the current state.
 
-        Raises:
-            Exception: An exception is raised if the chessboard fails to load the move or if the current state fails 
-            to update. The original exception is included in the raised exception.
+            Raises:
+                Exception: An exception is raised if the chessboard fails to load the move or if the current state fails 
+                to update. The original exception is included in the raised exception.
 
-        Side Effects:
-            Modifies the chessboard and the current state of the environment by loading the chess move and updating 
-            the current state.
-            Writes to the errors file if an error occurs.
+            Side Effects:
+                Modifies the chessboard and the current state of the environment by loading the chess move and updating 
+                the current state.
+                Writes to the errors file if an error occurs.
         """
     
         try:
@@ -875,44 +881,44 @@ class Bradley:
 
     def generate_Q_est_df(self, q_est_vals_file_path) -> None:
         """
-        Generates a dataframe containing the estimated Q-values for each chess move in the chess database.
+            Generates a dataframe containing the estimated Q-values for each chess move in the chess database.
 
-        This method iterates over each game in the chess database and plays through the game using the reinforcement 
-        learning agents. For each move, it calculates the estimated Q-value and writes it to a file.
+            This method iterates over each game in the chess database and plays through the game using the reinforcement 
+            learning agents. For each move, it calculates the estimated Q-value and writes it to a file.
 
-        The method first tries to get the current state of the game. If an error occurs, it logs the error and the 
-        current board state in the errors file and moves on to the next game.
+            The method first tries to get the current state of the game. If an error occurs, it logs the error and the 
+            current board state in the errors file and moves on to the next game.
 
-        The method then enters a loop where it alternates between the white and black agents choosing and playing 
-        moves. If an error occurs while choosing or playing a move, the method logs the error and the current state 
-        in the errors file and breaks out of the loop to move on to the next game.
+            The method then enters a loop where it alternates between the white and black agents choosing and playing 
+            moves. If an error occurs while choosing or playing a move, the method logs the error and the current state 
+            in the errors file and breaks out of the loop to move on to the next game.
 
-        After each move, the method tries to get the latest state of the game. If an error occurs, it logs the error 
-        and the current board state in the errors file and breaks out of the loop to move on to the next game.
+            After each move, the method tries to get the latest state of the game. If an error occurs, it logs the error 
+            and the current board state in the errors file and breaks out of the loop to move on to the next game.
 
-        If the game is not over and there are still legal moves, the method tries to find the estimated Q-value for 
-        the current move and writes it to the file. If an error occurs while finding the estimated Q-value, the 
-        method logs the error and the current state in the errors file and breaks out of the loop to move on to the 
-        next game.
+            If the game is not over and there are still legal moves, the method tries to find the estimated Q-value for 
+            the current move and writes it to the file. If an error occurs while finding the estimated Q-value, the 
+            method logs the error and the current state in the errors file and breaks out of the loop to move on to the 
+            next game.
 
-        The loop continues until the game is over, there are no more legal moves, or the maximum number of moves for 
-        the current training game has been reached.
+            The loop continues until the game is over, there are no more legal moves, or the maximum number of moves for 
+            the current training game has been reached.
 
-        After each game, the method resets the environment to prepare for the next game.
+            After each game, the method resets the environment to prepare for the next game.
 
-        Args:
-            q_est_vals_file_path (str): The path to the file where the estimated Q-values will be written.
+            Args:
+                q_est_vals_file_path (str): The path to the file where the estimated Q-values will be written.
 
-        Returns:
-            None.
+            Returns:
+                None.
 
-        Raises:
-            None.
+            Raises:
+                None.
 
-        Side Effects:
-            Writes to the errors file if an error occurs.
-            Writes to the Q-values file.
-            Modifies the current state of the environment.
+            Side Effects:
+                Writes to the errors file if an error occurs.
+                Writes to the Q-values file.
+                Modifies the current state of the environment.
         """
         q_est_vals_file = open(q_est_vals_file_path, 'a')
 

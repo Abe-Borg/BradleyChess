@@ -9,6 +9,8 @@ pd.set_option('display.max_columns', None)
 
 PRINT_TRAINING_RESULTS = False
 
+agent_vs_agent_num_games = 100 # number of games that agents will play against each other
+
 # the following numbers are based on centipawn scores
 CHESS_MOVE_VALUES: dict[str, int] = {
         'new_move': 100, # a move that has never been made before
@@ -25,7 +27,6 @@ max_num_turns_per_player = 200
 max_turn_index = max_num_turns_per_player * 2 - 1
 
 initial_q_val = 50 # this is relevant when first training an agent. SARSA algorithm requires an initial value
-agent_vs_agent_num_games = 100 # number of games that agents will play against each other
 chance_for_random_move = 0.05 # 10% chance that RL agent selects random chess move
         
 # The following values are for the chess engine analysis of moves.
@@ -276,4 +277,8 @@ chess_games_filepath_part_100 = base_directory / ".." / "chess_data" / "chess_ga
 
 ############################################################################################################
 
-CHESS_DATA = pd.read_pickle(chess_games_filepath_part_100, compression = 'zip')
+file_path_num = 100
+chess_data_filepath = f"chess_games_filepath_part_{file_path_num}"
+
+chess_data = pd.read_pickle(chess_data_filepath, compression = 'zip')
+est_q_vals_file_path = f"est_q_vals_filepath_part_{file_path_num}"

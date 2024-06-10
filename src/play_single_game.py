@@ -14,6 +14,7 @@ if __name__ == '__main__':
         bradley.engine.quit()    
     except Exception as e:
         print(f'simply play games, interrupted because of:  {e}')
+        bradley.engine.quit()    
         quit()
     
     print('play through 1 game is complete')
