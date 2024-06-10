@@ -1,6 +1,7 @@
 import game_settings
 import pandas as pd
 import time
+import numpy as np
 
 chess_data_file_path = game_settings.chess_games_filepath_part_1
 game_settings.CHESS_DATA = pd.read_pickle(chess_data_file_path, compression = 'zip')
