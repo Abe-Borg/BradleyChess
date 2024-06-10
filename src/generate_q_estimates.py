@@ -5,10 +5,9 @@ import time
 import Bradley
 
 chess_data_file_path = game_settings.chess_games_filepath_part_10
-game_settings.CHESS_DATA = pd.read_pickle(chess_data_file_path, compression = 'zip')
-game_settings.CHESS_DATA.set_flags(write = False)
+est_q_vals_file_path = game_settings.est_q_vals_filepath_part_10
 
-est_q_vals_file_path = game_settings.est_q_vals_filepath_part_50
+game_settings.CHESS_DATA = pd.read_pickle(chess_data_file_path, compression = 'zip')
 
 if __name__ == '__main__':
     bradley = Bradley.Bradley()

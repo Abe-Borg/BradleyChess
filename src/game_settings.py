@@ -4,8 +4,11 @@ from pathlib import Path
 import chess
 
 CHESS_DATA = None
+
 base_directory = Path(__file__).parent
+
 pd.set_option('display.max_columns', None)
+
 PRINT_TRAINING_RESULTS = False
 
 # the following numbers are based on centipawn scores

@@ -8,7 +8,6 @@ chess_data_file_path = game_settings.chess_games_filepath_part_10
 game_settings.CHESS_DATA = pd.read_pickle(chess_data_file_path, compression = 'zip')
 
 game_settings.CHESS_DATA = game_settings.CHESS_DATA.head(1)
-game_settings.CHESS_DATA.set_flags(write = False)
 
 if __name__ == '__main__':
     bradley = Bradley.Bradley()
@@ -21,7 +20,7 @@ if __name__ == '__main__':
         quit()
         
     end_time = time.time()
-    helper_methods.pikl_q_table(bradley, 'W',game_settings.bradley_agent_q_table_path)
+    helper_methods.pikl_q_table(bradley, 'W', game_settings.bradley_agent_q_table_path)
     helper_methods.pikl_q_table(bradley, 'B', game_settings.imman_agent_q_table_path)
     
     total_time = end_time - start_time
