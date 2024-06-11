@@ -279,7 +279,7 @@ chess_games_filepath_part_100 = base_directory / ".." / "chess_data" / "chess_ga
 ############################################################################################################
 
 
-chess_data = pd.read_pickle(chess_games_filepath_part_3, compression = 'zip')
+chess_data = pd.read_pickle(chess_games_filepath_part_4, compression = 'zip')
 
 # est_q_vals_file_path = 
 
