@@ -500,24 +500,24 @@ class Bradley:
 
     def rl_agent_plays_move(self, chess_move: str, curr_game) -> None:
         """
-        Loads the chessboard with the given move and updates the current state of the environment.
-        This method is used during training. It first attempts to load the chessboard with the given move. If an 
-        error occurs while loading the chessboard, it writes an error message to the errors file and raises an 
-        exception. It then attempts to update the current state of the environment. If an error occurs while 
-        updating the current state, it writes an error message to the errors file and raises an exception.
+            Loads the chessboard with the given move and updates the current state of the environment.
+            This method is used during training. It first attempts to load the chessboard with the given move. If an 
+            error occurs while loading the chessboard, it writes an error message to the errors file and raises an 
+            exception. It then attempts to update the current state of the environment. If an error occurs while 
+            updating the current state, it writes an error message to the errors file and raises an exception.
 
-        Args:
-            chess_move (str): A string representing the chess move in standard algebraic notation.
-            curr_game: The current game being played during training.
+            Args:
+                chess_move (str): A string representing the chess move in standard algebraic notation.
+                curr_game: The current game being played during training.
 
-        Raises:
-            Exception: An exception is raised if an error occurs while loading the chessboard or updating the 
-            current state. The original exception is included in the raised exception.
+            Raises:
+                Exception: An exception is raised if an error occurs while loading the chessboard or updating the 
+                current state. The original exception is included in the raised exception.
 
-        Side Effects:
-            Modifies the chessboard and the current state of the environment by loading the chess move and updating 
-            the current state.
-            Writes to the errors file if an error occurs.
+            Side Effects:
+                Modifies the chessboard and the current state of the environment by loading the chess move and updating 
+                the current state.
+                Writes to the errors file if an error occurs.
         """
 
         try:
@@ -1085,7 +1085,10 @@ class Bradley:
             -
         """
         self.step_by_step_file.write(f'hi from simply_play_games\n')
-
+        self.step_by_step_file.write(f'White Q table size before games: {self.W_rl_agent.Q_table.shape}\n')
+        self.step_by_step_file.write(f'Black Q table size before games: {self.B_rl_agent.Q_table.shape}\n')
+        self.step_by_step_file.write(f'chess_data head is: {game_settings.chess_data.head()}\n\n')
+        
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
         for game_num_str in game_settings.chess_data.index:
