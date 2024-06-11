@@ -1,9 +1,0 @@
-ERROR: Turn index out of range: 400
-ERROR: Turn index out of range: 400
-at, load_chessboard_for_Q_est, An error occurred: expected uci string to be of length 4 or 5: 'invalid', unable to load chessboard with invalidAn error occurred at environ.load_chessboard() for Game 1: Invalid move, unable to load chessboard with invalid========== End of Environ.load_chessboard ==========
-
-
-at, undo_move, An error occurred: pop from empty list, unable to undo moveturn index: 0
-ERROR: max_turn_index reached: 399 >= 399
-An error occurred: Index out of range, unable to pop chessboardat, undo_move, An error occurred: Index out of range, unable to undo moveturn index: 0
-ERROR: max_turn_index reached: 399 >= 399

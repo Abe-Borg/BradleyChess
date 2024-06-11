@@ -1084,15 +1084,19 @@ class Bradley:
         """
             -
         """
+        self.step_by_step_file.write(f'hi from simply_play_games\n')
+
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
-        
         for game_num_str in game_settings.chess_data.index:
             start_time = time.time()
             num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
 
+            self.step_by_step_file.write(f'game_num_str is: {game_num_str}\n')
+
             try:
                 curr_state = self.environ.get_curr_state()
+                self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
             except Exception as e:
                 self.errors_file.write(f'An error occurred at self.environ.get_curr_state: {e}\n')
                 self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
@@ -1103,6 +1107,9 @@ class Bradley:
             while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
                 ##################### WHITE'S TURN ####################
                 W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
+
+                self.step_by_step_file.write(f'W_chess_move is: {W_chess_move}\n')
+
                 if not W_chess_move:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
                     self.errors_file.write(f'W_chess_move is empty at state: {curr_state}\n')
@@ -1112,6 +1119,7 @@ class Bradley:
                 ### WHITE AGENT PLAYS THE SELECTED MOVE ###
                 try:
                     self.rl_agent_plays_move(W_chess_move, game_num_str)
+                    self.step_by_step_file.write(f'White played move: {W_chess_move}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.errors_file.write(f'at game: {game_num_str}\n')
@@ -1126,10 +1134,15 @@ class Bradley:
                     self.errors_file.write(f'at game: {game_num_str}\n')
                 
                 if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
+                    self.step_by_step_file.write(f'game is over\n')
+                    self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
                     break # and go to next game
 
                 ##################### BLACK'S TURN ####################
                 B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
+                
+                self.step_by_step_file.write(f'Black chess move: {B_chess_move}\n')
+
                 if not B_chess_move:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
                     self.errors_file.write(f'B_chess_move is empty at state: {curr_state}\n')
@@ -1139,6 +1152,7 @@ class Bradley:
                 ##### BLACK AGENT PLAYS SELECTED MOVE #####
                 try:
                     self.rl_agent_plays_move(B_chess_move, game_num_str)
+                    self.step_by_step_file.write(f'black agent played their move\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.errors_file.write(f'at {game_num_str}\n')
@@ -1147,22 +1161,21 @@ class Bradley:
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                 try:
                     curr_state = self.environ.get_curr_state()
+                    self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at environ.get_curr_state: {e}\n')
                     self.errors_file.write(f'at: {game_num_str}\n')
                     break
 
                 if self.environ.board.is_game_over() or not curr_state['legal_moves']:
+                    self.step_by_step_file.write(f'game is over\n')
                     break # and go to next game
-
-                try:
-                    curr_state = self.environ.get_curr_state()
-                except Exception as e:
-                    self.errors_file.write(f'An error occurred: {e}\n')
-                    self.errors_file.write("failed to get_curr_state\n") 
-                    self.errors_file.write(f'at: {game_num_str}\n')
-                    break
             ### END OF CURRENT GAME LOOP ###
+
+            self.step_by_step_file.write(f'game {game_num_str} is over\n')
+            self.step_by_step_file.write(f'agent q tables sizes are: \n')
+            self.step_by_step_file.write(f'White Q table: {self.W_rl_agent.Q_table.shape}\n')
+            self.step_by_step_file.write(f'Black Q table: {self.B_rl_agent.Q_table.shape}\n')
 
             # this curr game is done, reset environ to prepare for the next game
             self.environ.reset_environ() # reset and go to next game in chess database

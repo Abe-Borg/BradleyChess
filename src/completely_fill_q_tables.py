@@ -29,7 +29,7 @@ if __name__ == '__main__':
     print('q table populated with new moves from current section of chess db')
     print(f'it took: {total_time}')
 
-    bradley.W_rl_agent.Q_table.to_pickle(game_settings.bradley_agent_q_table_path, compression = 'zip')
-    bradley.B_rl_agent.Q_table.to_pickle(game_settings.imman_agent_q_table_path, compression = 'zip')
+    # bradley.W_rl_agent.Q_table.to_pickle(game_settings.bradley_agent_q_table_path, compression = 'zip')
+    # bradley.B_rl_agent.Q_table.to_pickle(game_settings.imman_agent_q_table_path, compression = 'zip')
 
     quit()
