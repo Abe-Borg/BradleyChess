@@ -48,12 +48,14 @@ class Bradley:
         # stockfish is used to analyze positions during training this is how we estimate the q value 
         # at each position, and also for anticipated next position
         self.engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
-
-        self.step_by_step_file.write(f'Bradley.__init__: hi and bye from Bradley.__init__\n')
+        
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'Bradley.__init__: hi and bye from Bradley.__init__\n')
     ### end of Bradley constructor ###
 
     def __del__(self):
-        self.step_by_step_file.write('hi and bye from Bradley.__del__\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write('hi and bye from Bradley.__del__\n')
         self.errors_file.close()
         self.initial_training_results.close()
         self.additional_training_results.close()
@@ -256,7 +258,8 @@ class Bradley:
                 Writes any errors that occur to the errors file.
                 Resets the environment at the end of each game.
         """
-        self.step_by_step_file.write(f'hi from Bradley.train_rl_agents\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'hi from Bradley.train_rl_agents\n')
 
         ### FOR EACH GAME IN THE TRAINING SET ###
         for game_num_str in game_settings.chess_data.index:
@@ -265,10 +268,11 @@ class Bradley:
             W_curr_Qval: int = game_settings.initial_q_val
             B_curr_Qval: int = game_settings.initial_q_val
 
-            self.step_by_step_file.write(f'At game: {game_num_str}\n')
-            self.step_by_step_file.write(f'num_chess_moves_curr_training_game: {num_chess_moves_curr_training_game}\n')
-            self.step_by_step_file.write(f'W_curr_Qval: {W_curr_Qval}\n')
-            self.step_by_step_file.write(f'B_curr_Qval: {B_curr_Qval}\n')
+            if game_settings.PRINT_STEP_BY_STEP:
+                self.step_by_step_file.write(f'At game: {game_num_str}\n')
+                self.step_by_step_file.write(f'num_chess_moves_curr_training_game: {num_chess_moves_curr_training_game}\n')
+                self.step_by_step_file.write(f'W_curr_Qval: {W_curr_Qval}\n')
+                self.step_by_step_file.write(f'B_curr_Qval: {B_curr_Qval}\n')
             
             if game_settings.PRINT_TRAINING_RESULTS:
                 self.initial_training_results.write(f'\nStart of {game_num_str} training\n\n')
@@ -282,7 +286,8 @@ class Bradley:
                 self.errors_file.write(f'at turn: {curr_state['turn_index']}')
                 break # stop current game and go to next game.
 
-            self.step_by_step_file.write(f'curr_state: {curr_state}\n')
+            if game_settings.PRINT_STEP_BY_STEP:
+                self.step_by_step_file.write(f'curr_state: {curr_state}\n')
 
             ### LOOP PLAYS THROUGH ONE GAME ###
             while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
@@ -290,7 +295,8 @@ class Bradley:
                 # choose action a from state s, using policy
                 W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
 
-                self.step_by_step_file.write(f'W_chess_move: {W_chess_move}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'W_chess_move: {W_chess_move}\n')
 
                 if not W_chess_move:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
@@ -304,7 +310,8 @@ class Bradley:
 
                 curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
 
-                self.step_by_step_file.write(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
 
                 ### WHITE AGENT PLAYS THE SELECTED MOVE ###
                 # take action a, observe r, s', and load chessboard
@@ -318,7 +325,8 @@ class Bradley:
 
                 W_reward = self.get_reward(W_chess_move)
 
-                self.step_by_step_file.write(f'W_reward: {W_reward}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'W_reward: {W_reward}\n')
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                 try:
@@ -330,11 +338,14 @@ class Bradley:
                     self.errors_file.write(f'at state: {curr_state}\n')
                     break # and go to the next game. this game is over.
                 
-                self.step_by_step_file.write(f'curr_state: {curr_state}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'curr_state: {curr_state}\n')
 
                 # find the estimated Q value for White, but first check if game ended
                 if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
-                    self.step_by_step_file.write(f'game {game_num_str} is over\n')
+                    
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        self.step_by_step_file.write(f'game {game_num_str} is over\n')
                     break # and go to next game
 
                 else: # current game continues
@@ -342,13 +353,15 @@ class Bradley:
                     # but we want to assign the q est based on turn just before the curr turn was incremented.
                     W_est_Qval: int = est_q_val_table.at[game_num_str, curr_turn_for_q_est]
 
-                    self.step_by_step_file.write(f'W_est_Qval: {W_est_Qval}\n')
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        self.step_by_step_file.write(f'W_est_Qval: {W_est_Qval}\n')
 
                 ##################### BLACK'S TURN ####################
                 # choose action a from state s, using policy
                 B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
 
-                self.step_by_step_file.write(f'B_chess_move: {B_chess_move}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'B_chess_move: {B_chess_move}\n')
                 
                 if not B_chess_move:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
@@ -361,7 +374,8 @@ class Bradley:
 
                 curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
 
-                self.step_by_step_file.write(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
 
                 ##### BLACK AGENT PLAYS SELECTED MOVE #####
                 # take action a, observe r, s', and load chessboard
@@ -375,7 +389,8 @@ class Bradley:
 
                 B_reward = self.get_reward(B_chess_move)
 
-                self.step_by_step_file.write(f'B_reward: {B_reward}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'B_reward: {B_reward}\n')
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                 try:
@@ -386,32 +401,36 @@ class Bradley:
                     self.errors_file.write(f'At game: {game_num_str}\n')
                     break
 
-                self.step_by_step_file.write(f'curr_state: {curr_state}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'curr_state: {curr_state}\n')
 
                 # find the estimated Q value for Black, but first check if game ended
                 if self.environ.board.is_game_over() or not curr_state['legal_moves']:
-                    self.step_by_step_file.write(f'game {game_num_str} is over\n')
+                    
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        self.step_by_step_file.write(f'game {game_num_str} is over\n')
                     break # and go to next game
                 else: # current game continues
                     B_est_Qval: int = est_q_val_table.at[game_num_str, curr_turn_for_q_est]
 
-                
-                self.step_by_step_file.write(f'B_est_Qval: {B_est_Qval}\n')
-                self.step_by_step_file.write(f'about to calc next q values\n')
-                self.step_by_step_file.write(f'W_curr_Qval: {W_curr_Qval}\n')
-                self.step_by_step_file.write(f'B_curr_Qval: {B_curr_Qval}\n')
-                self.step_by_step_file.write(f'W_reward: {W_reward}\n')
-                self.step_by_step_file.write(f'B_reward: {B_reward}\n')
-                self.step_by_step_file.write(f'W_est_Qval: {W_est_Qval}\n')
-                self.step_by_step_file.write(f'B_est_Qval: {B_est_Qval}\n\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'B_est_Qval: {B_est_Qval}\n')
+                    self.step_by_step_file.write(f'about to calc next q values\n')
+                    self.step_by_step_file.write(f'W_curr_Qval: {W_curr_Qval}\n')
+                    self.step_by_step_file.write(f'B_curr_Qval: {B_curr_Qval}\n')
+                    self.step_by_step_file.write(f'W_reward: {W_reward}\n')
+                    self.step_by_step_file.write(f'B_reward: {B_reward}\n')
+                    self.step_by_step_file.write(f'W_est_Qval: {W_est_Qval}\n')
+                    self.step_by_step_file.write(f'B_est_Qval: {B_est_Qval}\n\n')
 
                 # ***CRITICAL STEP***, this is the main part of the SARSA algorithm.
                 W_next_Qval: int = self.find_next_Qval(W_curr_Qval, self.W_rl_agent.learn_rate, W_reward, self.W_rl_agent.discount_factor, W_est_Qval)
                 B_next_Qval: int = self.find_next_Qval(B_curr_Qval, self.B_rl_agent.learn_rate, B_reward, self.B_rl_agent.discount_factor, B_est_Qval)
             
-                self.step_by_step_file.write(f'sarsa calc complete\n')
-                self.step_by_step_file.write(f'W_next_Qval: {W_next_Qval}\n')
-                self.step_by_step_file.write(f'B_next_Qval: {B_next_Qval}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'sarsa calc complete\n')
+                    self.step_by_step_file.write(f'W_next_Qval: {W_next_Qval}\n')
+                    self.step_by_step_file.write(f'B_next_Qval: {B_next_Qval}\n')
 
                 # on the next turn, W_next_Qval and B_next_Qval will be added to the Q table. so if this is the end of the first round,
                 # next round it will be W2 and then we assign the q value at W2 col
@@ -420,7 +439,9 @@ class Bradley:
 
                 try:
                     curr_state = self.environ.get_curr_state()
-                    self.step_by_step_file.write(f'curr_state: {curr_state}\n')
+                    
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        self.step_by_step_file.write(f'curr_state: {curr_state}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred: {e}\n')
                     self.errors_file.write("failed to get_curr_state\n") 
@@ -437,11 +458,15 @@ class Bradley:
                 self.initial_training_results.write(f'The game ended because of: {self.get_game_termination_reason()}\n')
                 self.initial_training_results.write(f'DB shows game ended b/c: {game_settings.chess_data.at[game_num_str, "Result"]}\n')
 
-            self.step_by_step_file.write(f'game {game_num_str} is over\n')
+            if game_settings.PRINT_STEP_BY_STEP:
+                self.step_by_step_file.write(f'game {game_num_str} is over\n')
+            
             self.environ.reset_environ() # reset and go to next game in training set
         
         # training is complete, all games in database have been processed
-        self.step_by_step_file.write(f'training is complete\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'training is complete\n')
+        
         self.W_rl_agent.is_trained = True
         self.B_rl_agent.is_trained = True
     ### end of train_rl_agents
@@ -1084,10 +1109,10 @@ class Bradley:
         """
             -
         """
-        self.step_by_step_file.write(f'hi from simply_play_games\n')
-        self.step_by_step_file.write(f'White Q table size before games: {self.W_rl_agent.Q_table.shape}\n')
-        self.step_by_step_file.write(f'Black Q table size before games: {self.B_rl_agent.Q_table.shape}\n')
-        self.step_by_step_file.write(f'chess_data head is: {game_settings.chess_data.head()}\n\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'hi from simply_play_games\n')
+            self.step_by_step_file.write(f'White Q table size before games: {self.W_rl_agent.Q_table.shape}\n')
+            self.step_by_step_file.write(f'Black Q table size before games: {self.B_rl_agent.Q_table.shape}\n')
         
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
@@ -1096,12 +1121,14 @@ class Bradley:
             
             num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
 
-            self.step_by_step_file.write(f'game_num_str is: {game_num_str}\n')
+            if game_settings.PRINT_STEP_BY_STEP:
+                self.step_by_step_file.write(f'game_num_str is: {game_num_str}\n')
 
             try:
                 curr_state = self.environ.get_curr_state()
                 
-                self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
             except Exception as e:
                 self.errors_file.write(f'An error occurred at self.environ.get_curr_state: {e}\n')
                 self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
@@ -1113,7 +1140,8 @@ class Bradley:
                 ##################### WHITE'S TURN ####################
                 W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
 
-                self.step_by_step_file.write(f'W_chess_move is: {W_chess_move}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'W_chess_move is: {W_chess_move}\n')
 
                 if not W_chess_move:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
@@ -1125,7 +1153,8 @@ class Bradley:
                 try:
                     self.rl_agent_plays_move(W_chess_move, game_num_str)
                     
-                    self.step_by_step_file.write(f'White played move: {W_chess_move}\n')
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        self.step_by_step_file.write(f'White played move: {W_chess_move}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.errors_file.write(f'at game: {game_num_str}\n')
@@ -1135,21 +1164,25 @@ class Bradley:
                 try:
                     curr_state = self.environ.get_curr_state()
 
-                    self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at get_curr_state: {e}\n')
                     self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
                     self.errors_file.write(f'at game: {game_num_str}\n')
                 
                 if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
-                    self.step_by_step_file.write(f'game is over\n')
-                    self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
+                    
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        self.step_by_step_file.write(f'game is over\n')
+                        self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
                     break # and go to next game
 
                 ##################### BLACK'S TURN ####################
                 B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
                 
-                self.step_by_step_file.write(f'Black chess move: {B_chess_move}\n')
+                if game_settings.PRINT_STEP_BY_STEP:
+                    self.step_by_step_file.write(f'Black chess move: {B_chess_move}\n')
 
                 if not B_chess_move:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
@@ -1161,7 +1194,8 @@ class Bradley:
                 try:
                     self.rl_agent_plays_move(B_chess_move, game_num_str)
                     
-                    self.step_by_step_file.write(f'black agent played their move\n')
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        self.step_by_step_file.write(f'black agent played their move\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.errors_file.write(f'at {game_num_str}\n')
@@ -1171,21 +1205,25 @@ class Bradley:
                 try:
                     curr_state = self.environ.get_curr_state()
                     
-                    self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at environ.get_curr_state: {e}\n')
                     self.errors_file.write(f'at: {game_num_str}\n')
                     break
 
                 if self.environ.board.is_game_over() or not curr_state['legal_moves']:
-                    self.step_by_step_file.write(f'game is over\n')
+                    
+                    if game_settings.PRINT_STEP_BY_STEP:
+                        elf.step_by_step_file.write(f'game is over\n')
                     break # and go to next game
             ### END OF CURRENT GAME LOOP ###
 
-            self.step_by_step_file.write(f'game {game_num_str} is over\n')
-            self.step_by_step_file.write(f'agent q tables sizes are: \n')
-            self.step_by_step_file.write(f'White Q table: {self.W_rl_agent.Q_table.shape}\n')
-            self.step_by_step_file.write(f'Black Q table: {self.B_rl_agent.Q_table.shape}\n')
+            if game_settings.PRINT_STEP_BY_STEP:
+                self.step_by_step_file.write(f'game {game_num_str} is over\n')
+                self.step_by_step_file.write(f'agent q tables sizes are: \n')
+                self.step_by_step_file.write(f'White Q table: {self.W_rl_agent.Q_table.shape}\n')
+                self.step_by_step_file.write(f'Black Q table: {self.B_rl_agent.Q_table.shape}\n')
 
             # this curr game is done, reset environ to prepare for the next game
             self.environ.reset_environ() # reset and go to next game in chess database

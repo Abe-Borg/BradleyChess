@@ -8,6 +8,7 @@ base_directory = Path(__file__).parent
 pd.set_option('display.max_columns', None)
 
 PRINT_TRAINING_RESULTS = False
+PRINT_STEP_BY_STEP = True
 
 agent_vs_agent_num_games = 100 # number of games that agents will play against each other
 

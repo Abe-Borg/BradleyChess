@@ -39,11 +39,14 @@ class Agent:
         self.is_trained: bool = False
         self.Q_table: pd.DataFrame = None # Q table will be assigned at program execution.
 
-        self.step_by_step_file.write(f'Agent.__init__: color: {color}, learn_rate: {learn_rate}, discount_factor: {discount_factor}, is_trained: {self.is_trained}\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'Agent.__init__: color: {color}, learn_rate: {learn_rate}, discount_factor: {discount_factor}, is_trained: {self.is_trained}\n')
     ### end of __init__ ###
 
     def __del__(self):
-        self.step_by_step_file.write('hi and bye from Agent.__del__\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write('hi and bye from Agent.__del__\n')
+        
         self.step_by_step_file.close()
         self.errors_file.close()
     ### end of __del__ ###
@@ -72,7 +75,8 @@ class Agent:
                 Modifies the Q-table if there are legal moves that are not in the Q-table.
                 Writes into the errors file if there are no legal moves.
         """
-        self.step_by_step_file.write(f'Agent.choose_action: environ_state: {environ_state}, curr_game: {curr_game}\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'Agent.choose_action: environ_state: {environ_state}, curr_game: {curr_game}\n')
 
         if environ_state['legal_moves'] == []:
             self.errors_file.write(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
@@ -82,8 +86,10 @@ class Agent:
         moves_not_in_Q_table: list[str] = [move for move in environ_state['legal_moves'] if move not in self.Q_table.index]
 
         if moves_not_in_Q_table:
-            self.step_by_step_file.write(f'Agent.choose_action: moves_not_in_Q_table: {moves_not_in_Q_table}\n')
-            self.step_by_step_file.write(f'Agent.choose_action: going to method updating Q table\n')
+            if game_settings.PRINT_STEP_BY_STEP:
+                self.step_by_step_file.write(f'Agent.choose_action: moves_not_in_Q_table: {moves_not_in_Q_table}\n')
+                self.step_by_step_file.write(f'Agent.choose_action: going to method updating Q table\n')
+            
             self.update_Q_table(moves_not_in_Q_table)
 
         if self.is_trained:
@@ -109,8 +115,10 @@ class Agent:
             Side Effects:
                 None.
         """
-        self.step_by_step_file.write(f'Agent.policy_training_mode: curr_game: {curr_game}, curr_turn: {curr_turn}\n')
-        self.step_by_step_file.write(f'chess move: {game_settings.chess_data.at[curr_game, curr_turn]}\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'Agent.policy_training_mode: curr_game: {curr_game}, curr_turn: {curr_turn}\n')
+            self.step_by_step_file.write(f'chess move: {game_settings.chess_data.at[curr_game, curr_turn]}\n')
+        
         return game_settings.chess_data.at[curr_game, curr_turn]
     ### end of policy_training_mode ###
 
