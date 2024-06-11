@@ -1090,12 +1090,14 @@ class Bradley:
         game_count = 0
         for game_num_str in game_settings.chess_data.index:
             start_time = time.time()
+            
             num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
 
             self.step_by_step_file.write(f'game_num_str is: {game_num_str}\n')
 
             try:
                 curr_state = self.environ.get_curr_state()
+                
                 self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
             except Exception as e:
                 self.errors_file.write(f'An error occurred at self.environ.get_curr_state: {e}\n')
@@ -1119,6 +1121,7 @@ class Bradley:
                 ### WHITE AGENT PLAYS THE SELECTED MOVE ###
                 try:
                     self.rl_agent_plays_move(W_chess_move, game_num_str)
+                    
                     self.step_by_step_file.write(f'White played move: {W_chess_move}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
@@ -1128,6 +1131,8 @@ class Bradley:
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                 try:
                     curr_state = self.environ.get_curr_state()
+
+                    self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at get_curr_state: {e}\n')
                     self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
@@ -1152,6 +1157,7 @@ class Bradley:
                 ##### BLACK AGENT PLAYS SELECTED MOVE #####
                 try:
                     self.rl_agent_plays_move(B_chess_move, game_num_str)
+                    
                     self.step_by_step_file.write(f'black agent played their move\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
@@ -1161,6 +1167,7 @@ class Bradley:
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                 try:
                     curr_state = self.environ.get_curr_state()
+                    
                     self.step_by_step_file.write(f'curr_state is: {curr_state}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at environ.get_curr_state: {e}\n')

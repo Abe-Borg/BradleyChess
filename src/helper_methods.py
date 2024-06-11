@@ -84,13 +84,14 @@ def pikl_q_table(bubs: Bradley.Bradley, rl_agent_color: str, q_table_path: str) 
 ### end of pikl_Q_table
 
 def bootstrap_agent(bubs: Bradley.Bradley, rl_agent_color: str, existing_q_table_path: str) -> None:
-    """Assign an agent's Q-table to an existing Q-table.
-    Args:
-        bubs (imman.Bradley): An object of the `Bradley` class representing the chess game environment.
-        rl_agent_color (str): A string representing the color of the RL agent ('W' for white or 'B' for black).
-        existing_q_table_path (str): A string representing the path to the existing Q-table file.
-    Returns:
-        None
+    """
+        Assign an agent's Q-table to an existing Q-table.
+        Args:
+            bubs (imman.Bradley): An object of the `Bradley` class representing the chess game environment.
+            rl_agent_color (str): A string representing the color of the RL agent ('W' for white or 'B' for black).
+            existing_q_table_path (str): A string representing the path to the existing Q-table file.
+        Returns:
+            None
     """
     if rl_agent_color == 'W':
         rl_agent = bubs.W_rl_agent

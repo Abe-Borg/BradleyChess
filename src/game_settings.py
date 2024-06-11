@@ -278,10 +278,10 @@ chess_games_filepath_part_100 = base_directory / ".." / "chess_data" / "chess_ga
 ############################################################################################################
 
 file_path_num = 1
-chess_data_filepath = f"chess_games_filepath_part_{file_path_num}"
+chess_data_filepath = f"chess_games_part_{file_path_num}.pkl"
 
 chess_data = pd.read_pickle(chess_data_filepath, compression = 'zip')
-est_q_vals_file_path = f"est_q_vals_filepath_part_{file_path_num}"
+est_q_vals_file_path = f"est_q_vals_part_{file_path_num}.txt"
 
 
 # only set this for certain scripts
