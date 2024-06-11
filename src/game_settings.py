@@ -8,7 +8,7 @@ base_directory = Path(__file__).parent
 pd.set_option('display.max_columns', None)
 
 PRINT_TRAINING_RESULTS = False
-PRINT_STEP_BY_STEP = True
+PRINT_STEP_BY_STEP = False
 
 agent_vs_agent_num_games = 100 # number of games that agents will play against each other
 
@@ -279,10 +279,10 @@ chess_games_filepath_part_100 = base_directory / ".." / "chess_data" / "chess_ga
 ############################################################################################################
 
 
-chess_data = pd.read_pickle(chess_games_filepath_part_1, compression = 'zip')
+chess_data = pd.read_pickle(chess_games_filepath_part_2, compression = 'zip')
 
 # est_q_vals_file_path = 
 
 
 # only set this for certain scripts
-chess_data = chess_data.head(1)
+chess_data = chess_data.head(100)

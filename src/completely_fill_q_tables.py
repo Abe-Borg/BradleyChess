@@ -14,7 +14,10 @@ if __name__ == '__main__':
     # initialize agents with q tables
     helper_methods.bootstrap_agent(bradley, 'W', game_settings.bradley_agent_q_table_path)
     helper_methods.bootstrap_agent(bradley, 'B', game_settings.imman_agent_q_table_path)
-    
+
+    print(f'White Q table size before games: {bradley.W_rl_agent.Q_table.shape}\n')
+    print(f'Black Q table size before games: {bradley.B_rl_agent.Q_table.shape}\n')
+
     try:
         bradley.simply_play_games()
         bradley.engine.quit()
@@ -28,6 +31,9 @@ if __name__ == '__main__':
 
     print('q table populated with new moves from current section of chess db')
     print(f'it took: {total_time}')
+
+    print(f'White Q table size after games: {bradley.W_rl_agent.Q_table.shape}\n')
+    print(f'Black Q table size after games: {bradley.B_rl_agent.Q_table.shape}\n')
 
     # bradley.W_rl_agent.Q_table.to_pickle(game_settings.bradley_agent_q_table_path, compression = 'zip')
     # bradley.B_rl_agent.Q_table.to_pickle(game_settings.imman_agent_q_table_path, compression = 'zip')

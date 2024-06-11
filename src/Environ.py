@@ -42,7 +42,9 @@ class Environ:
     ### end of constructor
 
     def __del__(self):
-        self.step_by_step_file.write(f'========== hi & bye from Environ.__del__ ==========\n\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'========== hi & bye from Environ.__del__ ==========\n\n')
+        
         self.step_by_step_file.close()
         self.errors_file.close()
     ### end of Bradley destructor ###
@@ -68,19 +70,25 @@ class Environ:
             Side Effects:
                 Writes into the errors file if an IndexError is encountered.
         """
-        self.step_by_step_file.write(f'========== Start of Environ.get_curr_state ==========\n')
-        self.step_by_step_file.write(f'board: \n{self.board}\n\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'========== Start of Environ.get_curr_state ==========\n')
+            self.step_by_step_file.write(f'board: \n{self.board}\n\n')
 
         if not (0 <= self.turn_index < len(self.turn_list)):
             self.errors_file.write(f'ERROR: Turn index out of range: {self.turn_index}\n')
             raise IndexError(f'Turn index out of range: {self.turn_index}')
     
         curr_turn = self.get_curr_turn()
-        self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
-        self.step_by_step_file.write(f'curr_turn: {curr_turn}\n')
+
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'turn_index: {self.turn_index}\n')
+            self.step_by_step_file.write(f'curr_turn: {curr_turn}\n')
+        
         legal_moves = self.get_legal_moves()
-        self.step_by_step_file.write(f'legal_moves: {legal_moves}\n')
-        self.step_by_step_file.write(f'========== End of Environ.get_curr_state ==========\n\n\n')
+
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'legal_moves: {legal_moves}\n')
+            self.step_by_step_file.write(f'========== End of Environ.get_curr_state ==========\n\n\n')
 
         return {'turn_index': self.turn_index, 'curr_turn': curr_turn, 'legal_moves': legal_moves}
     ### end of get_curr_state
@@ -158,21 +166,25 @@ class Environ:
                 Modifies the chessboard's state by applying the provided move.
                 Writes into the errors file if a ValueError is encountered.
         """
-        self.step_by_step_file.write(f'========== Start of Environ.load_chessboard ==========\n')
-        self.step_by_step_file.write(f'current turn: {self.get_curr_turn()}\n')
-        self.step_by_step_file.write(f'board: \n{self.board}\n\n')
-        self.step_by_step_file.write(f'chess move to play: {chess_move_str}\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'========== Start of Environ.load_chessboard ==========\n')
+            self.step_by_step_file.write(f'current turn: {self.get_curr_turn()}\n')
+            self.step_by_step_file.write(f'board: \n{self.board}\n\n')
+            self.step_by_step_file.write(f'chess move to play: {chess_move_str}\n')
 
         try:
             self.board.push_san(chess_move_str)
-            self.step_by_step_file.write(f'move {chess_move_str} applied to board successfully\n')
-            self.step_by_step_file.write(f'board: \n{self.board}\n\n')
+
+            if game_settings.PRINT_STEP_BY_STEP:
+                self.step_by_step_file.write(f'move {chess_move_str} applied to board successfully\n')
+                self.step_by_step_file.write(f'board: \n{self.board}\n\n')
         except ValueError as e:
             self.errors_file.write(f'An error occurred at environ.load_chessboard() for {curr_game}: {e}, unable to load chessboard with {chess_move_str}')
             self.errors_file.write(f'========== End of Environ.load_chessboard ==========\n\n\n')
             raise ValueError(e) from e
         
-        self.step_by_step_file.write(f'========== End of Environ.load_chessboard ==========\n\n\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'========== End of Environ.load_chessboard ==========\n\n\n')
     ### end of load_chessboard    
 
     def pop_chessboard(self) -> None:
@@ -243,25 +255,30 @@ class Environ:
                 Modifies the chessboard's state by applying the anticipated next move.
                 Writes into the errors file if a ValueError is encountered.
         """
-        self.step_by_step_file.write(f'========== Start of Environ.load_chessboard_for_Q_est ==========\n')
-        self.step_by_step_file.write(f'board\n: {self.board}\n\n')
-        self.step_by_step_file.write(f'analysis_results: {analysis_results}\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'========== Start of Environ.load_chessboard_for_Q_est ==========\n')
+            self.step_by_step_file.write(f'board\n: {self.board}\n\n')
+            self.step_by_step_file.write(f'analysis_results: {analysis_results}\n')
 
         # this is the anticipated chess move due to opponent's previous chess move. so if White plays Ne4, what is Black likely to play according to the engine?
         anticipated_chess_move = analysis_results['anticipated_next_move']  # this has the form like this, Move.from_uci('e4f6')
         
-        self.step_by_step_file.write(f'anticipated_chess_move: {anticipated_chess_move}\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'anticipated_chess_move: {anticipated_chess_move}\n')
 
         try:
             move = chess.Move.from_uci(anticipated_chess_move)
             self.board.push(move)
-            self.step_by_step_file.write(f'board after push\n')
-            self.step_by_step_file.write(f'board\n: {self.board}\n\n')
+            
+            if game_settings.PRINT_STEP_BY_STEP:
+                self.step_by_step_file.write(f'board after push\n')
+                self.step_by_step_file.write(f'board\n: {self.board}\n\n')
         except ValueError as e:
             self.errors_file.write(f'at, load_chessboard_for_Q_est, An error occurred: {e}, unable to load chessboard with {anticipated_chess_move}')
             raise ValueError(e) from e
 
-        self.step_by_step_file.write(f'========== End of Environ.load_chessboard_for_Q_est ==========\n\n\n')
+        if game_settings.PRINT_STEP_BY_STEP:
+            self.step_by_step_file.write(f'========== End of Environ.load_chessboard_for_Q_est ==========\n\n\n')
     ### end of load_chessboard_for_Q_est
 
     def reset_environ(self) -> None:
