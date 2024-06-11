@@ -63,29 +63,24 @@ class Bradley:
     def receive_opp_move(self, chess_move: str) -> bool:                                                                                 
         """
             Receives the opponent's chess move and updates the environment.
-
             This method receives the opponent's chess move, loads it onto the chessboard, and updates the current state 
             of the environment. If an error occurs while loading the chessboard or updating the current state, an error 
             message is written to the errors file and an exception is raised.
 
             Args:
                 chess_move (str): A string representing the opponent's chess move, such as 'Nf3'.
-
             Returns:
                 bool: A boolean value indicating whether the move was successfully loaded and the current state was 
                 successfully updated. Returns False if an error occurred while loading the chessboard, and does not 
                 attempt to update the current state.
-
             Raises:
                 Exception: An exception is raised if the chessboard fails to load the move or if the current state fails 
                 to update. The original exception is included in the raised exception.
-
             Side Effects:
                 Modifies the chessboard and the current state of the environment by loading the chess move and updating 
                 the current state.
                 Writes to the errors file if an error occurs.
         """
-    
         try:
             self.environ.load_chessboard(chess_move)
         except Exception as e:
@@ -105,7 +100,7 @@ class Bradley:
     def rl_agent_selects_chess_move(self, rl_agent_color: str) -> str:
         """
         The Agent selects a chess move and loads it onto the chessboard.
-        This method allows the Reinforcement Learning (RL) agent to select a chess move and load it onto the 
+        This method allows the agent to select a chess move and load it onto the 
         chessboard. It is used during actual gameplay between the computer and the user, not during training. The 
         method first gets the current state of the environment. If the list of legal moves is empty, an exception 
         is raised. Depending on the color of the RL agent, the appropriate agent selects a move. The selected move 
@@ -113,21 +108,17 @@ class Bradley:
 
         Args:
             rl_agent_color (str): A string indicating the color of the RL agent, either 'W' or 'B'.
-
         Returns:
             str: A string representing the selected chess move.
-
         Raises:
             Exception: An exception is raised if the current state is not valid, if the list of legal moves is 
             empty, if the chessboard fails to load the move, or if the current state fails to update. The original 
             exception is included in the raised exception.
-
         Side Effects:
             Modifies the chessboard and the current state of the environment by loading the chess move and updating 
             the current state.
             Writes to the errors file if an error occurs.
         """
-
         try:
             curr_state = self.environ.get_curr_state()
         except Exception as e:
@@ -150,6 +141,7 @@ class Bradley:
         try:
             self.environ.load_chessboard(chess_move) 
         except Exception as e:
+            self.errors_file.write('hello from Bradley.rl_agent_selects_chess_move\n')
             self.errors_file.write(f'Error {e}: failed to load chessboard with move: {chess_move}\n')
             raise Exception from e
 
@@ -157,6 +149,7 @@ class Bradley:
             self.environ.update_curr_state()
             return chess_move
         except Exception as e:
+            self.errors_file.write('hello from Bradley.rl_agent_selects_chess_move\n')
             self.errors_file.write(f'Error: {e}, failed to update_curr_state\n')
             raise Exception from e
     ### end of rl_agent_selects_chess_move
@@ -172,11 +165,9 @@ class Bradley:
         Returns:
             bool: A boolean value indicating whether the game is over. Returns True if any of the three conditions 
             are met, and False otherwise.
-
         Side Effects:
             None.
         """
-
         if self.environ.board.is_game_over() or (self.environ.turn_index >= game_settings.max_turn_index) or not self.environ.get_legal_moves():
             return True
         else:
@@ -196,88 +187,88 @@ class Bradley:
             or '1/2-1/2', representing a win for white, a win for black, or a draw, respectively. If an error 
             occurred while getting the game outcome, the returned string starts with 'error at get_game_outcome: ' 
             and includes the error message.
-
         Raises:
             AttributeError: An AttributeError is raised if the game outcome cannot be determined. The original 
             exception is included in the raised exception.
-
         Side Effects:
             None.
         """
-
         try:
             game_outcome = self.environ.board.outcome().result()
             return game_outcome
         except AttributeError as e:
+            self.errors_file.write('hello from Bradley.get_game_outcome\n')
             return f'error at get_game_outcome: {e}'
     ### end of get_game_outcome
     
     def get_game_termination_reason(self) -> str:
         """
-        Returns a string that describes the reason for the game ending.
-        This method returns a string that describes the reason for the game ending. It calls the `outcome` method 
-        on the chessboard, which returns an instance of the `chess.Outcome` class, and then gets the termination 
-        reason from this instance. If an error occurs while getting the termination reason, an error message is 
-        returned.
+            Returns a string that describes the reason for the game ending.
+            This method returns a string that describes the reason for the game ending. It calls the `outcome` method 
+            on the chessboard, which returns an instance of the `chess.Outcome` class, and then gets the termination 
+            reason from this instance. If an error occurs while getting the termination reason, an error message is 
+            returned.
 
-        Returns:
-            str: A string representing the reason for the game ending. The termination reason is one of the 
-            following: 'normal', 'abandoned', 'death', 'emergency', 'rules infraction', 'time forfeit', or 'unknown'. 
-            If an error occurred while getting the termination reason, the returned string starts with 'error at 
-            get_game_termination_reason: ' and includes the error message.
-
-        Raises:
-            AttributeError: An AttributeError is raised if the termination reason cannot be determined. The original 
-            exception is included in the raised exception.
-
-        Side Effects:
-            None.
+            Returns:
+                str: A string representing the reason for the game ending. The termination reason is one of the 
+                following: 'normal', 'abandoned', 'death', 'emergency', 'rules infraction', 'time forfeit', or 'unknown'. 
+                If an error occurred while getting the termination reason, the returned string starts with 'error at 
+                get_game_termination_reason: ' and includes the error message.
+            Raises:
+                AttributeError: An AttributeError is raised if the termination reason cannot be determined. The original 
+                exception is included in the raised exception.
+            Side Effects:
+                None.
         """
-
         try:
             termination_reason = str(self.environ.board.outcome().termination)
             return termination_reason
         except AttributeError as e:
+            self.errors_file.write('hello from Bradley.get_game_termination_reason\n')
+            self.errors_file.write(f'Error: {e}, failed to get game end reason\n')
             return f'error at get_game_termination_reason: {e}'
     ### end of get_game_termination_reason
     
     def train_rl_agents(self, est_q_val_table: pd.DataFrame) -> None:
         """
-        Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
+            Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
+            This method trains two RL agents by having them play games from a database exactly as shown, and learning from that. 
+            The training process involves the following steps:
 
-        This method trains two RL agents by having them play games from a database exactly as shown, and learning from that. 
-        The training process involves the following steps:
+            1. For each game in the training set, the method initializes the Q values for the white and black agents.
+            2. It then enters a loop that continues until the current turn index reaches the number of moves in the current training game.
+            3. On each turn, the agent chooses an action based on the current state and the policy. If an error occurs while choosing an action, the method writes an error message to the errors file and moves on to the next game.
+            4. The method then assigns points to the Q table for the agent based on the chosen action, the current turn, and the current Q value.
+            5. The agent then plays the chosen move. If an error occurs while playing the move, the method writes an error message to the errors file and moves on to the next game.
+            6. The method then gets the reward for the move and updates the current state.
+            7. If the game is not over, the method finds the estimated Q value for the agent and calculates the next Q value using the SARSA algorithm.
+            8. The method then updates the current Q value to the next Q value and gets the latest current state.
+            9. After all turns in the current game have been played, the method resets the environment to prepare for the next game.
+            10. Once all games in the training set have been played, the method sets the `is_trained` flag of the agents to True.
 
-        1. For each game in the training set, the method initializes the Q values for the white and black agents.
-        2. It then enters a loop that continues until the current turn index reaches the number of moves in the current training game.
-        3. On each turn, the agent chooses an action based on the current state and the policy. If an error occurs while choosing an action, the method writes an error message to the errors file and moves on to the next game.
-        4. The method then assigns points to the Q table for the agent based on the chosen action, the current turn, and the current Q value.
-        5. The agent then plays the chosen move. If an error occurs while playing the move, the method writes an error message to the errors file and moves on to the next game.
-        6. The method then gets the reward for the move and updates the current state.
-        7. If the game is not over, the method finds the estimated Q value for the agent and calculates the next Q value using the SARSA algorithm.
-        8. The method then updates the current Q value to the next Q value and gets the latest current state.
-        9. After all turns in the current game have been played, the method resets the environment to prepare for the next game.
-        10. Once all games in the training set have been played, the method sets the `is_trained` flag of the agents to True.
-
-        Args:
-            est_q_val_table (pd.DataFrame): A DataFrame containing the estimated Q values for each game in the training set.
-
-        Raises:
-            Exception: An exception is raised if an error occurs while getting the current state, choosing an action, playing a move, or getting the latest current state. The exception is written to the errors file.
-
-        Side Effects:
-            Modifies the Q tables of the RL agents and sets their `is_trained` flag to True.
-            Writes the start and end of each game, any errors that occur, and the final state of the chessboard to the initial training results file.
-            Writes any errors that occur to the errors file.
-            Resets the environment at the end of each game.
+            Args:
+                est_q_val_table (pd.DataFrame): A DataFrame containing the estimated Q values for each game in the training set.
+            Raises:
+                Exception: An exception is raised if an error occurs while getting the current state, choosing an action, playing a move, or getting the latest current state. The exception is written to the errors file.
+            Side Effects:
+                Modifies the Q tables of the RL agents and sets their `is_trained` flag to True.
+                Writes the start and end of each game, any errors that occur, and the final state of the chessboard to the initial training results file.
+                Writes any errors that occur to the errors file.
+                Resets the environment at the end of each game.
         """
+        self.step_by_step_file.write(f'hi from Bradley.train_rl_agents\n')
 
         ### FOR EACH GAME IN THE TRAINING SET ###
-        for game_num_str in game_settings.CHESS_DATA.index:
-            num_chess_moves_curr_training_game: int = game_settings.CHESS_DATA.at[game_num_str, 'PlyCount']
+        for game_num_str in game_settings.chess_data.index:
+            num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
 
             W_curr_Qval: int = game_settings.initial_q_val
             B_curr_Qval: int = game_settings.initial_q_val
+
+            self.step_by_step_file.write(f'At game: {game_num_str}\n')
+            self.step_by_step_file.write(f'num_chess_moves_curr_training_game: {num_chess_moves_curr_training_game}\n')
+            self.step_by_step_file.write(f'W_curr_Qval: {W_curr_Qval}\n')
+            self.step_by_step_file.write(f'B_curr_Qval: {B_curr_Qval}\n')
             
             if game_settings.PRINT_TRAINING_RESULTS:
                 self.initial_training_results.write(f'\nStart of {game_num_str} training\n\n')
@@ -288,13 +279,19 @@ class Bradley:
                 self.errors_file.write(f'An error occurred at self.environ.get_curr_state: {e}\n')
                 self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
                 self.errors_file.write(f'at game: {game_num_str}\n')
-                break
+                self.errors_file.write(f'at turn: {curr_state['turn_index']}')
+                break # stop current game and go to next game.
+
+            self.step_by_step_file.write(f'curr_state: {curr_state}\n')
 
             ### LOOP PLAYS THROUGH ONE GAME ###
             while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
                 ##################### WHITE'S TURN ####################
                 # choose action a from state s, using policy
                 W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
+
+                self.step_by_step_file.write(f'W_chess_move: {W_chess_move}\n')
+
                 if not W_chess_move:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
                     self.errors_file.write(f'W_chess_move is empty at state: {curr_state}\n')
@@ -307,15 +304,21 @@ class Bradley:
 
                 curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
 
+                self.step_by_step_file.write(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
+
                 ### WHITE AGENT PLAYS THE SELECTED MOVE ###
                 # take action a, observe r, s', and load chessboard
                 try:
                     self.rl_agent_plays_move(W_chess_move, game_num_str)
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
+                    self.errors_file.write(f'at curr_game: {game_num_str}\n')
+                    self.errors_file.write(f'at state: {curr_state}\n')
                     break # and go to the next game. this game is over.
 
                 W_reward = self.get_reward(W_chess_move)
+
+                self.step_by_step_file.write(f'W_reward: {W_reward}\n')
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                 try:
@@ -324,18 +327,29 @@ class Bradley:
                     self.errors_file.write(f'An error occurred at get_curr_state: {e}\n')
                     self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
                     self.errors_file.write(f'At game: {game_num_str}\n')
-                    break
+                    self.errors_file.write(f'at state: {curr_state}\n')
+                    break # and go to the next game. this game is over.
                 
+                self.step_by_step_file.write(f'curr_state: {curr_state}\n')
+
                 # find the estimated Q value for White, but first check if game ended
                 if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
+                    self.step_by_step_file.write(f'game {game_num_str} is over\n')
                     break # and go to next game
 
                 else: # current game continues
+                    # the var curr_turn_for_q_est is here because we previously moved to next turn (after move was played)
+                    # but we want to assign the q est based on turn just before the curr turn was incremented.
                     W_est_Qval: int = est_q_val_table.at[game_num_str, curr_turn_for_q_est]
+
+                    self.step_by_step_file.write(f'W_est_Qval: {W_est_Qval}\n')
 
                 ##################### BLACK'S TURN ####################
                 # choose action a from state s, using policy
                 B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
+
+                self.step_by_step_file.write(f'B_chess_move: {B_chess_move}\n')
+                
                 if not B_chess_move:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
                     self.errors_file.write(f'B_chess_move is empty at state: {curr_state}\n')
@@ -347,15 +361,21 @@ class Bradley:
 
                 curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
 
+                self.step_by_step_file.write(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
+
                 ##### BLACK AGENT PLAYS SELECTED MOVE #####
                 # take action a, observe r, s', and load chessboard
                 try:
                     self.rl_agent_plays_move(B_chess_move, game_num_str)
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
+                    self.errors_file.write(f'at curr_game: {game_num_str}\n')
+                    self.errors_file.write(f'at state: {curr_state}\n')
                     break 
 
                 B_reward = self.get_reward(B_chess_move)
+
+                self.step_by_step_file.write(f'B_reward: {B_reward}\n')
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                 try:
@@ -366,23 +386,41 @@ class Bradley:
                     self.errors_file.write(f'At game: {game_num_str}\n')
                     break
 
+                self.step_by_step_file.write(f'curr_state: {curr_state}\n')
+
                 # find the estimated Q value for Black, but first check if game ended
                 if self.environ.board.is_game_over() or not curr_state['legal_moves']:
+                    self.step_by_step_file.write(f'game {game_num_str} is over\n')
                     break # and go to next game
                 else: # current game continues
                     B_est_Qval: int = est_q_val_table.at[game_num_str, curr_turn_for_q_est]
+
+                
+                self.step_by_step_file.write(f'B_est_Qval: {B_est_Qval}\n')
+                self.step_by_step_file.write(f'about to calc next q values\n')
+                self.step_by_step_file.write(f'W_curr_Qval: {W_curr_Qval}\n')
+                self.step_by_step_file.write(f'B_curr_Qval: {B_curr_Qval}\n')
+                self.step_by_step_file.write(f'W_reward: {W_reward}\n')
+                self.step_by_step_file.write(f'B_reward: {B_reward}\n')
+                self.step_by_step_file.write(f'W_est_Qval: {W_est_Qval}\n')
+                self.step_by_step_file.write(f'B_est_Qval: {B_est_Qval}\n\n')
 
                 # ***CRITICAL STEP***, this is the main part of the SARSA algorithm.
                 W_next_Qval: int = self.find_next_Qval(W_curr_Qval, self.W_rl_agent.learn_rate, W_reward, self.W_rl_agent.discount_factor, W_est_Qval)
                 B_next_Qval: int = self.find_next_Qval(B_curr_Qval, self.B_rl_agent.learn_rate, B_reward, self.B_rl_agent.discount_factor, B_est_Qval)
             
-                # on the next turn, this Q value will be added to the Q table. so if this is the end of the first round,
+                self.step_by_step_file.write(f'sarsa calc complete\n')
+                self.step_by_step_file.write(f'W_next_Qval: {W_next_Qval}\n')
+                self.step_by_step_file.write(f'B_next_Qval: {B_next_Qval}\n')
+
+                # on the next turn, W_next_Qval and B_next_Qval will be added to the Q table. so if this is the end of the first round,
                 # next round it will be W2 and then we assign the q value at W2 col
                 W_curr_Qval = W_next_Qval
                 B_curr_Qval = B_next_Qval
 
                 try:
                     curr_state = self.environ.get_curr_state()
+                    self.step_by_step_file.write(f'curr_state: {curr_state}\n')
                 except Exception as e:
                     self.errors_file.write(f'An error occurred: {e}\n')
                     self.errors_file.write("failed to get_curr_state\n") 
@@ -397,11 +435,13 @@ class Bradley:
                 self.initial_training_results.write(f'\n{self.environ.board}\n\n')
                 self.initial_training_results.write(f'Game result is: {self.get_game_outcome()}\n')    
                 self.initial_training_results.write(f'The game ended because of: {self.get_game_termination_reason()}\n')
-                self.initial_training_results.write(f'DB shows game ended b/c: {game_settings.CHESS_DATA.at[game_num_str, "Result"]}\n')
+                self.initial_training_results.write(f'DB shows game ended b/c: {game_settings.chess_data.at[game_num_str, "Result"]}\n')
 
+            self.step_by_step_file.write(f'game {game_num_str} is over\n')
             self.environ.reset_environ() # reset and go to next game in training set
         
         # training is complete, all games in database have been processed
+        self.step_by_step_file.write(f'training is complete\n')
         self.W_rl_agent.is_trained = True
         self.B_rl_agent.is_trained = True
     ### end of train_rl_agents
@@ -773,9 +813,9 @@ class Bradley:
         """
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
-        for game_num_str in game_settings.CHESS_DATA.index:
+        for game_num_str in game_settings.chess_data.index:
             start_time = time.time()
-            num_chess_moves_curr_training_game: int = game_settings.CHESS_DATA.at[game_num_str, 'PlyCount']
+            num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
 
             try:
                 curr_state = self.environ.get_curr_state()
@@ -924,8 +964,8 @@ class Bradley:
 
         try:
             ### FOR EACH GAME IN THE TRAINING SET ###
-            for game_num_str in game_settings.CHESS_DATA.index:
-                num_chess_moves_curr_training_game: int = game_settings.CHESS_DATA.at[game_num_str, 'PlyCount']
+            for game_num_str in game_settings.chess_data.index:
+                num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
 
                 try:
                     curr_state = self.environ.get_curr_state()
@@ -1046,8 +1086,8 @@ class Bradley:
         """
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
-        for game_num_str in game_settings.CHESS_DATA.index:
-            num_chess_moves_curr_training_game: int = game_settings.CHESS_DATA.at[game_num_str, 'PlyCount']
+        for game_num_str in game_settings.chess_data.index:
+            num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
 
             try:
                 curr_state = self.environ.get_curr_state()
