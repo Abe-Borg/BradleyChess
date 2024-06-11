@@ -15,7 +15,7 @@ if __name__ == '__main__':
     helper_methods.bootstrap_agent(bradley, 'W', game_settings.bradley_agent_q_table_path)
     helper_methods.bootstrap_agent(bradley, 'B', game_settings.imman_agent_q_table_path)
 
-    print(f'White Q table size before games: {bradley.W_rl_agent.Q_table.shape}\n')
+    print(f'White Q table size before games: {bradley.W_rl_agent.Q_table.shape}')
     print(f'Black Q table size before games: {bradley.B_rl_agent.Q_table.shape}\n')
 
     try:
@@ -29,13 +29,13 @@ if __name__ == '__main__':
     end_time = time.time()
     total_time = end_time - start_time
 
-    print('q table populated with new moves from current section of chess db')
-    print(f'it took: {total_time}')
+    print('\nq table populated with new moves from current section of chess db')
+    print(f'it took: {total_time}\n')
 
-    print(f'White Q table size after games: {bradley.W_rl_agent.Q_table.shape}\n')
-    print(f'Black Q table size after games: {bradley.B_rl_agent.Q_table.shape}\n')
+    print(f'White Q table size after games: {bradley.W_rl_agent.Q_table.shape}')
+    print(f'Black Q table size after games: {bradley.B_rl_agent.Q_table.shape}')
 
-    # bradley.W_rl_agent.Q_table.to_pickle(game_settings.bradley_agent_q_table_path, compression = 'zip')
-    # bradley.B_rl_agent.Q_table.to_pickle(game_settings.imman_agent_q_table_path, compression = 'zip')
+    bradley.W_rl_agent.Q_table.to_pickle(game_settings.bradley_agent_q_table_path, compression = 'zip')
+    bradley.B_rl_agent.Q_table.to_pickle(game_settings.imman_agent_q_table_path, compression = 'zip')
 
     quit()
