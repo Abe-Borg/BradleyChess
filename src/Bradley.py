@@ -776,40 +776,40 @@ class Bradley:
 
     def identify_corrupted_games(self) -> None:
         """
-        Identifies corrupted games in the chess database and logs them in the errors file.
+            Identifies corrupted games in the chess database and logs them in the errors file.
 
-        This method iterates over each game in the chess database and tries to play through the game using the 
-        reinforcement learning agents. If an error occurs at any point during the game, the game number is added to 
-        the list of corrupted games and the error is logged in the errors file.
+            This method iterates over each game in the chess database and tries to play through the game using the 
+            reinforcement learning agents. If an error occurs at any point during the game, the game number is added to 
+            the list of corrupted games and the error is logged in the errors file.
 
-        The method first tries to get the current state of the game. If an error occurs, it logs the error and the 
-        current board state in the errors file, adds the game number to the list of corrupted games, and moves on to 
-        the next game.
+            The method first tries to get the current state of the game. If an error occurs, it logs the error and the 
+            current board state in the errors file, adds the game number to the list of corrupted games, and moves on to 
+            the next game.
 
-        The method then enters a loop where it alternates between the white and black agents choosing and playing 
-        moves. If an error occurs while choosing or playing a move, the method logs the error and the current state 
-        in the errors file, adds the game number to the list of corrupted games, and breaks out of the loop to move 
-        on to the next game.
+            The method then enters a loop where it alternates between the white and black agents choosing and playing 
+            moves. If an error occurs while choosing or playing a move, the method logs the error and the current state 
+            in the errors file, adds the game number to the list of corrupted games, and breaks out of the loop to move 
+            on to the next game.
 
-        After each move, the method tries to get the latest state of the game. If an error occurs, it logs the error 
-        and the current board state in the errors file, adds the game number to the list of corrupted games, and 
-        breaks out of the loop to move on to the next game.
+            After each move, the method tries to get the latest state of the game. If an error occurs, it logs the error 
+            and the current board state in the errors file, adds the game number to the list of corrupted games, and 
+            breaks out of the loop to move on to the next game.
 
-        The loop continues until the game is over, there are no more legal moves, or the maximum number of moves for 
-        the current training game has been reached.
+            The loop continues until the game is over, there are no more legal moves, or the maximum number of moves for 
+            the current training game has been reached.
 
-        After each game, the method resets the environment to prepare for the next game. It also prints a progress 
-        notification every 1000 games.
+            After each game, the method resets the environment to prepare for the next game. It also prints a progress 
+            notification every 1000 games.
 
-        Args:
-            None.
-        Returns:
-            None.
-        Raises:
-            None.
+            Args:
+                None.
+            Returns:
+                None.
+            Raises:
+                None.
 
-        Side Effects:
-            Modifies the list of corrupted games and writes to the errors file if an error occurs.
+            Side Effects:
+                Modifies the list of corrupted games and writes to the errors file if an error occurs.
         """
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
@@ -1086,7 +1086,9 @@ class Bradley:
         """
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
+        
         for game_num_str in game_settings.chess_data.index:
+            start_time = time.time()
             num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
 
             try:
@@ -1164,5 +1166,11 @@ class Bradley:
 
             # this curr game is done, reset environ to prepare for the next game
             self.environ.reset_environ() # reset and go to next game in chess database
+            
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            # Print progress notification every 1000 games
+            if game_count % 1000 == 0:
+                print(f"Notification: Game {game_count} is done. Time elapsed: {elapsed_time:.2f} seconds.")
             game_count += 1
         ### END OF FOR LOOP THROUGH CHESS DB ###

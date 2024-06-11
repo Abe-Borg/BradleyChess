@@ -3,6 +3,9 @@ import game_settings
 import time
 import Bradley
 
+# !!! MAKE SURE to set desired chess_data path in game settings before executing this script !!! #
+
+
 if __name__ == '__main__':
     start_time = time.time()
     bradley = Bradley.Bradley()
@@ -10,10 +13,12 @@ if __name__ == '__main__':
     try:
         helper_methods.bootstrap_agent(bradley, 'W', game_settings.bradley_agent_q_table_path)
         helper_methods.bootstrap_agent(bradley, 'B', game_settings.imman_agent_q_table_path)
+
         bradley.continue_training_rl_agents(game_settings.agent_vs_agent_num_games)
 
         helper_methods.pikl_q_table(bradley, 'W', game_settings.bradley_agent_q_table_path)
         helper_methods.pikl_q_table(bradley, 'B', game_settings.imman_agent_q_table_path)
+
         bradley.engine.quit()
     except Exception as e:
         print(f'training interrupted because of:  {e}')

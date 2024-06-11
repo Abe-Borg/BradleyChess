@@ -4,19 +4,19 @@ import pandas as pd
 import time
 import Bradley
 
-chess_data_file_path = game_settings.chess_games_filepath_part_10
-game_settings.CHESS_DATA = pd.read_pickle(chess_data_file_path, compression = 'zip')
+# !!! MAKE SURE to set desired chess_data path in game settings before executing this script !!! #
 
-game_settings.CHESS_DATA = game_settings.CHESS_DATA.head(1)
 
 if __name__ == '__main__':
-    bradley = Bradley.Bradley()
     start_time = time.time()
+    bradley = Bradley.Bradley()
     
     try:
         bradley.train_rl_agents()
+        bradley.engine.quit()
     except Exception as e:
         print(f'training interrupted because of:  {e}')
+        bradley.engine.quit()
         quit()
         
     end_time = time.time()
