@@ -7,7 +7,7 @@ import re
 import copy
 import time
 import custom_exceptions
-
+import sys
 
 class Bradley:
     """
@@ -680,14 +680,22 @@ class Bradley:
             int: The next Q-value, calculated using the SARSA algorithm.
 
         Raises:
-            None.
+            QValueCalculationError: If an error or overflow occurs during the calculation of the next Q-value.
 
         Side Effects:
             None.
         """
-
-        next_Qval = int(curr_Qval + learn_rate * (reward + ((discount_factor * est_Qval) - curr_Qval)))
-        return next_Qval
+        try:
+            next_Qval = int(curr_Qval + learn_rate * (reward + ((discount_factor * est_Qval) - curr_Qval)))
+            return next_Qval
+        except OverflowError:
+            self.errors_file.write(f'@ Bradley.find_next_Qval. An error occurred: OverflowError\n')
+            self.errors_file.write(f'curr_Qval: {curr_Qval}\n')
+            self.errors_file.write(f'learn_rate: {learn_rate}\n')
+            self.errors_file.write(f'reward: {reward}\n')
+            self.errors_file.write(f'discount_factor: {discount_factor}\n')
+            self.errors_file.write(f'est_Qval: {est_Qval}\n')
+            raise custom_exceptions.QValueCalculationError("Overflow occurred during Q-value calculation") from OverflowError
     # end of find_next_Qval
     
     def analyze_board_state(self, board: chess.Board) -> dict:
@@ -711,27 +719,30 @@ class Bradley:
                 board (chess.Board): The current state of the chessboard to analyze.
 
             Returns:
-                dict: A dictionary containing the analysis results. The dictionary includes the mate score, the centipawn 
-                score, and the anticipated next move.
+                dict: A dictionary containing the analysis results:
+                - 'mate_score': Number of moves to mate (None if not a mate position)
+                - 'centipawn_score': Centipawn score (None if mate position)
+                - 'anticipated_next_move': The best move suggested by the engine
 
             Raises:
-                ValueError: A ValueError is raised if the board is in an invalid state.
-                Exception: An Exception is raised if an error occurs during the analysis, while extracting the scores, or 
-                while extracting the anticipated next move. The original exception is included in the raised exception.
+                InvalidBoardStateError: If the board is in an invalid state.
+                EngineAnalysisError: If an error occurs during the Stockfish analysis.
+                ScoreExtractionError: If an error occurs while extracting scores from the analysis.
+                MoveExtractionError: If an error occurs while extracting the anticipated next move.
 
             Side Effects:
                 Writes to the errors file if an error occurs.
         """
         if not self.environ.board.is_valid():
             self.errors_file.write(f'at Bradley.analyze_board_state. Board is in invalid state\n')
-            raise ValueError(f'at Bradley.analyze_board_state. Board is in invalid state\n')
+            raise custom_exceptions.InvalidBoardStateError(f'at Bradley.analyze_board_state. Board is in invalid state\n')
 
         try: 
             analysis_result = self.engine.analyse(board, game_settings.search_limit, multipv=game_settings.num_moves_to_return)
         except Exception as e:
             self.errors_file.write(f'@ Bradley_analyze_board_state. An error occurred during analysis: {e}\n')
             self.errors_file.write(f"Chessboard is:\n{board}\n")
-            raise Exception from e
+            raise custom_exceptions.EngineAnalysisError("error occured during stockfish analysis") from e
 
         mate_score = None
         centipawn_score = None
@@ -748,14 +759,14 @@ class Bradley:
                 centipawn_score = pov_score.score()
         except Exception as e:
             self.errors_file.write(f'An error occurred while extracting scores: {e}\n')
-            raise Exception from e
+            raise custom_exceptions.ScoreExtractionError("Error occurred while extracting scores from analysis") from e
 
         try:
             # Extract the anticipated next move from the analysis
             anticipated_next_move = analysis_result[0]['pv'][0]
         except Exception as e:
             self.errors_file.write(f'An error occurred while extracting the anticipated next move: {e}\n')
-            raise Exception from e
+            raise MoveExtractionError("Error occurred while extracting the anticipated next move") from e
         
         return {
             'mate_score': mate_score,
@@ -766,32 +777,35 @@ class Bradley:
  
     def get_reward(self, chess_move: str) -> int:
         """
-        Calculates the reward for a given chess move based on the type of move.
+            Calculates the reward for a given chess move based on the type of move.
 
-        This method calculates the reward for a given chess move by checking for specific patterns in the move string 
-        that correspond to different types of moves. The reward is calculated as follows:
+            This method calculates the reward for a given chess move by checking for specific patterns in the move string 
+            that correspond to different types of moves. The reward is calculated as follows:
 
-        1. If the move involves the development of a piece (N, R, B, Q), the reward is increased by the value 
-        associated with 'piece_development' in the game settings.
-        2. If the move involves a capture (indicated by 'x' in the move string), the reward is increased by the value 
-        associated with 'capture' in the game settings.
-        3. If the move involves a promotion (indicated by '=' in the move string), the reward is increased by the value 
-        associated with 'promotion' in the game settings. If the promotion is to a queen (indicated by '=Q' in the 
-        move string), the reward is further increased by the value associated with 'promotion_queen' in the game 
-        settings.
+            1. If the move involves the development of a piece (N, R, B, Q), the reward is increased by the value 
+            associated with 'piece_development' in the game settings.
+            2. If the move involves a capture (indicated by 'x' in the move string), the reward is increased by the value 
+            associated with 'capture' in the game settings.
+            3. If the move involves a promotion (indicated by '=' in the move string), the reward is increased by the value 
+            associated with 'promotion' in the game settings. If the promotion is to a queen (indicated by '=Q' in the 
+            move string), the reward is further increased by the value associated with 'promotion_queen' in the game 
+            settings.
 
-        Args:
-            chess_move (str): A string representing the selected chess move in standard algebraic notation.
+            Args:
+                chess_move (str): A string representing the selected chess move in standard algebraic notation.
 
-        Returns:
-            int: The total reward for the given chess move, calculated based on the type of move.
+            Returns:
+                int: The total reward for the given chess move, calculated based on the type of move.
 
-        Raises:
-            None.
+            Raises:
+                ValueError: If the chess_move string is empty or invalid.
 
-        Side Effects:
-            None.
+            Side Effects:
+                None.
         """
+        if not chess_move or not isinstance(chess_move, str):
+            raise ValueError("Invalid chess move input")
+
         total_reward = 0
         # Check for piece development (N, R, B, Q)
         if re.search(r'[NRBQ]', chess_move):

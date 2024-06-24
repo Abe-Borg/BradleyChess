@@ -95,3 +95,33 @@ class ChessboardManipulationError(ChessError):
     def __init__(self, message="Error manipulating chessboard"):
         self.message = message
         super().__init__(self.message)
+
+class QValueCalculationError(ChessError):
+    """Exception raised when there's an error calculating the Q-value."""
+    def __init__(self, message="Error calculating Q-value"):
+        self.message = message
+        super().__init__(self.message)
+
+class InvalidBoardStateError(ChessError):
+    """Exception raised when the chess board is in an invalid state."""
+    def __init__(self, message="Chess board is in an invalid state"):
+        self.message = message
+        super().__init__(self.message)
+
+class EngineAnalysisError(ChessError):
+    """Exception raised when there's an error during engine analysis."""
+    def __init__(self, message="Error occurred during chess engine analysis"):
+        self.message = message
+        super().__init__(self.message)
+
+class ScoreExtractionError(ChessError):
+    """Exception raised when there's an error extracting scores from analysis."""
+    def __init__(self, message="Error extracting scores from analysis"):
+        self.message = message
+        super().__init__(self.message)
+
+class MoveExtractionError(ChessError):
+    """Exception raised when there's an error extracting the anticipated move from analysis."""
+    def __init__(self, message="Error extracting anticipated move from analysis"):
+        self.message = message
+        super().__init__(self.message)
