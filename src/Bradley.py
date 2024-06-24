@@ -6,6 +6,8 @@ import pandas as pd
 import re
 import copy
 import time
+import custom_exceptions
+
 
 class Bradley:
     """
@@ -60,6 +62,8 @@ class Bradley:
         self.initial_training_results.close()
         self.additional_training_results.close()
         self.step_by_step_file.close()
+        if hasattr(self, 'engine'):
+            self.engine.quit()
     ### end of Bradley destructor ###
 
     def receive_opp_move(self, chess_move: str) -> bool:                                                                                 
@@ -85,7 +89,7 @@ class Bradley:
         """
         try:
             self.environ.load_chessboard(chess_move)
-        except Exception as e:
+        except custom_exceptions.ChessboardLoadError as e:
             self.errors_file.write("hello from Bradley.receive_opp_move, an error occurred\n")
             self.errors_file.write(f'Error: {e}, failed to load chessboard with move: {chess_move}\n')
             return False
@@ -93,7 +97,7 @@ class Bradley:
         try:
             self.environ.update_curr_state()
             return True
-        except Exception as e:
+        except custom_exceptions.StateUpdateError as e:
             self.errors_file.write(f'hello from Bradley.receive_opp_move, an error occurrd\n')
             self.errors_file.write(f'Error: {e}, failed to update_curr_state\n') 
             raise Exception from e
@@ -113,9 +117,10 @@ class Bradley:
         Returns:
             str: A string representing the selected chess move.
         Raises:
-            Exception: An exception is raised if the current state is not valid, if the list of legal moves is 
-            empty, if the chessboard fails to load the move, or if the current state fails to update. The original 
-            exception is included in the raised exception.
+            StateUpdateError: If the current state is not valid or fails to update.
+            NoLegalMovesError: If the list of legal moves is empty.
+            ChessboardLoadError: If the chessboard fails to load the move.
+            StateRetrievalError: If the current state is not valid or fails to retrieve.
         Side Effects:
             Modifies the chessboard and the current state of the environment by loading the chess move and updating 
             the current state.
@@ -123,7 +128,7 @@ class Bradley:
         """
         try:
             curr_state = self.environ.get_curr_state()
-        except Exception as e:
+        except custom_exceptions.StateRetrievalError as e:
             self.errors_file.write("hello from Bradley.rl_agent_selects_chess_move, an error occurred\n")
             self.errors_file.write(f'Error: {e}, failed to get_curr_state\n')
             raise Exception from e
@@ -131,7 +136,7 @@ class Bradley:
         if curr_state['legal_moves'] == []:
             self.errors_file.write('hello from Bradley.rl_agent_selects_chess_move, legal_moves is empty\n')
             self.errors_file.write(f'curr state is: {curr_state}\n')
-            raise Exception(f'hello from Bradley.rl_agent_selects_chess_move, legal_moves is empty\n')
+            raise custom_exceptions.NoLegalMovesError(f'hello from Bradley.rl_agent_selects_chess_move, legal_moves is empty\n')
         
         if rl_agent_color == 'W':    
             # W agent selects action
@@ -142,7 +147,7 @@ class Bradley:
 
         try:
             self.environ.load_chessboard(chess_move) 
-        except Exception as e:
+        except custom_exceptions.ChessboardLoadError as e:
             self.errors_file.write('hello from Bradley.rl_agent_selects_chess_move\n')
             self.errors_file.write(f'Error {e}: failed to load chessboard with move: {chess_move}\n')
             raise Exception from e
@@ -150,7 +155,7 @@ class Bradley:
         try:
             self.environ.update_curr_state()
             return chess_move
-        except Exception as e:
+        except custom_exceptions.StateUpdateError as e:
             self.errors_file.write('hello from Bradley.rl_agent_selects_chess_move\n')
             self.errors_file.write(f'Error: {e}, failed to update_curr_state\n')
             raise Exception from e
@@ -170,11 +175,30 @@ class Bradley:
         Side Effects:
             None.
         """
-        if self.environ.board.is_game_over() or (self.environ.turn_index >= game_settings.max_turn_index) or not self.environ.get_legal_moves():
-            return True
-        else:
-            return False
+        return (
+            self._is_game_over_by_rules() or
+            self._is_max_turns_reached() or
+            self._is_no_legal_moves_left()
+        )
     ### end of is_game_over
+
+    ### helper methods for is_game_over ###
+    def _is_game_over_by_rules(self) -> bool:
+        """Check if the game is over according to chess rules."""
+        return self.environ.board.is_game_over()
+
+    def _is_max_turns_reached(self) -> bool:
+        """Check if the maximum number of turns has been reached."""
+        return self.environ.turn_index >= game_settings.max_turn_index
+
+    def _is_no_legal_moves_left(self) -> bool:
+        """Check if there are no legal moves left."""
+        return len(self._get_legal_moves()) == 0
+
+    def _get_legal_moves(self) -> List[str]:
+        """Get the list of legal moves from the environment."""
+        return self.environ.get_legal_moves()
+    ### end of helper methods for is_game_over ###
         
     def get_game_outcome(self) -> str:
         """
@@ -190,15 +214,13 @@ class Bradley:
             occurred while getting the game outcome, the returned string starts with 'error at get_game_outcome: ' 
             and includes the error message.
         Raises:
-            AttributeError: An AttributeError is raised if the game outcome cannot be determined. The original 
-            exception is included in the raised exception.
+            GameOutcomeError: If the game outcome cannot be determined.
         Side Effects:
             None.
         """
         try:
-            game_outcome = self.environ.board.outcome().result()
-            return game_outcome
-        except AttributeError as e:
+            return self.environ.board.outcome().result()
+        except custom_exceptions.GameOutcomeError as e:
             self.errors_file.write('hello from Bradley.get_game_outcome\n')
             return f'error at get_game_outcome: {e}'
     ### end of get_game_outcome
@@ -217,15 +239,13 @@ class Bradley:
                 If an error occurred while getting the termination reason, the returned string starts with 'error at 
                 get_game_termination_reason: ' and includes the error message.
             Raises:
-                AttributeError: An AttributeError is raised if the termination reason cannot be determined. The original 
-                exception is included in the raised exception.
+                GameTerminationError: If the termination reason cannot be determined.
             Side Effects:
                 None.
         """
         try:
-            termination_reason = str(self.environ.board.outcome().termination)
-            return termination_reason
-        except AttributeError as e:
+            return str(self.environ.board.outcome().termination)
+        except custom_exceptions.GameTerminationError as e:
             self.errors_file.write('hello from Bradley.get_game_termination_reason\n')
             self.errors_file.write(f'Error: {e}, failed to get game end reason\n')
             return f'error at get_game_termination_reason: {e}'
@@ -1103,7 +1123,7 @@ class Bradley:
                 self.environ.reset_environ() # reset and go to next game in training set
         finally:
             self.engine.quit()
-
+    # end of generate_Q_est_df
 
     def simply_play_games(self) -> None:
         """
