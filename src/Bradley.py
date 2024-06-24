@@ -62,8 +62,9 @@ class Bradley:
         self.initial_training_results.close()
         self.additional_training_results.close()
         self.step_by_step_file.close()
-        if hasattr(self, 'engine'):
-            self.engine.quit()
+
+        # if hasattr(self, 'engine'):
+            # self.engine.quit()
     ### end of Bradley destructor ###
 
     def receive_opp_move(self, chess_move: str) -> bool:                                                                                 
@@ -195,7 +196,7 @@ class Bradley:
         """Check if there are no legal moves left."""
         return len(self._get_legal_moves()) == 0
 
-    def _get_legal_moves(self) -> List[str]:
+    def _get_legal_moves(self) -> list[str]:
         """Get the list of legal moves from the environment."""
         return self.environ.get_legal_moves()
     ### end of helper methods for is_game_over ###
@@ -255,23 +256,12 @@ class Bradley:
         """
             Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
             This method trains two RL agents by having them play games from a database exactly as shown, and learning from that. 
-            The training process involves the following steps:
-
-            1. For each game in the training set, the method initializes the Q values for the white and black agents.
-            2. It then enters a loop that continues until the current turn index reaches the number of moves in the current training game.
-            3. On each turn, the agent chooses an action based on the current state and the policy. If an error occurs while choosing an action, the method writes an error message to the errors file and moves on to the next game.
-            4. The method then assigns points to the Q table for the agent based on the chosen action, the current turn, and the current Q value.
-            5. The agent then plays the chosen move. If an error occurs while playing the move, the method writes an error message to the errors file and moves on to the next game.
-            6. The method then gets the reward for the move and updates the current state.
-            7. If the game is not over, the method finds the estimated Q value for the agent and calculates the next Q value using the SARSA algorithm.
-            8. The method then updates the current Q value to the next Q value and gets the latest current state.
-            9. After all turns in the current game have been played, the method resets the environment to prepare for the next game.
-            10. Once all games in the training set have been played, the method sets the `is_trained` flag of the agents to True.
-
+            The agents learn from these games using the SARSA (State-Action-Reward-State-Action) algorithm.
+            
             Args:
                 est_q_val_table (pd.DataFrame): A DataFrame containing the estimated Q values for each game in the training set.
             Raises:
-                Exception: An exception is raised if an error occurs while getting the current state, choosing an action, playing a move, or getting the latest current state. The exception is written to the errors file.
+                Exception: A TrainingError is raised if an error occurs while getting the current state, choosing an action, playing a move, or getting the latest current state. The exception is written to the errors file.
             Side Effects:
                 Modifies the Q tables of the RL agents and sets their `is_trained` flag to True.
                 Writes the start and end of each game, any errors that occur, and the final state of the chessboard to the initial training results file.
@@ -514,17 +504,17 @@ class Bradley:
                 rl_agent_color (str): The color of the RL agent making the move.
 
             Raises:
-                KeyError: A KeyError is raised if the chess move is not represented in the Q table. The exception is 
+                QTableUpdateError: is raised if the chess move is not represented in the Q table. The exception is 
                 written to the errors file.
 
             Side Effects:
                 Modifies the Q table of the RL agent by assigning points to the given chess move.
-                Writes to the errors file if a KeyError is raised.
+                Writes to the errors file if a exception is raised.
         """
         if rl_agent_color == 'W':
             try:
                 self.W_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
-            except KeyError as e: 
+            except custom_exceptions.QTableUpdateError as e: 
                 # chess move is not represented in the Q table, update Q table and try again.
                 self.errors_file.write(f'caught exception: {e} at assign_points_to_Q_table\n')
                 self.errors_file.write(f'Chess move is not represented in the White Q table, updating Q table and trying again...\n')
@@ -534,7 +524,7 @@ class Bradley:
         else: # black's turn
             try:
                 self.B_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
-            except KeyError as e: 
+            except custom_exceptions.QTableUpdateError as e: 
                 # chess move is not represented in the Q table, update Q table and try again. 
                 self.errors_file.write(f'caught exception: {e} at assign_points_to_Q_table\n')
                 self.errors_file.write(f'Chess move is not represented in the White Q table, updating Q table and trying again...\n')
@@ -551,7 +541,7 @@ class Bradley:
             exception. It then attempts to update the current state of the environment. If an error occurs while 
             updating the current state, it writes an error message to the errors file and raises an exception.
 
-            Args:
+            Args: 
                 chess_move (str): A string representing the chess move in standard algebraic notation.
                 curr_game: The current game being played during training.
 
@@ -567,7 +557,7 @@ class Bradley:
 
         try:
             self.environ.load_chessboard(chess_move, curr_game)
-        except Exception as e:
+        except custom_exceptions.ChessboardLoadError as e:
             self.errors_file.write(f'at Bradley.rl_agent_plays_move. An error occurred at {curr_game}: {e}\n')
             self.errors_file.write(f"failed to load_chessboard with move {chess_move}\n")
             # self.corrupted_games_list.append(curr_game)
@@ -575,7 +565,7 @@ class Bradley:
 
         try:
             self.environ.update_curr_state()
-        except Exception as e:
+        except custom_exceptions.StateUpdateError as e:
             self.errors_file.write(f'at Bradley.rl_agent_plays_move. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
             self.errors_file.write(f'Current state is: {self.environ.get_curr_state()}\n')
             raise Exception from e
@@ -603,15 +593,13 @@ class Bradley:
             int: The estimated Q-value for the agent's next action.
 
         Raises:
-            Exception: An exception is raised if an error occurs while analyzing the board state, loading the 
-            chessboard, popping the chessboard, or analyzing the board state for the estimated Q-value. The original 
-            exception is included in the raised exception.
+            BoardAnalysisError: An exception is raised if an error occurs while analyzing the board state for the estimated Q-value
+            ChessboardManipulationError: if an error occurs loading the chessboard, popping the chessboard.
 
         Side Effects:
-            Modifies the state of the chessboard by loading and popping moves.
+            Temporarily modifies the state of the chessboard by loading and popping moves.
             Writes to the errors file if an error occurs.
         """
-
         # RL agent just played a move. the board has changed, if stockfish analyzes the board, 
         # it will give points for the agent, based on the agent's latest move.
         # We also need the points for the ANTICIPATED next state, 

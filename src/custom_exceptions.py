@@ -76,3 +76,22 @@ class MoveError(ChessError):
     def __init__(self, message="An error occurred while processing a chess move"):
         self.message = message
         super().__init__(self.message)
+
+class QTableUpdateError(ChessError):
+    """Exception raised when there's an error updating the Q-table."""
+    def __init__(self, message="Error updating Q-table"):
+        self.message = message
+        super().__init__(self.message)
+
+
+class BoardAnalysisError(ChessError):
+    """Exception raised when there's an error analyzing the board state."""
+    def __init__(self, message="Error analyzing board state"):
+        self.message = message
+        super().__init__(self.message)
+
+class ChessboardManipulationError(ChessError):
+    """Exception raised when there's an error manipulating the chessboard."""
+    def __init__(self, message="Error manipulating chessboard"):
+        self.message = message
+        super().__init__(self.message)

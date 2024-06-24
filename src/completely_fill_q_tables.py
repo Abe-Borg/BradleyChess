@@ -29,7 +29,7 @@ if __name__ == '__main__':
     end_time = time.time()
     total_time = end_time - start_time
 
-    print('\nq table populated with new moves from current section of chess db')
+    print(f'\nq table populated with new moves from current section of chess db')
     print(f'it took: {total_time}\n')
 
     print(f'White Q table size after games: {bradley.W_rl_agent.Q_table.shape}')
