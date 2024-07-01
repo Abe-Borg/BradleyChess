@@ -100,9 +100,17 @@ def bootstrap_agent(bubs: Bradley.Bradley, rl_agent_color: str, existing_q_table
 
     rl_agent.Q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
     
-    # rl_agent.is_trained = True
-    
+    rl_agent.is_trained = True
 ### end of bootstrap_agent
+
+def bootstrap_agent_fill_q_table(bubs: Bradley.Bradley, rl_agent_color: str, existing_q_table_path: str) -> None:
+    if rl_agent_color == 'W':
+        rl_agent = bubs.W_rl_agent
+    else:
+        rl_agent = bubs.B_rl_agent
+
+    rl_agent.Q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
+
 
 def get_number_with_probability(probability: float) -> int:
     """Generate a random number with a given probability.

@@ -12,8 +12,8 @@ if __name__ == '__main__':
     bradley = Bradley.Bradley()
 
     # initialize agents with q tables
-    helper_methods.bootstrap_agent(bradley, 'W', game_settings.bradley_agent_q_table_path)
-    helper_methods.bootstrap_agent(bradley, 'B', game_settings.imman_agent_q_table_path)
+    helper_methods.bootstrap_agent_fill_q_table(bradley, 'W', game_settings.bradley_agent_q_table_path)
+    helper_methods.bootstrap_agent_fill_q_table(bradley, 'B', game_settings.imman_agent_q_table_path)
 
     print(f'White Q table size before games: {bradley.W_rl_agent.Q_table.shape}')
     print(f'Black Q table size before games: {bradley.B_rl_agent.Q_table.shape}\n')
