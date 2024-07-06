@@ -5,9 +5,7 @@ import game_settings
 import Bradley
 import time
 
-
-if __name__ == '__main__':
-
+def add_to_q_table_moves_list(chess_data):
     start_time = time.time()
     bradley = Bradley.Bradley()
 
@@ -22,7 +20,7 @@ if __name__ == '__main__':
         all_white_moves = set()
         all_black_moves = set()
 
-        for _, game in game_settings.chess_data.iterrows():
+        for _, game in chess_data.iterrows():
             # Extract moves
             white_moves = game.filter(regex=r'^W\d+$').dropna().unique()
             black_moves = game.filter(regex=r'^B\d+$').dropna().unique()
@@ -53,7 +51,20 @@ if __name__ == '__main__':
         bradley.engine.quit()
     except Exception as e:
         print(f'program interrupted because of:  {e}')
-        bradley.engine.quit()    
+        bradley.engine.quit()
+
+if __name__ == '__main__':
+    chess_data_76 = pd.read_pickle(game_settings.chess_games_filepath_part_76, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_76)
+    chess_data_77 = pd.read_pickle(game_settings.chess_games_filepath_part_77, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_77)
+    chess_data_78 = pd.read_pickle(game_settings.chess_games_filepath_part_78, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_78)
+    chess_data_79 = pd.read_pickle(game_settings.chess_games_filepath_part_79, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_79)
+    chess_data_80 = pd.read_pickle(game_settings.chess_games_filepath_part_80, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_80)
+
 
     
     
