@@ -42,6 +42,7 @@ absolute_stockfish_filepath = stockfish_filepath.resolve()
 
 bradley_agent_q_table_path = base_directory / ".." / "Q_Tables" / "bradley_agent_q_table.pkl"
 imman_agent_q_table_path = base_directory / ".." / "Q_Tables" / "imman_agent_q_table.pkl"
+unique_chess_moves_list_path = base_directory / ".." / "Q_Tables" / "unique_chess_moves_list.pkl"
 
 helper_methods_errors_filepath = base_directory / ".." / "debug" / "helper_methods_errors_log.txt"
 agent_errors_filepath = base_directory / ".." / "debug" / "agent_errors_log.txt"
