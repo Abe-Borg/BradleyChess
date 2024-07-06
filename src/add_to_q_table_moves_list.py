@@ -54,16 +54,69 @@ def add_to_q_table_moves_list(chess_data):
         bradley.engine.quit()
 
 if __name__ == '__main__':
-    chess_data_76 = pd.read_pickle(game_settings.chess_games_filepath_part_76, compression = 'zip')
-    add_to_q_table_moves_list(chess_data_76)
-    chess_data_77 = pd.read_pickle(game_settings.chess_games_filepath_part_77, compression = 'zip')
-    add_to_q_table_moves_list(chess_data_77)
-    chess_data_78 = pd.read_pickle(game_settings.chess_games_filepath_part_78, compression = 'zip')
-    add_to_q_table_moves_list(chess_data_78)
-    chess_data_79 = pd.read_pickle(game_settings.chess_games_filepath_part_79, compression = 'zip')
-    add_to_q_table_moves_list(chess_data_79)
     chess_data_80 = pd.read_pickle(game_settings.chess_games_filepath_part_80, compression = 'zip')
     add_to_q_table_moves_list(chess_data_80)
+    chess_data_80 = None
+    chess_data_81 = pd.read_pickle(game_settings.chess_games_filepath_part_81, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_81)
+    chess_data_81 = None
+    chess_data_82 = pd.read_pickle(game_settings.chess_games_filepath_part_82, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_82)
+    chess_data_82 = None
+    chess_data_83 = pd.read_pickle(game_settings.chess_games_filepath_part_83, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_83)
+    chess_data_83 = None
+    chess_data_84 = pd.read_pickle(game_settings.chess_games_filepath_part_84, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_84)
+    chess_data_84 = None
+    chess_data_85 = pd.read_pickle(game_settings.chess_games_filepath_part_85, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_85)
+    chess_data_85 = None
+    chess_data_86 = pd.read_pickle(game_settings.chess_games_filepath_part_86, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_86)
+    chess_data_86 = None
+    chess_data_87 = pd.read_pickle(game_settings.chess_games_filepath_part_87, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_87)
+    chess_data_87 = None
+    chess_data_88 = pd.read_pickle(game_settings.chess_games_filepath_part_88, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_88)
+    chess_data_88 = None
+    chess_data_89 = pd.read_pickle(game_settings.chess_games_filepath_part_89, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_89)
+    chess_data_89 = None
+    chess_data_90 = pd.read_pickle(game_settings.chess_games_filepath_part_90, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_90)
+    chess_data_90 = None
+    chess_data_91 = pd.read_pickle(game_settings.chess_games_filepath_part_91, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_91)
+    chess_data_91 = None
+    chess_data_92 = pd.read_pickle(game_settings.chess_games_filepath_part_92, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_92)
+    chess_data_92 = None
+    chess_data_93 = pd.read_pickle(game_settings.chess_games_filepath_part_93, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_93)
+    chess_data_93 = None
+    chess_data_94 = pd.read_pickle(game_settings.chess_games_filepath_part_94, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_94)
+    chess_data_94 = None
+    chess_data_95 = pd.read_pickle(game_settings.chess_games_filepath_part_95, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_95)
+    chess_data_95 = None
+    chess_data_96 = pd.read_pickle(game_settings.chess_games_filepath_part_96, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_96)
+    chess_data_96 = None
+    chess_data_97 = pd.read_pickle(game_settings.chess_games_filepath_part_97, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_97)
+    chess_data_97 = None
+    chess_data_98 = pd.read_pickle(game_settings.chess_games_filepath_part_98, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_98)
+    chess_data_98 = None
+    chess_data_99 = pd.read_pickle(game_settings.chess_games_filepath_part_99, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_99)
+    chess_data_99 = None
+    chess_data_100 = pd.read_pickle(game_settings.chess_games_filepath_part_100, compression = 'zip')
+    add_to_q_table_moves_list(chess_data_100)
+    chess_data_100 = None
 
 
     
