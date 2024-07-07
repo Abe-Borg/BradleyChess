@@ -821,7 +821,7 @@ class Bradley:
         return total_reward
     ## end of get_reward
 
-    def identify_corrupted_games(self) -> None:
+    def identify_corrupted_games(self, chess_data) -> None:
         """
             Identifies corrupted games in the chess database and logs them in the errors file.
 
@@ -849,7 +849,7 @@ class Bradley:
             notification every 1000 games.
 
             Args:
-                None.
+                chess_data: The chess database containing the games to check for corruption. a pandas dataframe.
             Returns:
                 None.
             Raises:
@@ -860,9 +860,9 @@ class Bradley:
         """
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
-        for game_num_str in game_settings.chess_data.index:
+        for game_num_str in chess_data.index:
             start_time = time.time()
-            num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
+            num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
 
             try:
                 curr_state = self.environ.get_curr_state()
