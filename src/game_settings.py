@@ -57,6 +57,16 @@ initial_training_results_filepath = base_directory / ".." / "training_results" /
 additional_training_results_filepath = base_directory / ".." / "training_results" / "additional_training_results.txt"
 agent_vs_agent_filepath = base_directory / ".." / "training_results" / "agent_vs_agent_games.txt"
 
+chess_games_pgn_filepath_part_32 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_32.pgn"
+chess_games_pgn_filepath_part_33 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_33.pgn"
+chess_games_pgn_filepath_part_34 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_34.pgn"
+chess_games_pgn_filepath_part_35 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_35.pgn"
+chess_games_pgn_filepath_part_36 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_36.pgn"
+chess_games_pgn_filepath_part_37 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_37.pgn"
+chess_games_pgn_filepath_part_38 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_38.pgn"
+chess_games_pgn_filepath_part_39 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_39.pgn"
+chess_games_pgn_filepath_part_40 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_40.pgn"
+
 est_q_vals_filepath_part_1 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_1.txt"
 est_q_vals_filepath_part_2 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_2.txt"
 est_q_vals_filepath_part_3 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_3.txt"
