@@ -2,6 +2,7 @@ import pandas as pd
 import chess.pgn
 import game_settings
 import time
+from tqdm import tqdm
 
 def pgn_to_dataframe(input_file_path):
     """
@@ -37,8 +38,13 @@ def pgn_to_dataframe(input_file_path):
     games_list = []
 
     with open(input_file_path, 'r', encoding='utf-8') as file:
-        while True:
+        # Count total number of games for tqdm
+        total_games = sum(1 for _ in iter(lambda: chess.pgn.read_game(file), None))
+        file.seek(0)  # Reset file pointer to beginning
+            
+        for _ in tqdm(range(total_games), desc="Processing games"):
             game = chess.pgn.read_game(file)
+            
             if game is None:
                 break
 
@@ -65,31 +71,25 @@ def pgn_to_dataframe(input_file_path):
 
     return chess_df
 
+
 if __name__ == '__main__':
     start_time = time.time()
     
-    df_51 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_1)
-    df_52 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_2)
-    df_53 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_3)
-    df_54 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_4)
-    df_55 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_5)
-    df_56 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_6)
-    df_57 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_7)
-    df_58 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_8)
-    df_59 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_9)
-    df_60 = pgn_to_dataframe(game_settings.chess_pgn_file_path_19_part_10)
+    try:
+        df_33 = pgn_to_dataframe(game_settings.chess_games_pgn_filepath_part_33)
+        df_33.to_pickle(game_settings.chess_games_filepath_part_33, compression='zip')
+        
+        end_time = time.time()
+        print('PGN to DataFrame conversion is complete')
+        print(f'It took: {end_time - start_time:.2f} seconds')
 
-    df_51.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_1, compression='zip')
-    df_52.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_2, compression='zip')
-    df_53.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_3, compression='zip')
-    df_54.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_4, compression='zip')
-    df_55.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_5, compression='zip')
-    df_56.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_6, compression='zip')
-    df_57.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_7, compression='zip')
-    df_58.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_8, compression='zip')
-    df_59.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_9, compression='zip')
-    df_60.to_pickle(game_settings.chess_pd_dataframe_file_path_part_19_part_10, compression='zip')
-
-    end_time = time.time()
-    print('PGN to DataFrame conversion is complete\n')
-    print(f'It took: {end_time - start_time} seconds')
+        print(f'dataframe size is: {df_33.shape}')
+        print(f'df head: {df_33.head()}')
+    
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        end_time = time.time()
+        print(f'Process terminated after: {end_time - start_time:.2f} seconds')
+    
+    finally:
+        print("Process finished.")
