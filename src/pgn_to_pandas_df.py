@@ -81,14 +81,14 @@ if __name__ == '__main__':
     start_time = time.time()
     
     try:
-        df_35 = pgn_to_dataframe(game_settings.chess_games_pgn_filepath_part_35)
-        df_35.to_pickle(game_settings.chess_games_filepath_part_35, compression='zip')
+        df_40 = pgn_to_dataframe(game_settings.chess_games_pgn_filepath_part_40)
+        df_40.to_pickle(game_settings.chess_games_filepath_part_40, compression='zip')
         
         end_time = time.time()
         print('PGN to DataFrame conversion is complete')
         print(f'It took: {end_time - start_time:.2f} seconds')
 
-        print(f'dataframe size is: {df_35.shape}')
+        print(f'dataframe size is: {df_40.shape}')
     
     except Exception as e:
         print(f"An error occurred: {str(e)}")
