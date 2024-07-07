@@ -42,7 +42,7 @@ def pgn_to_dataframe(input_file_path):
         total_games = sum(1 for _ in iter(lambda: chess.pgn.read_game(file), None))
         file.seek(0)  # Reset file pointer to beginning
             
-        for _ in tqdm(range(total_games), desc="Processing games"):
+        for _ in tqdm(range(total_games)):
             game = chess.pgn.read_game(file)
             
             if game is None:
@@ -53,8 +53,13 @@ def pgn_to_dataframe(input_file_path):
                 "Result": game.headers["Result"]
             }
 
+            max_moves = game_settings.max_num_turns_per_player
             board = game.board()
+
             for i, move in enumerate(game.mainline_moves()):
+                if i >= max_moves * 2:
+                    print(f"Warning: Game exceeded {max_moves} moves per player. Truncating.")
+                    break
                 col_prefix = 'W' if i % 2 == 0 else 'B'
                 move_num = i // 2 + 1
                 col_name = f"{col_prefix}{move_num}"
@@ -76,15 +81,14 @@ if __name__ == '__main__':
     start_time = time.time()
     
     try:
-        df_33 = pgn_to_dataframe(game_settings.chess_games_pgn_filepath_part_33)
-        df_33.to_pickle(game_settings.chess_games_filepath_part_33, compression='zip')
+        df_35 = pgn_to_dataframe(game_settings.chess_games_pgn_filepath_part_35)
+        df_35.to_pickle(game_settings.chess_games_filepath_part_35, compression='zip')
         
         end_time = time.time()
         print('PGN to DataFrame conversion is complete')
         print(f'It took: {end_time - start_time:.2f} seconds')
 
-        print(f'dataframe size is: {df_33.shape}')
-        print(f'df head: {df_33.head()}')
+        print(f'dataframe size is: {df_35.shape}')
     
     except Exception as e:
         print(f"An error occurred: {str(e)}")
