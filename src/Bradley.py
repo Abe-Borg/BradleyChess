@@ -15,7 +15,6 @@ import io
 import functools
 import logging
 
-
 class Bradley:
     """
         Acts as the single point of communication between the RL agent and the player.
@@ -27,8 +26,6 @@ class Bradley:
             environ (Environ.Environ): An Environ object representing the chessboard environment.
             W_rl_agent (Agent.Agent): A white RL Agent object.
             B_rl_agent (Agent.Agent): A black RL Agent object.
-            engine (chess.engine.SimpleEngine): A Stockfish engine used to analyze positions during training.
-            initial_training_results (file): A file object to log initial training results.
             corrupted_games_list (list): A list of games that are corrupted and cannot be used for training.
     """
     def __init__(self):
@@ -67,9 +64,9 @@ class Bradley:
         self.B_rl_agent = Agent.Agent('B')
         self.corrupted_games_list = set()
 
-        # stockfish is used to analyze positions during training this is how we estimate the q value 
-        # at each position, and also for anticipated next position
-        self.engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
+        # # stockfish is used to analyze positions during training this is how we estimate the q value 
+        # # at each position, and also for anticipated next position
+        # self.engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
         
         if game_settings.PRINT_STEP_BY_STEP:
             self.step_by_step_logger.debug('Bradley.__init__: hi and bye from Bradley.__init__')
@@ -720,7 +717,7 @@ class Bradley:
             raise custom_exceptions.QValueCalculationError("Overflow occurred during Q-value calculation") from OverflowError
     # end of find_next_Qval
     
-    def analyze_board_state(self, board: chess.Board) -> dict:
+    def analyze_board_state(self, board: chess.Board, engine) -> dict:
         """
             Analyzes the current state of the chessboard using the Stockfish engine and returns the analysis results.
 
@@ -760,7 +757,7 @@ class Bradley:
             raise custom_exceptions.InvalidBoardStateError(f'at Bradley.analyze_board_state. Board is in invalid state\n')
 
         try: 
-            analysis_result = self.engine.analyse(board, game_settings.search_limit, multipv=game_settings.num_moves_to_return)
+            analysis_result = engine.analyse(board, game_settings.search_limit, multipv=game_settings.num_moves_to_return)
         except Exception as e:
             self.error_logger.error(f'@ Bradley_analyze_board_state. An error occurred during analysis: {e}\n')
             self.error_logger.error(f"Chessboard is:\n{board}\n")
@@ -788,7 +785,7 @@ class Bradley:
             anticipated_next_move = analysis_result[0]['pv'][0]
         except Exception as e:
             self.error_logger.error(f'An error occurred while extracting the anticipated next move: {e}\n')
-            raise MoveExtractionError("Error occurred while extracting the anticipated next move") from e
+            raise custom_exceptions.MoveExtractionError("Error occurred while extracting the anticipated next move") from e
         
         return {
             'mate_score': mate_score,
@@ -1145,8 +1142,8 @@ class Bradley:
                 q_est_vals_file.write('\n')
 
                 self.environ.reset_environ() # reset and go to next game in training set
-        finally:
-            self.engine.quit()
+        except Exception as e:
+            self.error_logger.error(f'An error occurred at generate_Q_est_df: {e}\n')
     # end of generate_Q_est_df
 
     def simply_play_games(self) -> None:
@@ -1259,7 +1256,7 @@ class Bradley:
                 if self.environ.board.is_game_over() or not curr_state['legal_moves']:
                     
                     if game_settings.PRINT_STEP_BY_STEP:
-                        elf.step_by_step_logger.debug(f'game is over\n')
+                        self.step_by_step_logger.debug(f'game is over\n')
                     break # and go to next game
             ### END OF CURRENT GAME LOOP ###
 

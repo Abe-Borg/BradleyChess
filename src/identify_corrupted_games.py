@@ -17,10 +17,8 @@ def identifying_corrupted_games(chess_data_filepath):
         bradley.profile_corrupted_games_identification(chess_data)
         chess_data.drop(list(bradley.corrupted_games_list), inplace = True)
         print(f'Total number of rows after cleanup: {len(chess_data)}')
-        bradley.engine.quit()
     except Exception as e:
         print(f'corrupted games identification interrupted because of:  {e}')
-        bradley.engine.quit()
         quit()
     
     end_time = time.time()
