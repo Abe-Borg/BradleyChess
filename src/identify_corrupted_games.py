@@ -42,4 +42,4 @@ def identifying_corrupted_games(chess_data_filepath):
 
 
 if __name__ == '__main__':     
-    identifying_corrupted_games(game_settings.chess_games_filepath_part_32)
+    identifying_corrupted_games(game_settings.chess_games_filepath_part_1)
