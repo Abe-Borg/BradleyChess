@@ -967,18 +967,6 @@ class Bradley:
         return None
     ### end of process_game
 
-    def profile_corrupted_games_identification(self, chess_data):
-        profiler = cProfile.Profile()
-        profiler.enable()
-        
-        self.identify_corrupted_games(chess_data)
-        
-        profiler.disable()
-        s = io.StringIO()
-        ps = pstats.Stats(profiler, stream=s).sort_stats('cumulative')
-        ps.print_stats()
-        print(s.getvalue())
-
     def generate_Q_est_df(self, q_est_vals_file_path) -> None:
         """
             Generates a dataframe containing the estimated Q-values for each chess move in the chess database.
