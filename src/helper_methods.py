@@ -3,11 +3,11 @@ import game_settings
 import random
 import chess.engine
 
-def play_game(bubs, rl_agent_color: str) -> None:
+def play_game(bubs, chess_agent) -> None:
     def handle_move(player_color):
-        if player_color == rl_agent.color:
+        if player_color == chess_agent.color:
             print('=== RL AGENT\'S TURN ===\n')
-            return bubs.rl_agent_selects_chess_move(player_color)
+            return bubs.rl_agent_selects_chess_move(player_color, chess_agent)
         else:
             print('=== OPPONENT\'S TURN ===')
             move = input('Enter chess move: ')

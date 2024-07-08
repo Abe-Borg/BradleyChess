@@ -49,10 +49,7 @@ class Bradley:
         step_by_step_handler = logging.FileHandler(game_settings.bradley_step_by_step_filepath)
         self.step_by_step_logger.addHandler(step_by_step_handler)
 
-        self.environ = Environ.Environ()
-        self.W_rl_agent = Agent.Agent('W')
-        self.B_rl_agent = Agent.Agent('B')
-        self.corrupted_games_list = set()        
+        self.environ = Environ.Environ()       
     ### end of Bradley constructor ###
 
     def __del__(self):
@@ -107,7 +104,7 @@ class Bradley:
             raise Exception from e
     ### end of receive_opp_move ###
 
-    def rl_agent_selects_chess_move(self, rl_agent_color: str) -> str:
+    def rl_agent_selects_chess_move(self, chess_agent) -> str:
         """
         The Agent selects a chess move and loads it onto the chessboard.
         This method allows the agent to select a chess move and load it onto the 
@@ -117,7 +114,6 @@ class Bradley:
         is then loaded onto the chessboard and the current state of the environment is updated.
 
         Args:
-            rl_agent_color (str): A string indicating the color of the RL agent, either 'W' or 'B'.
         Returns:
             str: A string representing the selected chess move.
         Raises:
@@ -142,15 +138,10 @@ class Bradley:
             self.error_logger.error(f'curr state is: {curr_state}\n')
             raise custom_exceptions.NoLegalMovesError(f'hello from Bradley.rl_agent_selects_chess_move, legal_moves is empty\n')
         
-        if rl_agent_color == 'W':    
-            # W agent selects action
-            chess_move: str= self.W_rl_agent.choose_action(curr_state)
-        else:
-            # B agent selects action
-            chess_move = self.B_rl_agent.choose_action(curr_state)        
+        chess_move: str = chess_agent.choose_action(curr_state)
 
         try:
-            self.environ.load_chessboard(chess_move) 
+            self.environ.load_chessboard(chess_move)
         except custom_exceptions.ChessboardLoadError as e:
             self.error_logger.error('hello from Bradley.rl_agent_selects_chess_move\n')
             self.error_logger.error(f'Error {e}: failed to load chessboard with move: {chess_move}\n')
