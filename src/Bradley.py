@@ -888,15 +888,15 @@ class Bradley:
     # end of identify_corrupted_games 
 
     def process_game(self, game_data):
-        start_time = time.time()
+        process_environ = Environ.Environ()
         game_num_str, game = game_data
         num_chess_moves_curr_training_game: int = game['PlyCount']
 
         try:
-            curr_state = self.environ.get_curr_state()
+            curr_state = process_environ.get_curr_state()
         except Exception as e:
             self.error_logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
-            self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
+            self.error_logger.error(f'curr board is:\n{process_environ.board}\n\n')
             self.error_logger.error(f'at game: {game_num_str}\n')
             return game_num_str
 
@@ -920,14 +920,14 @@ class Bradley:
 
             # get latest curr_state since self.rl_agent_plays_move updated the chessboard
             try:
-                curr_state = self.environ.get_curr_state()
+                curr_state = process_environ.get_curr_state()
             except Exception as e:
                 self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
-                self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
+                self.error_logger.error(f'curr board is:\n{process_environ.board}\n\n')
                 self.error_logger.error(f'at game: {game_num_str}\n')
                 return game_num_str
             
-            if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
+            if process_environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
                 return None # and go to next game
 
             ##################### BLACK'S TURN ####################
@@ -948,17 +948,17 @@ class Bradley:
 
             # get latest curr_state since self.rl_agent_plays_move updated the chessboard
             try:
-                curr_state = self.environ.get_curr_state()
+                curr_state = process_environ.get_curr_state()
             except Exception as e:
                 self.error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
                 self.error_logger.error(f'at: {game_num_str}\n')
                 return game_num_str
 
-            if self.environ.board.is_game_over() or not curr_state['legal_moves']:
+            if process_environ.board.is_game_over() or not curr_state['legal_moves']:
                 return None # and go to next game
 
             try:
-                curr_state = self.environ.get_curr_state()
+                curr_state = process_environ.get_curr_state()
             except Exception as e:
                 self.error_logger.error(f'An error occurred: {e}\n')
                 self.error_logger.error("failed to get_curr_state\n") 
@@ -966,11 +966,7 @@ class Bradley:
                 return game_num_str
         ### END OF CURRENT GAME LOOP ###
 
-        self.environ.reset_environ()
-        
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-
+        process_environ.reset_environ()
         return None
     ### end of process_game
 
