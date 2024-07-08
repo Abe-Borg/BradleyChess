@@ -1,6 +1,7 @@
 import pandas as pd
 import game_settings
 import random
+import chess.engine
 
 def play_game(bubs, rl_agent_color: str) -> None:
     def handle_move(player_color):
@@ -100,3 +101,7 @@ def get_number_with_probability(probability: float) -> int:
     else:
         return 0
 ### end of get_number_with_probability
+
+def start_chess_engine(): 
+    chess_engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
+    return chess_engine

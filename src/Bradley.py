@@ -29,14 +29,6 @@ class Bradley:
             corrupted_games_list (list): A list of games that are corrupted and cannot be used for training.
     """
     def __init__(self):
-        """
-            This method initializes a Bradley object It also opens the errors file and
-            the training results files in append mode, and initializes an empty list for corrupted games.
-
-            Side Effects:
-                Opens the errors file, the initial training results file, and the additional training results file in 
-                append mode.
-        """
         self.error_logger = logging.getLogger(__name__)
         self.error_logger.setLevel(logging.ERROR)
         error_handler = logging.FileHandler(game_settings.bradley_errors_filepath)
@@ -60,14 +52,7 @@ class Bradley:
         self.environ = Environ.Environ()
         self.W_rl_agent = Agent.Agent('W')
         self.B_rl_agent = Agent.Agent('B')
-        self.corrupted_games_list = set()
-
-        # # stockfish is used to analyze positions during training this is how we estimate the q value 
-        # # at each position, and also for anticipated next position
-        # self.engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
-        
-        if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_logger.debug('Bradley.__init__: hi and bye from Bradley.__init__')
+        self.corrupted_games_list = set()        
     ### end of Bradley constructor ###
 
     def __del__(self):
