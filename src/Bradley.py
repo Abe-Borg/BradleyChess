@@ -24,7 +24,7 @@ class Bradley:
             none
         Attributes:
             environ (Environ.Environ): An Environ object representing the chessboard environment.
-            W_rl_agent (Agent.Agent): A white RL Agent object.
+            w_agent (Agent.Agent): A white RL Agent object.
             B_rl_agent (Agent.Agent): A black RL Agent object.
             corrupted_games_list (list): A list of games that are corrupted and cannot be used for training.
     """
@@ -239,7 +239,7 @@ class Bradley:
             return f'error at get_game_termination_reason: {e}'
     ### end of get_game_termination_reason
     
-    def train_rl_agents(self, est_q_val_table: pd.DataFrame) -> None:
+    def train_rl_agents(self, est_q_val_table: pd.DataFrame, chess_data: pd.DataFrame, w_agent, b_agent) -> None:
         """
             Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
             This method trains two RL agents by having them play games from a database exactly as shown, and learning from that. 
@@ -255,21 +255,21 @@ class Bradley:
                 Writes any errors that occur to the errors file.
                 Resets the environment at the end of each game.
         """
-        if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_logger.debug(f'hi from Bradley.train_rl_agents\n')
 
         ### FOR EACH GAME IN THE TRAINING SET ###
-        for game_num_str in game_settings.chess_data.index:
-            num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
+        for game_num_str in chess_data.index:
+            num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
 
-            W_curr_Qval: int = game_settings.initial_q_val
-            B_curr_Qval: int = game_settings.initial_q_val
+            w_curr_qval: int = game_settings.initial_q_val
+            b_curr_qval: int = game_settings.initial_q_val
 
+
+            ### this section might need to be part of train_one_game() ###
             if game_settings.PRINT_STEP_BY_STEP:
                 self.step_by_step_logger.debug(f'At game: {game_num_str}\n')
                 self.step_by_step_logger.debug(f'num_chess_moves_curr_training_game: {num_chess_moves_curr_training_game}\n')
-                self.step_by_step_logger.debug(f'W_curr_Qval: {W_curr_Qval}\n')
-                self.step_by_step_logger.debug(f'B_curr_Qval: {B_curr_Qval}\n')
+                self.step_by_step_logger.debug(f'w_curr_qval: {w_curr_qval}\n')
+                self.step_by_step_logger.debug(f'b_curr_qval: {b_curr_qval}\n')
             
             if game_settings.PRINT_TRAINING_RESULTS:
                 self.initial_training_logger.info(f'\nStart of {game_num_str} training\n\n')
@@ -281,29 +281,32 @@ class Bradley:
                 self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
                 self.error_logger.error(f'at game: {game_num_str}\n')
                 self.error_logger.error(f'at turn: {curr_state['turn_index']}')
-                break # stop current game and go to next game.
-
+                return
+            
             if game_settings.PRINT_STEP_BY_STEP:
                 self.step_by_step_logger.debug(f'curr_state: {curr_state}\n')
+            ### END OF SECTION THAT MIGHT NEED TO BE PART OF train_one_game() ###
 
-            ### LOOP PLAYS THROUGH ONE GAME ###
+            
+
+            ### THIS WHILE LOOP PLAYS THROUGH ONE GAME ###  < maybe this should be a func call, train_one_game?
             while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
                 ##################### WHITE'S TURN ####################
                 # choose action a from state s, using policy
-                W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
+                w_chess_move = w_agent.choose_action(curr_state, game_num_str)
 
                 if game_settings.PRINT_STEP_BY_STEP:
-                    self.step_by_step_logger.debug(f'W_chess_move: {W_chess_move}\n')
+                    self.step_by_step_logger.debug(f'w_chess_move: {w_chess_move}\n')
 
-                if not W_chess_move:
-                    self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                    self.error_logger.error(f'W_chess_move is empty at state: {curr_state}\n')
+                if not w_chess_move:
+                    self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
+                    self.error_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
                     break # and go to the next game. this game is over.
 
                 ### ASSIGN POINTS TO Q TABLE FOR WHITE AGENT ###
                 # on the first turn for white, this would assign to W1 col at chess_move row.
                 # on W's second turn, this would be Q_next which is calculated on the first loop.                
-                self.assign_points_to_Q_table(W_chess_move, curr_state['curr_turn'], W_curr_Qval, self.W_rl_agent.color)
+                self.assign_points_to_Q_table(w_chess_move, curr_state['curr_turn'], w_curr_qval, w_agent.color)
 
                 curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
 
@@ -313,14 +316,14 @@ class Bradley:
                 ### WHITE AGENT PLAYS THE SELECTED MOVE ###
                 # take action a, observe r, s', and load chessboard
                 try:
-                    self.rl_agent_plays_move(W_chess_move, game_num_str)
+                    self.rl_agent_plays_move(w_chess_move, game_num_str, environ)
                 except Exception as e:
                     self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.error_logger.error(f'at curr_game: {game_num_str}\n')
                     self.error_logger.error(f'at state: {curr_state}\n')
                     break # and go to the next game. this game is over.
 
-                W_reward = self.get_reward(W_chess_move)
+                W_reward = self.get_reward(w_chess_move)
 
                 if game_settings.PRINT_STEP_BY_STEP:
                     self.step_by_step_logger.debug(f'W_reward: {W_reward}\n')
@@ -355,19 +358,19 @@ class Bradley:
 
                 ##################### BLACK'S TURN ####################
                 # choose action a from state s, using policy
-                B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
+                b_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
 
                 if game_settings.PRINT_STEP_BY_STEP:
-                    self.step_by_step_logger.debug(f'B_chess_move: {B_chess_move}\n')
+                    self.step_by_step_logger.debug(f'b_chess_move: {b_chess_move}\n')
                 
-                if not B_chess_move:
-                    self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                    self.error_logger.error(f'B_chess_move is empty at state: {curr_state}\n')
+                if not b_chess_move:
+                    self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
+                    self.error_logger.error(f'b_chess_move is empty at state: {curr_state}\n')
                     self.error_logger.error(f'at: {game_num_str}\n')
                     break # game is over, go to next game.
 
                 # assign points to Q table
-                self.assign_points_to_Q_table(B_chess_move, curr_state['curr_turn'], B_curr_Qval, self.B_rl_agent.color)
+                self.assign_points_to_Q_table(b_chess_move, curr_state['curr_turn'], b_curr_qval, self.B_rl_agent.color)
 
                 curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
 
@@ -377,14 +380,14 @@ class Bradley:
                 ##### BLACK AGENT PLAYS SELECTED MOVE #####
                 # take action a, observe r, s', and load chessboard
                 try:
-                    self.rl_agent_plays_move(B_chess_move, game_num_str)
+                    self.rl_agent_plays_move(b_chess_move, game_num_str)
                 except Exception as e:
                     self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.error_logger.error(f'at curr_game: {game_num_str}\n')
                     self.error_logger.error(f'at state: {curr_state}\n')
                     break 
 
-                B_reward = self.get_reward(B_chess_move)
+                B_reward = self.get_reward(b_chess_move)
 
                 if game_settings.PRINT_STEP_BY_STEP:
                     self.step_by_step_logger.debug(f'B_reward: {B_reward}\n')
@@ -413,16 +416,16 @@ class Bradley:
                 if game_settings.PRINT_STEP_BY_STEP:
                     self.step_by_step_logger.debug(f'B_est_Qval: {B_est_Qval}\n')
                     self.step_by_step_logger.debug(f'about to calc next q values\n')
-                    self.step_by_step_logger.debug(f'W_curr_Qval: {W_curr_Qval}\n')
-                    self.step_by_step_logger.debug(f'B_curr_Qval: {B_curr_Qval}\n')
+                    self.step_by_step_logger.debug(f'w_curr_qval: {w_curr_qval}\n')
+                    self.step_by_step_logger.debug(f'b_curr_qval: {b_curr_qval}\n')
                     self.step_by_step_logger.debug(f'W_reward: {W_reward}\n')
                     self.step_by_step_logger.debug(f'B_reward: {B_reward}\n')
                     self.step_by_step_logger.debug(f'W_est_Qval: {W_est_Qval}\n')
                     self.step_by_step_logger.debug(f'B_est_Qval: {B_est_Qval}\n\n')
 
                 # ***CRITICAL STEP***, this is the main part of the SARSA algorithm.
-                W_next_Qval: int = self.find_next_Qval(W_curr_Qval, self.W_rl_agent.learn_rate, W_reward, self.W_rl_agent.discount_factor, W_est_Qval)
-                B_next_Qval: int = self.find_next_Qval(B_curr_Qval, self.B_rl_agent.learn_rate, B_reward, self.B_rl_agent.discount_factor, B_est_Qval)
+                W_next_Qval: int = self.find_next_Qval(w_curr_qval, w_agent.learn_rate, W_reward, w_agent.discount_factor, W_est_Qval)
+                B_next_Qval: int = self.find_next_Qval(b_curr_qval, self.B_rl_agent.learn_rate, B_reward, self.B_rl_agent.discount_factor, B_est_Qval)
             
                 if game_settings.PRINT_STEP_BY_STEP:
                     self.step_by_step_logger.debug(f'sarsa calc complete\n')
@@ -431,8 +434,8 @@ class Bradley:
 
                 # on the next turn, W_next_Qval and B_next_Qval will be added to the Q table. so if this is the end of the first round,
                 # next round it will be W2 and then we assign the q value at W2 col
-                W_curr_Qval = W_next_Qval
-                B_curr_Qval = B_next_Qval
+                w_curr_qval = W_next_Qval
+                b_curr_qval = B_next_Qval
 
                 try:
                     curr_state = self.environ.get_curr_state()
@@ -464,7 +467,7 @@ class Bradley:
         if game_settings.PRINT_STEP_BY_STEP:
             self.step_by_step_logger.debug(f'training is complete\n')
         
-        self.W_rl_agent.is_trained = True
+        w_agent.is_trained = True
         self.B_rl_agent.is_trained = True
     ### end of train_rl_agents
 
@@ -506,8 +509,8 @@ class Bradley:
                 self.error_logger.error(f'caught exception: {e} at assign_points_to_Q_table\n')
                 self.error_logger.error(f'Chess move is not represented in the White Q table, updating Q table and trying again...\n')
 
-                self.W_rl_agent.update_Q_table([chess_move])
-                self.W_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
+                w_agent.update_Q_table([chess_move])
+                w_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
         else: # black's turn
             try:
                 self.B_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
@@ -520,7 +523,7 @@ class Bradley:
                 self.B_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
     # enf of assign_points_to_Q_table
 
-    def rl_agent_plays_move(self, chess_move: str, curr_game, process_environ) -> None:
+    def rl_agent_plays_move(self, chess_move: str, curr_game, environ) -> None:
         """
             Loads the chessboard with the given move and updates the current state of the environment.
             This method is used during training. It first attempts to load the chessboard with the given move. If an 
@@ -542,17 +545,17 @@ class Bradley:
                 Writes to the errors file if an error occurs.
         """
         try:
-            process_environ.load_chessboard(chess_move, curr_game)
+            environ.load_chessboard(chess_move, curr_game)
         except custom_exceptions.ChessboardLoadError as e:
             self.error_logger.error(f'at Bradley.rl_agent_plays_move. An error occurred at {curr_game}: {e}\n')
             self.error_logger.error(f"failed to load_chessboard with move {chess_move}\n")
             raise Exception from e
 
         try:
-            process_environ.update_curr_state()
+            environ.update_curr_state()
         except custom_exceptions.StateUpdateError as e:
             self.error_logger.error(f'at Bradley.rl_agent_plays_move. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
-            self.error_logger.error(f'Current state is: {process_environ.get_curr_state()}\n')
+            self.error_logger.error(f'Current state is: {environ.get_curr_state()}\n')
             raise Exception from e
     # end of rl_agent_plays_move
 
@@ -867,10 +870,10 @@ class Bradley:
                 while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
                     ##################### WHITE'S TURN ####################
                     # choose action a from state s, using policy
-                    W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
-                    if not W_chess_move:
-                        self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                        self.error_logger.error(f'W_chess_move is empty at state: {curr_state}\n')
+                    w_chess_move = w_agent.choose_action(curr_state, game_num_str)
+                    if not w_chess_move:
+                        self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
+                        self.error_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
                         break
 
                     # assign curr turn to new var for now. once agent plays move, turn will be updated, but we need 
@@ -880,7 +883,7 @@ class Bradley:
                     ### WHITE AGENT PLAYS THE SELECTED MOVE ###
                     # take action a, observe r, s', and load chessboard
                     try:
-                        self.rl_agent_plays_move(W_chess_move, game_num_str)
+                        self.rl_agent_plays_move(w_chess_move, game_num_str)
                     except Exception as e:
                         self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
                         self.error_logger.error(f'at: {game_num_str}\n')
@@ -909,10 +912,10 @@ class Bradley:
 
                     ##################### BLACK'S TURN ####################
                     # choose action a from state s, using policy
-                    B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
-                    if not B_chess_move:
-                        self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                        self.error_logger.error(f'B_chess_move is empty at state: {curr_state}\n')
+                    b_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
+                    if not b_chess_move:
+                        self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
+                        self.error_logger.error(f'b_chess_move is empty at state: {curr_state}\n')
                         self.error_logger.error(f'at: {game_num_str}\n')
                         break
 
@@ -923,7 +926,7 @@ class Bradley:
                     ##### BLACK AGENT PLAYS SELECTED MOVE #####
                     # take action a, observe r, s', and load chessboard
                     try:
-                        self.rl_agent_plays_move(B_chess_move, game_num_str)
+                        self.rl_agent_plays_move(b_chess_move, game_num_str)
                     except Exception as e:
                         self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
                         self.error_logger.error(f'at: {game_num_str}\n')
@@ -973,7 +976,7 @@ class Bradley:
         """
         if game_settings.PRINT_STEP_BY_STEP:
             self.step_by_step_logger.debug(f'hi from simply_play_games\n')
-            self.step_by_step_logger.debug(f'White Q table size before games: {self.W_rl_agent.q_table.shape}\n')
+            self.step_by_step_logger.debug(f'White Q table size before games: {w_agent.q_table.shape}\n')
             self.step_by_step_logger.debug(f'Black Q table size before games: {self.B_rl_agent.q_table.shape}\n')
         
         ### FOR EACH GAME IN THE CHESS DB ###
@@ -1000,23 +1003,23 @@ class Bradley:
             ### LOOP PLAYS THROUGH ONE GAME ###
             while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
                 ##################### WHITE'S TURN ####################
-                W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
+                w_chess_move = w_agent.choose_action(curr_state, game_num_str)
 
                 if game_settings.PRINT_STEP_BY_STEP:
-                    self.step_by_step_logger.debug(f'W_chess_move is: {W_chess_move}\n')
+                    self.step_by_step_logger.debug(f'w_chess_move is: {w_chess_move}\n')
 
-                if not W_chess_move:
-                    self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                    self.error_logger.error(f'W_chess_move is empty at state: {curr_state}\n')
+                if not w_chess_move:
+                    self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
+                    self.error_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
                     self.error_logger.error(f'at game: {game_num_str}\n')
                     break # and go to the next game. this game is over.
 
                 ### WHITE AGENT PLAYS THE SELECTED MOVE ###
                 try:
-                    self.rl_agent_plays_move(W_chess_move, game_num_str)
+                    self.rl_agent_plays_move(w_chess_move, game_num_str)
                     
                     if game_settings.PRINT_STEP_BY_STEP:
-                        self.step_by_step_logger.debug(f'White played move: {W_chess_move}\n')
+                        self.step_by_step_logger.debug(f'White played move: {w_chess_move}\n')
                 except Exception as e:
                     self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.error_logger.error(f'at game: {game_num_str}\n')
@@ -1041,20 +1044,20 @@ class Bradley:
                     break # and go to next game
 
                 ##################### BLACK'S TURN ####################
-                B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
+                b_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
                 
                 if game_settings.PRINT_STEP_BY_STEP:
-                    self.step_by_step_logger.debug(f'Black chess move: {B_chess_move}\n')
+                    self.step_by_step_logger.debug(f'Black chess move: {b_chess_move}\n')
 
-                if not B_chess_move:
-                    self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                    self.error_logger.error(f'B_chess_move is empty at state: {curr_state}\n')
+                if not b_chess_move:
+                    self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
+                    self.error_logger.error(f'b_chess_move is empty at state: {curr_state}\n')
                     self.error_logger.error(f'at: {game_num_str}\n')
                     break # game is over, go to next game.
 
                 ##### BLACK AGENT PLAYS SELECTED MOVE #####
                 try:
-                    self.rl_agent_plays_move(B_chess_move, game_num_str)
+                    self.rl_agent_plays_move(b_chess_move, game_num_str)
                     
                     if game_settings.PRINT_STEP_BY_STEP:
                         self.step_by_step_logger.debug(f'black agent played their move\n')
@@ -1084,7 +1087,7 @@ class Bradley:
             if game_settings.PRINT_STEP_BY_STEP:
                 self.step_by_step_logger.debug(f'game {game_num_str} is over\n')
                 self.step_by_step_logger.debug(f'agent q tables sizes are: \n')
-                self.step_by_step_logger.debug(f'White Q table: {self.W_rl_agent.q_table.shape}\n')
+                self.step_by_step_logger.debug(f'White Q table: {w_agent.q_table.shape}\n')
                 self.step_by_step_logger.debug(f'Black Q table: {self.B_rl_agent.q_table.shape}\n')
 
             # this curr game is done, reset environ to prepare for the next game

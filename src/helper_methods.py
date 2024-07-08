@@ -2,6 +2,7 @@ import pandas as pd
 import game_settings
 import random
 import chess.engine
+import logging
 
 def play_game(bubs, chess_agent) -> None:
     def handle_move(player_color):
@@ -16,54 +17,49 @@ def play_game(bubs, chess_agent) -> None:
                 move = input('Enter chess move: ')
             return move
 
-    def log_error(e):
-        errors_file.write(f'An error occurred: {e}\n')
-
-    rl_agent = bubs.W_rl_agent if rl_agent_color == 'W' else bubs.B_rl_agent
     player_turn = 'W'
-
-    with open(game_settings.helper_methods_errors_filepath, 'a') as errors_file:
-        while bubs.is_game_over() == False:
-            try:
-                print(f'\nCurrent turn is :  {bubs.environ.get_curr_turn()}\n')
-                chess_move = handle_move(player_turn)
-                print(f'{player_turn} played {chess_move}\n')
-            except Exception as e:
-                log_error(e)
-
-            player_turn = 'B' if player_turn == 'W' else 'W'
-
-        print(f'Game is over, result is: {bubs.get_game_outcome()}')
-        print(f'The game ended because of: {bubs.get_game_termination_reason()}')
-        bubs.reset_environ()
-### end of play_game
-
-def agent_vs_agent(bubs) -> None:
-    def play_turn(agent_color: str):
+    while bubs.is_game_over() == False:
         try:
-            chess_move = bubs.rl_agent_selects_chess_move(agent_color)
-            agent_vs_agent_file.write(f'{agent_color} agent played {chess_move}\n')
+            print(f'\nCurrent turn is :  {bubs.environ.get_curr_turn()}\n')
+            chess_move = handle_move(player_turn)
+            print(f'{player_turn} played {chess_move}\n')
         except Exception as e:
-            agent_vs_agent_file.write(f'An error occurred: {e}\n')
+            # put in logger here.
             raise Exception from e
 
-    with open(game_settings.agent_vs_agent_filepath, 'a') as agent_vs_agent_file:
+        player_turn = 'B' if player_turn == 'W' else 'W'
+
+    print(f'Game is over, result is: {bubs.get_game_outcome()}')
+    print(f'The game ended because of: {bubs.get_game_termination_reason()}')
+    bubs.reset_environ()
+### end of play_game
+
+def agent_vs_agent(bubs, w_agent, b_agent) -> None:
+    def play_turn(chess_agent):
         try:
-            while bubs.is_game_over() == False:
-                agent_vs_agent_file.write(f'\nCurrent turn: {bubs.environ.get_curr_turn()}')
-                play_turn('W')
-                
-                if bubs.is_game_over() == False:
-                    play_turn('B')
-
-            agent_vs_agent_file.write('Game is over, chessboard looks like this:\n')
-            agent_vs_agent_file.write(bubs.environ.board + '\n\n')
-            agent_vs_agent_file.write(f'Game result is: {bubs.get_game_outcome()}\n')
-            agent_vs_agent_file.write(f'Game ended because of: {bubs.get_game_termination_reason()}\n')
+            chess_move = bubs.rl_agent_selects_chess_move(chess_agent.color)
+            # agent_vs_agent_file.write(f'{chess_agent.color} agent played {chess_move}\n')
         except Exception as e:
-            agent_vs_agent_file.write(f'An unhandled error occurred: {e}\n')
+            # agent_vs_agent_file.write(f'An error occurred: {e}\n')
+            raise Exception from e
 
-        bubs.reset_environ()
+    try:
+        while bubs.is_game_over() == False:
+            # agent_vs_agent_file.write(f'\nCurrent turn: {bubs.environ.get_curr_turn()}')
+            play_turn('W')
+            
+            if bubs.is_game_over() == False:
+                play_turn('B')
+
+        # agent_vs_agent_file.write('Game is over, chessboard looks like this:\n')
+        # agent_vs_agent_file.write(bubs.environ.board + '\n\n')
+        # agent_vs_agent_file.write(f'Game result is: {bubs.get_game_outcome()}\n')
+        # agent_vs_agent_file.write(f'Game ended because of: {bubs.get_game_termination_reason()}\n')
+    except Exception as e:
+        # agent_vs_agent_file.write(f'An unhandled error occurred: {e}\n')
+        raise Exception from e
+
+    bubs.reset_environ()
 ### end of agent_vs_agent
 
 def pikl_q_table(bubs, chess_agent, q_table_path: str) -> None:
