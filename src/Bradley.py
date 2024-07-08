@@ -30,9 +30,7 @@ class Bradley:
     """
     def __init__(self):
         """
-            Initializes a Bradley object with environment, agents, and a chess engine.
-            This method initializes a Bradley object by creating an environment, creating two 
-            agents (one for white and one for black), and starting a chess engine. It also opens the errors file and 
+            This method initializes a Bradley object It also opens the errors file and
             the training results files in append mode, and initializes an empty list for corrupted games.
 
             Side Effects:

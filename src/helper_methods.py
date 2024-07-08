@@ -102,15 +102,6 @@ def bootstrap_agent(bubs, rl_agent_color: str, existing_q_table_path: str) -> No
     rl_agent.is_trained = True
 ### end of bootstrap_agent
 
-def bootstrap_agent_fill_q_table(bubs, rl_agent_color: str, existing_q_table_path: str) -> None:
-    if rl_agent_color == 'W':
-        rl_agent = bubs.W_rl_agent
-    else:
-        rl_agent = bubs.B_rl_agent
-
-    rl_agent.q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
-
-
 def get_number_with_probability(probability: float) -> int:
     """Generate a random number with a given probability.
     Args:
@@ -118,21 +109,8 @@ def get_number_with_probability(probability: float) -> int:
     Returns:
         int: A random integer value of either 0 or 1.
     """
-    # if game_settings.PRINT_DEBUG:
-        # debug_file = open(game_settings.helper_methods_debug_filepath, 'a')
-        # debug_file.write('========== Hello from Helper Methods get_number_with_probability ==========\n')
-        # debug_file.write(f'probability: {probability}\n')
-
     if random.random() < probability:
-        # if game_settings.PRINT_DEBUG:
-            # debug_file.write("Random number is less than probability, returning 1\n")
-            # debug_file.write("========== Bye from Helper Methods get_number_with_probability ==========\n\n\n")
-        # debug_file.close()
         return 1
     else:
-        # if game_settings.PRINT_DEBUG:
-            # debug_file.write("Random number is >= than probability, returning 0\n")
-            # debug_file.write("========== Bye from Helper Methods get_number_with_probability ==========\n\n\n")
-        # debug_file.close()
         return 0
 ### end of get_number_with_probability
