@@ -66,21 +66,8 @@ def agent_vs_agent(bubs) -> None:
         bubs.reset_environ()
 ### end of agent_vs_agent
 
-def pikl_q_table(bubs, rl_agent_color: str, q_table_path: str) -> None:
-    """Save the Q-table of a trained RL agent to a file.
-    Args:
-        bubs (Bradley.Bradley): An object of the `Bradley` class representing the chess game environment.
-        rl_agent_color (str): A string representing the color of the RL agent ('W' for white or 'B' for black).
-        q_table_path (str): A string representing the path to the output file.
-    Returns:
-        None
-    """
-    if rl_agent_color == 'W':
-        rl_agent = bubs.W_rl_agent
-    else:
-        rl_agent = bubs.B_rl_agent
-
-    rl_agent.q_table.to_pickle(q_table_path, compression = 'zip')
+def pikl_q_table(bubs, chess_agent, q_table_path: str) -> None:
+    chess_agent.q_table.to_pickle(q_table_path, compression = 'zip')
 ### end of pikl_Q_table
 
 def bootstrap_agent(chess_agent, existing_q_table_path: str) -> None:
