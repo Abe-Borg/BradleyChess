@@ -4,17 +4,17 @@ import time
 import Bradley
 
 
+
 def identifying_corrupted_games(chess_data_filepath):
     start_time = time.time()
-
     chess_data = pd.read_pickle(chess_data_filepath, compression = 'zip')
+    bradley = Bradley.Bradley()
    
     print(f'Total number of rows before cleanup: {chess_data[0]}')
-    bradley = Bradley.Bradley()
-
+    
     try:
-        bradley.identify_corrupted_games(chess_data)
-        chess_data.drop(bradley.corrupted_games_list, inplace = True)
+        bradley.profile_corrupted_games_identification(chess_data)
+        chess_data.drop(list(bradley.corrupted_games_list), inplace = True)
         print(f'Total number of rows after cleanup: {chess_data[0]}')
         bradley.engine.quit()
     except Exception as e:

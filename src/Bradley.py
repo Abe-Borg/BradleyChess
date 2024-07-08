@@ -8,6 +8,11 @@ import copy
 import time
 import custom_exceptions
 import sys
+from multiprocessing import Pool, cpu_count
+import cProfile
+import pstats
+import io
+
 
 class Bradley:
     """
@@ -45,7 +50,7 @@ class Bradley:
         self.environ = Environ.Environ()
         self.W_rl_agent = Agent.Agent('W')
         self.B_rl_agent = Agent.Agent('B')
-        self.corrupted_games_list = []
+        self.corrupted_games_list = set()
 
         # stockfish is used to analyze positions during training this is how we estimate the q value 
         # at each position, and also for anticipated next position
@@ -858,11 +863,12 @@ class Bradley:
             Side Effects:
                 Modifies the list of corrupted games and writes to the errors file if an error occurs.
         """
-        ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
-        for game_num_str in chess_data.index:
+
+        def process_game(game_data):
+            game_num_str, game = game_data
             start_time = time.time()
-            num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
+            num_chess_moves_curr_training_game: int = game['PlyCount']        
 
             try:
                 curr_state = self.environ.get_curr_state()
@@ -870,9 +876,7 @@ class Bradley:
                 self.errors_file.write(f'An error occurred at self.environ.get_curr_state: {e}\n')
                 self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
                 self.errors_file.write(f'at game: {game_num_str}\n')
-                self.corrupted_games_list.append(game_num_str)
-                self.errors_file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
-                break
+                return game_num_str
 
             ### LOOP PLAYS THROUGH ONE GAME ###
             while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
@@ -882,9 +886,7 @@ class Bradley:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
                     self.errors_file.write(f'W_chess_move is empty at state: {curr_state}\n')
                     self.errors_file.write(f'at game: {game_num_str}\n')
-                    self.corrupted_games_list.append(game_num_str)
-                    self.errors_file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
-                    break # and go to the next game. this game is over.
+                    return game_num_str
 
                 ### WHITE AGENT PLAYS THE SELECTED MOVE ###
                 try:
@@ -892,9 +894,7 @@ class Bradley:
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.errors_file.write(f'at game: {game_num_str}\n')
-                    self.corrupted_games_list.append(game_num_str)
-                    self.errors_file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
-                    break # and go to the next game. this game is over.
+                    return game_num_str
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                 try:
@@ -903,11 +903,10 @@ class Bradley:
                     self.errors_file.write(f'An error occurred at get_curr_state: {e}\n')
                     self.errors_file.write(f'curr board is:\n{self.environ.board}\n\n')
                     self.errors_file.write(f'at game: {game_num_str}\n')
-                    self.corrupted_games_list.append(game_num_str)
-                    self.errors_file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
+                    return game_num_str
                 
                 if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
-                    break # and go to next game
+                    return None # and go to next game
 
                 ##################### BLACK'S TURN ####################
                 B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
@@ -915,9 +914,7 @@ class Bradley:
                     self.errors_file.write(f'An error occurred at self.W_rl_agent.choose_action\n')
                     self.errors_file.write(f'B_chess_move is empty at state: {curr_state}\n')
                     self.errors_file.write(f'at: {game_num_str}\n')
-                    self.corrupted_games_list.append(game_num_str)
-                    self.errors_file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
-                    break # game is over, go to next game.
+                    return game_num_str
 
                 ##### BLACK AGENT PLAYS SELECTED MOVE #####
                 try:
@@ -925,9 +922,7 @@ class Bradley:
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at rl_agent_plays_move: {e}\n')
                     self.errors_file.write(f'at {game_num_str}\n')
-                    self.corrupted_games_list.append(game_num_str)
-                    self.errors_file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
-                    break 
+                    return game_num_str
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                 try:
@@ -935,12 +930,10 @@ class Bradley:
                 except Exception as e:
                     self.errors_file.write(f'An error occurred at environ.get_curr_state: {e}\n')
                     self.errors_file.write(f'at: {game_num_str}\n')
-                    self.corrupted_games_list.append(game_num_str)
-                    self.errors_file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
-                    break
+                    return game_num_str
 
                 if self.environ.board.is_game_over() or not curr_state['legal_moves']:
-                    break # and go to next game
+                    return None # and go to next game
 
                 try:
                     curr_state = self.environ.get_curr_state()
@@ -948,23 +941,42 @@ class Bradley:
                     self.errors_file.write(f'An error occurred: {e}\n')
                     self.errors_file.write("failed to get_curr_state\n") 
                     self.errors_file.write(f'at: {game_num_str}\n')
-                    self.corrupted_games_list.append(game_num_str)
-                    self.errors_file.write(f'corrupt games list is: {self.corrupted_games_list}\n')
-                    break
+                    return game_num_str
             ### END OF CURRENT GAME LOOP ###
 
-            # this curr game is done, reset environ to prepare for the next game
-            self.environ.reset_environ() # reset and go to next game in chess database
+            self.environ.reset_environ()
             
             end_time = time.time()
             elapsed_time = end_time - start_time
+
             # Print progress notification every 1000 games
             if game_count % 1000 == 0:
                 print(f"Notification: Game {game_count} is done. Time elapsed: {elapsed_time:.2f} seconds.")
+            
             game_count += 1
-        
-        ### END OF FOR LOOP THROUGH CHESS DB ###
+
+            return None
+        ### end of process_game
+
+        with Pool(cpu_count()) as pool:
+            corrupted_games = pool.map(process_game, chess_data.iterrows())
+
+        self.corrupted_games.update(game for game in corrupted_games if game is not None)
+        print(f"Number of corrupted games: {len(self.corrupted_games)}")
+        print(f"Corrupted games: {self.corrupted_games}")
     # end of identify_corrupted_games
+
+    def profile_corrupted_games_identification(self, chess_data):
+        profiler = cProfile.Profile()
+        profiler.enable()
+        
+        self.identify_corrupted_games(chess_data)
+        
+        profiler.disable()
+        s = io.StringIO()
+        ps = pstats.Stats(profiler, stream=s).sort_stats('cumulative')
+        ps.print_stats()
+        print(s.getvalue())
 
     def generate_Q_est_df(self, q_est_vals_file_path) -> None:
         """
