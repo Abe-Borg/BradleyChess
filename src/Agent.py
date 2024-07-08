@@ -87,14 +87,14 @@ class Agent:
             return ''
 
         # check if any of the legal moves is not already in the Q table
-        moves_not_in_Q_table: list[str] = [move for move in environ_state['legal_moves'] if move not in self.Q_table.index]
+        # moves_not_in_Q_table: list[str] = [move for move in environ_state['legal_moves'] if move not in self.Q_table.index]
 
-        if moves_not_in_Q_table:
-            if game_settings.PRINT_STEP_BY_STEP:
-                self.step_by_step_logger.debug(f'Agent.choose_action: moves_not_in_Q_table: {moves_not_in_Q_table}\n')
-                self.step_by_step_logger.debug(f'Agent.choose_action: going to method updating Q table\n')
+        # if moves_not_in_Q_table:
+            # if game_settings.PRINT_STEP_BY_STEP:
+                # self.step_by_step_logger.debug(f'Agent.choose_action: moves_not_in_Q_table: {moves_not_in_Q_table}\n')
+                # self.step_by_step_logger.debug(f'Agent.choose_action: going to method updating Q table\n')
             
-            self.update_Q_table(moves_not_in_Q_table)
+            # self.update_Q_table(moves_not_in_Q_table)
 
         if self.is_trained:
             return self.policy_game_mode(environ_state['legal_moves'], environ_state['curr_turn'])
