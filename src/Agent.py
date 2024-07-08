@@ -50,11 +50,6 @@ class Agent:
             self.step_by_step_logger.debug(f'Agent.__init__: color: {color}, learn_rate: {learn_rate}, discount_factor: {discount_factor}, is_trained: {self.is_trained}\n')
     ### end of __init__ ###
 
-    def __del__(self):
-        if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_logger.debug('hi and bye from Agent.__del__\n')
-    ### end of __del__ ###
-
     def choose_action(self, environ_state: dict[str, str, list[str]], curr_game: str = 'Game 1') -> str:
         """
             Chooses the next chess move for the agent based on the current state.

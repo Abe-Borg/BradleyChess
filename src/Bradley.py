@@ -508,7 +508,7 @@ class Bradley:
         ### placeholder, will implement this function later.
     ### end of continue_training_rl_agents
     
-    def assign_points_to_Q_table(self, chess_move: str, curr_turn: str, curr_Qval: int, rl_agent_color: str) -> None:
+    def assign_points_to_Q_table(self, chess_move: str, curr_turn: str, curr_Qval: int, chess_agent: Agent.Agent) -> None:
         """
             Assigns points to the Q table for the given chess move, current turn, current Q value, and RL agent color.
             This method assigns points to the Q table for the RL agent of the given color. It calls the 
@@ -531,9 +531,9 @@ class Bradley:
                 Modifies the Q table of the RL agent by assigning points to the given chess move.
                 Writes to the errors file if a exception is raised.
         """
-        if rl_agent_color == 'W':
+        if chess_agent.color == 'W':
             try:
-                self.W_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
+                chess_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
             except custom_exceptions.QTableUpdateError as e: 
                 # chess move is not represented in the Q table, update Q table and try again.
                 self.error_logger.error(f'caught exception: {e} at assign_points_to_Q_table\n')
@@ -574,7 +574,6 @@ class Bradley:
                 the current state.
                 Writes to the errors file if an error occurs.
         """
-
         try:
             process_environ.load_chessboard(chess_move, curr_game)
         except custom_exceptions.ChessboardLoadError as e:
