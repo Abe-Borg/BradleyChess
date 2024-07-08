@@ -2,6 +2,9 @@ import game_settings
 import pandas as pd
 import time
 import Bradley
+import logging
+
+logging.basicConfig(filename=game_settings.bradley_errors_filepath, level=logging.ERROR)
 
 def identifying_corrupted_games(chess_data_filepath):
     start_time = time.time()
