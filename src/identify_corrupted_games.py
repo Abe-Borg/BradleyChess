@@ -9,7 +9,6 @@ logging.basicConfig(filename=game_settings.bradley_errors_filepath, level=loggin
 def identifying_corrupted_games(chess_data_filepath):
     start_time = time.time()
     chess_data = pd.read_pickle(chess_data_filepath, compression = 'zip')
-    chess_data = chess_data.head(100)
     bradley = Bradley.Bradley()
    
     print(f'Total number of rows before cleanup: {len(chess_data)}')

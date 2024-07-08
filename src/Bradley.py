@@ -877,27 +877,19 @@ class Bradley:
             Side Effects:
                 Modifies the list of corrupted games and writes to the errors file if an error occurs.
         """
-        self.error_logger.info(f"Starting to identify corrupted games. Total games: {len(chess_data)}")
         partial_process_game = functools.partial(self.process_game)
 
         with Pool(cpu_count()) as pool:
             corrupted_games = pool.map(partial_process_game, chess_data.iterrows())
 
-        self.error_logger.info(f"Finished processing games. Results: {corrupted_games}")
-
         corrupted_games = [game for game in corrupted_games if game is not None]
-        self.error_logger.info(f"corrupted games: {corrupted_games}")
 
         self.corrupted_games_list.update(corrupted_games)
-        self.error_logger.info(f'Number of corrupted games: {len(self.corrupted_games_list)}\n')
-        self.error_logger.info(f'Corrupted games: {self.corrupted_games_list}\n')
     # end of identify_corrupted_games 
 
     def process_game(self, game_data):
         start_time = time.time()
         game_num_str, game = game_data
-
-        self.error_logger.info(f"Processing game: {game_num_str}")
         num_chess_moves_curr_training_game: int = game['PlyCount']
 
         try:
