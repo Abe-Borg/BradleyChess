@@ -2,6 +2,7 @@ import game_settings
 import pandas as pd
 import numpy as np
 import helper_methods
+import logging
 
 class Agent:
     """
@@ -22,16 +23,22 @@ class Agent:
     """
     def __init__(self, color: str, learn_rate = 0.6, discount_factor = 0.35):
         """
-            Initializes an Agent object with a color, a learning rate, a discount factor, and an errors file.
+            Initializes an Agent object with a color, a learning rate, a discount factor
             This method initializes an Agent object by setting the color, the learning rate, and the 
-            discount factor. It also opens the errors file in append mode and initializes the Q-table.
+            discount factor. It also initializes the Q-table.
             
-            Side Effects:
-            Opens the errors file in append mode.
+            Side Effects: 
             Modifies the learn_rate, discount_factor, color, is_trained, and Q_table attributes.
         """
-        self.errors_file = open(game_settings.agent_errors_filepath, 'a')
-        self.step_by_step_file = open(game_settings.agent_step_by_step_filepath, 'a')
+        self.error_logger = logging.getLogger(__name__)
+        self.error_logger.setLevel(logging.ERROR)
+        error_handler = logging.FileHandler(game_settings.agent_errors_filepath)
+        self.error_logger.addHandler(error_handler)
+
+        self.step_by_step_logger = logging.getLogger(__name__ + '.step_by_step')
+        self.step_by_step_logger.setLevel(logging.DEBUG)
+        step_by_step_handler = logging.FileHandler(game_settings.agent_step_by_step_filepath)
+        self.step_by_step_logger.addHandler(step_by_step_handler)
         
         self.learn_rate = learn_rate
         self.discount_factor = discount_factor
@@ -40,15 +47,12 @@ class Agent:
         self.Q_table: pd.DataFrame = None # Q table will be assigned at program execution.
 
         if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_file.write(f'Agent.__init__: color: {color}, learn_rate: {learn_rate}, discount_factor: {discount_factor}, is_trained: {self.is_trained}\n')
+            self.step_by_step_logger.debug(f'Agent.__init__: color: {color}, learn_rate: {learn_rate}, discount_factor: {discount_factor}, is_trained: {self.is_trained}\n')
     ### end of __init__ ###
 
     def __del__(self):
         if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_file.write('hi and bye from Agent.__del__\n')
-        
-        self.step_by_step_file.close()
-        self.errors_file.close()
+            self.step_by_step_logger.debug('hi and bye from Agent.__del__\n')
     ### end of __del__ ###
 
     def choose_action(self, environ_state: dict[str, str, list[str]], curr_game: str = 'Game 1') -> str:
@@ -76,10 +80,10 @@ class Agent:
                 Writes into the errors file if there are no legal moves.
         """
         if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_file.write(f'Agent.choose_action: environ_state: {environ_state}, curr_game: {curr_game}\n')
+            self.step_by_step_logger.debug(f'Agent.choose_action: environ_state: {environ_state}, curr_game: {curr_game}\n')
 
         if environ_state['legal_moves'] == []:
-            self.errors_file.write(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
+            self.error_logger.error(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             return ''
 
         # check if any of the legal moves is not already in the Q table
@@ -87,8 +91,8 @@ class Agent:
 
         if moves_not_in_Q_table:
             if game_settings.PRINT_STEP_BY_STEP:
-                self.step_by_step_file.write(f'Agent.choose_action: moves_not_in_Q_table: {moves_not_in_Q_table}\n')
-                self.step_by_step_file.write(f'Agent.choose_action: going to method updating Q table\n')
+                self.step_by_step_logger.debug(f'Agent.choose_action: moves_not_in_Q_table: {moves_not_in_Q_table}\n')
+                self.step_by_step_logger.debug(f'Agent.choose_action: going to method updating Q table\n')
             
             self.update_Q_table(moves_not_in_Q_table)
 
@@ -116,8 +120,8 @@ class Agent:
                 None.
         """
         if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_file.write(f'Agent.policy_training_mode: curr_game: {curr_game}, curr_turn: {curr_turn}\n')
-            self.step_by_step_file.write(f'chess move: {game_settings.chess_data.at[curr_game, curr_turn]}\n')
+            self.step_by_step_logger.debug(f'Agent.policy_training_mode: curr_game: {curr_game}, curr_turn: {curr_turn}\n')
+            self.step_by_step_logger.debug(f'chess move: {game_settings.chess_data.at[curr_game, curr_turn]}\n')
         
         return game_settings.chess_data.at[curr_game, curr_turn]
     ### end of policy_training_mode ###

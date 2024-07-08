@@ -42,10 +42,10 @@ class Bradley:
                 Opens the errors file, the initial training results file, and the additional training results file in 
                 append mode.
         """
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.ERROR)
+        self.error_logger = logging.getLogger(__name__)
+        self.error_logger.setLevel(logging.ERROR)
         error_handler = logging.FileHandler(game_settings.bradley_errors_filepath)
-        self.logger.addHandler(error_handler)
+        self.error_logger.addHandler(error_handler)
 
         self.initial_training_logger = logging.getLogger(__name__ + '.initial_training')
         self.initial_training_logger.setLevel(logging.INFO)
@@ -84,7 +84,7 @@ class Bradley:
             # self.engine.quit()
         
         # Remove handlers from loggers to ensure they're properly closed
-        for logger in [self.logger, self.initial_training_logger, self.additional_training_logger, self.step_by_step_logger]:
+        for logger in [self.error_logger, self.initial_training_logger, self.additional_training_logger, self.step_by_step_logger]:
             for handler in logger.handlers[:]:
                 handler.close()
                 logger.removeHandler(handler)
@@ -114,16 +114,16 @@ class Bradley:
         try:
             self.environ.load_chessboard(chess_move)
         except custom_exceptions.ChessboardLoadError as e:
-            self.logger.error("hello from Bradley.receive_opp_move, an error occurred\n")
-            self.logger.error(f'Error: {e}, failed to load chessboard with move: {chess_move}\n')
+            self.error_logger.error("hello from Bradley.receive_opp_move, an error occurred\n")
+            self.error_logger.error(f'Error: {e}, failed to load chessboard with move: {chess_move}\n')
             return False
 
         try:
             self.environ.update_curr_state()
             return True
         except custom_exceptions.StateUpdateError as e:
-            self.logger.error(f'hello from Bradley.receive_opp_move, an error occurrd\n')
-            self.logger.error(f'Error: {e}, failed to update_curr_state\n') 
+            self.error_logger.error(f'hello from Bradley.receive_opp_move, an error occurrd\n')
+            self.error_logger.error(f'Error: {e}, failed to update_curr_state\n') 
             raise Exception from e
     ### end of receive_opp_move ###
 
@@ -153,13 +153,13 @@ class Bradley:
         try:
             curr_state = self.environ.get_curr_state()
         except custom_exceptions.StateRetrievalError as e:
-            self.logger.error("hello from Bradley.rl_agent_selects_chess_move, an error occurred\n")
-            self.logger.error(f'Error: {e}, failed to get_curr_state\n')
+            self.error_logger.error("hello from Bradley.rl_agent_selects_chess_move, an error occurred\n")
+            self.error_logger.error(f'Error: {e}, failed to get_curr_state\n')
             raise Exception from e
         
         if curr_state['legal_moves'] == []:
-            self.logger.error('hello from Bradley.rl_agent_selects_chess_move, legal_moves is empty\n')
-            self.logger.error(f'curr state is: {curr_state}\n')
+            self.error_logger.error('hello from Bradley.rl_agent_selects_chess_move, legal_moves is empty\n')
+            self.error_logger.error(f'curr state is: {curr_state}\n')
             raise custom_exceptions.NoLegalMovesError(f'hello from Bradley.rl_agent_selects_chess_move, legal_moves is empty\n')
         
         if rl_agent_color == 'W':    
@@ -172,16 +172,16 @@ class Bradley:
         try:
             self.environ.load_chessboard(chess_move) 
         except custom_exceptions.ChessboardLoadError as e:
-            self.logger.error('hello from Bradley.rl_agent_selects_chess_move\n')
-            self.logger.error(f'Error {e}: failed to load chessboard with move: {chess_move}\n')
+            self.error_logger.error('hello from Bradley.rl_agent_selects_chess_move\n')
+            self.error_logger.error(f'Error {e}: failed to load chessboard with move: {chess_move}\n')
             raise Exception from e
 
         try:
             self.environ.update_curr_state()
             return chess_move
         except custom_exceptions.StateUpdateError as e:
-            self.logger.error('hello from Bradley.rl_agent_selects_chess_move\n')
-            self.logger.error(f'Error: {e}, failed to update_curr_state\n')
+            self.error_logger.error('hello from Bradley.rl_agent_selects_chess_move\n')
+            self.error_logger.error(f'Error: {e}, failed to update_curr_state\n')
             raise Exception from e
     ### end of rl_agent_selects_chess_move
 
@@ -245,7 +245,7 @@ class Bradley:
         try:
             return self.environ.board.outcome().result()
         except custom_exceptions.GameOutcomeError as e:
-            self.logger.error('hello from Bradley.get_game_outcome\n')
+            self.error_logger.error('hello from Bradley.get_game_outcome\n')
             return f'error at get_game_outcome: {e}'
     ### end of get_game_outcome
     
@@ -270,8 +270,8 @@ class Bradley:
         try:
             return str(self.environ.board.outcome().termination)
         except custom_exceptions.GameTerminationError as e:
-            self.logger.error('hello from Bradley.get_game_termination_reason\n')
-            self.logger.error(f'Error: {e}, failed to get game end reason\n')
+            self.error_logger.error('hello from Bradley.get_game_termination_reason\n')
+            self.error_logger.error(f'Error: {e}, failed to get game end reason\n')
             return f'error at get_game_termination_reason: {e}'
     ### end of get_game_termination_reason
     
@@ -313,10 +313,10 @@ class Bradley:
             try:
                 curr_state = self.environ.get_curr_state()
             except Exception as e:
-                self.logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
-                self.logger.error(f'curr board is:\n{self.environ.board}\n\n')
-                self.logger.error(f'at game: {game_num_str}\n')
-                self.logger.error(f'at turn: {curr_state['turn_index']}')
+                self.error_logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
+                self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
+                self.error_logger.error(f'at game: {game_num_str}\n')
+                self.error_logger.error(f'at turn: {curr_state['turn_index']}')
                 break # stop current game and go to next game.
 
             if game_settings.PRINT_STEP_BY_STEP:
@@ -332,8 +332,8 @@ class Bradley:
                     self.step_by_step_logger.debug(f'W_chess_move: {W_chess_move}\n')
 
                 if not W_chess_move:
-                    self.logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                    self.logger.error(f'W_chess_move is empty at state: {curr_state}\n')
+                    self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
+                    self.error_logger.error(f'W_chess_move is empty at state: {curr_state}\n')
                     break # and go to the next game. this game is over.
 
                 ### ASSIGN POINTS TO Q TABLE FOR WHITE AGENT ###
@@ -351,9 +351,9 @@ class Bradley:
                 try:
                     self.rl_agent_plays_move(W_chess_move, game_num_str)
                 except Exception as e:
-                    self.logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
-                    self.logger.error(f'at curr_game: {game_num_str}\n')
-                    self.logger.error(f'at state: {curr_state}\n')
+                    self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
+                    self.error_logger.error(f'at curr_game: {game_num_str}\n')
+                    self.error_logger.error(f'at state: {curr_state}\n')
                     break # and go to the next game. this game is over.
 
                 W_reward = self.get_reward(W_chess_move)
@@ -365,10 +365,10 @@ class Bradley:
                 try:
                     curr_state = self.environ.get_curr_state()
                 except Exception as e:
-                    self.logger.error(f'An error occurred at get_curr_state: {e}\n')
-                    self.logger.error(f'curr board is:\n{self.environ.board}\n\n')
-                    self.logger.error(f'At game: {game_num_str}\n')
-                    self.logger.error(f'at state: {curr_state}\n')
+                    self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
+                    self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
+                    self.error_logger.error(f'At game: {game_num_str}\n')
+                    self.error_logger.error(f'at state: {curr_state}\n')
                     break # and go to the next game. this game is over.
                 
                 if game_settings.PRINT_STEP_BY_STEP:
@@ -397,9 +397,9 @@ class Bradley:
                     self.step_by_step_logger.debug(f'B_chess_move: {B_chess_move}\n')
                 
                 if not B_chess_move:
-                    self.logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                    self.logger.error(f'B_chess_move is empty at state: {curr_state}\n')
-                    self.logger.error(f'at: {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
+                    self.error_logger.error(f'B_chess_move is empty at state: {curr_state}\n')
+                    self.error_logger.error(f'at: {game_num_str}\n')
                     break # game is over, go to next game.
 
                 # assign points to Q table
@@ -415,9 +415,9 @@ class Bradley:
                 try:
                     self.rl_agent_plays_move(B_chess_move, game_num_str)
                 except Exception as e:
-                    self.logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
-                    self.logger.error(f'at curr_game: {game_num_str}\n')
-                    self.logger.error(f'at state: {curr_state}\n')
+                    self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
+                    self.error_logger.error(f'at curr_game: {game_num_str}\n')
+                    self.error_logger.error(f'at state: {curr_state}\n')
                     break 
 
                 B_reward = self.get_reward(B_chess_move)
@@ -429,9 +429,9 @@ class Bradley:
                 try:
                     curr_state = self.environ.get_curr_state()
                 except Exception as e:
-                    self.logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
-                    self.logger.error(f'curr board is:\n{self.environ.board}\n\n')
-                    self.logger.error(f'At game: {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
+                    self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
+                    self.error_logger.error(f'At game: {game_num_str}\n')
                     break
 
                 if game_settings.PRINT_STEP_BY_STEP:
@@ -476,9 +476,9 @@ class Bradley:
                     if game_settings.PRINT_STEP_BY_STEP:
                         self.step_by_step_logger.debug(f'curr_state: {curr_state}\n')
                 except Exception as e:
-                    self.logger.error(f'An error occurred: {e}\n')
-                    self.logger.error("failed to get_curr_state\n") 
-                    self.logger.error(f'At game: {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred: {e}\n')
+                    self.error_logger.error("failed to get_curr_state\n") 
+                    self.error_logger.error(f'At game: {game_num_str}\n')
                     break
             ### END OF CURRENT GAME LOOP ###
 
@@ -539,8 +539,8 @@ class Bradley:
                 self.W_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
             except custom_exceptions.QTableUpdateError as e: 
                 # chess move is not represented in the Q table, update Q table and try again.
-                self.logger.error(f'caught exception: {e} at assign_points_to_Q_table\n')
-                self.logger.error(f'Chess move is not represented in the White Q table, updating Q table and trying again...\n')
+                self.error_logger.error(f'caught exception: {e} at assign_points_to_Q_table\n')
+                self.error_logger.error(f'Chess move is not represented in the White Q table, updating Q table and trying again...\n')
 
                 self.W_rl_agent.update_Q_table([chess_move])
                 self.W_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
@@ -549,8 +549,8 @@ class Bradley:
                 self.B_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
             except custom_exceptions.QTableUpdateError as e: 
                 # chess move is not represented in the Q table, update Q table and try again. 
-                self.logger.error(f'caught exception: {e} at assign_points_to_Q_table\n')
-                self.logger.error(f'Chess move is not represented in the White Q table, updating Q table and trying again...\n')
+                self.error_logger.error(f'caught exception: {e} at assign_points_to_Q_table\n')
+                self.error_logger.error(f'Chess move is not represented in the White Q table, updating Q table and trying again...\n')
 
                 self.B_rl_agent.update_Q_table([chess_move])
                 self.B_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
@@ -581,15 +581,15 @@ class Bradley:
         try:
             self.environ.load_chessboard(chess_move, curr_game)
         except custom_exceptions.ChessboardLoadError as e:
-            self.logger.error(f'at Bradley.rl_agent_plays_move. An error occurred at {curr_game}: {e}\n')
-            self.logger.error(f"failed to load_chessboard with move {chess_move}\n")
+            self.error_logger.error(f'at Bradley.rl_agent_plays_move. An error occurred at {curr_game}: {e}\n')
+            self.error_logger.error(f"failed to load_chessboard with move {chess_move}\n")
             raise Exception from e
 
         try:
             self.environ.update_curr_state()
         except custom_exceptions.StateUpdateError as e:
-            self.logger.error(f'at Bradley.rl_agent_plays_move. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
-            self.logger.error(f'Current state is: {self.environ.get_curr_state()}\n')
+            self.error_logger.error(f'at Bradley.rl_agent_plays_move. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
+            self.error_logger.error(f'Current state is: {self.environ.get_curr_state()}\n')
             raise Exception from e
     # end of rl_agent_plays_move
 
@@ -629,16 +629,16 @@ class Bradley:
         try:
             analysis_results = self.analyze_board_state(self.environ.board)
         except Exception as e:
-            self.logger.error(f'at Bradley.find_estimated_Q_value. An error occurred: {e}\n')
-            self.logger.error(f'failed to analyze_board_state\n')
+            self.error_logger.error(f'at Bradley.find_estimated_Q_value. An error occurred: {e}\n')
+            self.error_logger.error(f'failed to analyze_board_state\n')
             raise Exception from e
         
         # load up the chess board with opponent's anticipated chess move 
         try:
             self.environ.load_chessboard_for_Q_est(analysis_results)
         except Exception as e:
-            self.logger.error(f'at Bradley.find_estimated_Q_value. An error occurred: {e}\n')
-            self.logger.error(f'failed to load_chessboard_for_Q_est\n')
+            self.error_logger.error(f'at Bradley.find_estimated_Q_value. An error occurred: {e}\n')
+            self.error_logger.error(f'failed to load_chessboard_for_Q_est\n')
             raise Exception from e
         
         # check if the game would be over with the anticipated next move
@@ -646,8 +646,8 @@ class Bradley:
             try:
                 self.environ.pop_chessboard()
             except Exception as e:
-                self.logger.error(f'at Bradley.find_estimated_Q_value. An error occurred: {e}\n')
-                self.logger.error(f'failed at self.environ.pop_chessboard\n')
+                self.error_logger.error(f'at Bradley.find_estimated_Q_value. An error occurred: {e}\n')
+                self.error_logger.error(f'failed at self.environ.pop_chessboard\n')
                 raise Exception from e
             return 1 # just return some value, doesn't matter.
             
@@ -655,8 +655,8 @@ class Bradley:
         try:
             est_Qval_analysis = self.analyze_board_state(self.environ.board)
         except Exception as e:
-            self.logger.error(f'at Bradley.find_estimated_Q_value. An error occurred: {e}\n')
-            self.logger.error(f'failed at self.analyze_board_state\n')
+            self.error_logger.error(f'at Bradley.find_estimated_Q_value. An error occurred: {e}\n')
+            self.error_logger.error(f'failed at self.analyze_board_state\n')
             raise Exception from e
 
         # get pts for est_Qval 
@@ -670,8 +670,8 @@ class Bradley:
         try:
             self.environ.pop_chessboard()
         except Exception as e:
-            self.logger.error(f'@ Bradley.find_estimated_Q_value. An error occurred: {e}\n')
-            self.logger.error("failed to pop_chessboard\n")
+            self.error_logger.error(f'@ Bradley.find_estimated_Q_value. An error occurred: {e}\n')
+            self.error_logger.error("failed to pop_chessboard\n")
             raise Exception from e
 
         return est_Qval
@@ -711,12 +711,12 @@ class Bradley:
             next_Qval = int(curr_Qval + learn_rate * (reward + ((discount_factor * est_Qval) - curr_Qval)))
             return next_Qval
         except OverflowError:
-            self.logger.error(f'@ Bradley.find_next_Qval. An error occurred: OverflowError\n')
-            self.logger.error(f'curr_Qval: {curr_Qval}\n')
-            self.logger.error(f'learn_rate: {learn_rate}\n')
-            self.logger.error(f'reward: {reward}\n')
-            self.logger.error(f'discount_factor: {discount_factor}\n')
-            self.logger.error(f'est_Qval: {est_Qval}\n')
+            self.error_logger.error(f'@ Bradley.find_next_Qval. An error occurred: OverflowError\n')
+            self.error_logger.error(f'curr_Qval: {curr_Qval}\n')
+            self.error_logger.error(f'learn_rate: {learn_rate}\n')
+            self.error_logger.error(f'reward: {reward}\n')
+            self.error_logger.error(f'discount_factor: {discount_factor}\n')
+            self.error_logger.error(f'est_Qval: {est_Qval}\n')
             raise custom_exceptions.QValueCalculationError("Overflow occurred during Q-value calculation") from OverflowError
     # end of find_next_Qval
     
@@ -756,14 +756,14 @@ class Bradley:
                 Writes to the errors file if an error occurs.
         """
         if not self.environ.board.is_valid():
-            self.logger.error(f'at Bradley.analyze_board_state. Board is in invalid state\n')
+            self.error_logger.error(f'at Bradley.analyze_board_state. Board is in invalid state\n')
             raise custom_exceptions.InvalidBoardStateError(f'at Bradley.analyze_board_state. Board is in invalid state\n')
 
         try: 
             analysis_result = self.engine.analyse(board, game_settings.search_limit, multipv=game_settings.num_moves_to_return)
         except Exception as e:
-            self.logger.error(f'@ Bradley_analyze_board_state. An error occurred during analysis: {e}\n')
-            self.logger.error(f"Chessboard is:\n{board}\n")
+            self.error_logger.error(f'@ Bradley_analyze_board_state. An error occurred during analysis: {e}\n')
+            self.error_logger.error(f"Chessboard is:\n{board}\n")
             raise custom_exceptions.EngineAnalysisError("error occured during stockfish analysis") from e
 
         mate_score = None
@@ -780,14 +780,14 @@ class Bradley:
             else:
                 centipawn_score = pov_score.score()
         except Exception as e:
-            self.logger.error(f'An error occurred while extracting scores: {e}\n')
+            self.error_logger.error(f'An error occurred while extracting scores: {e}\n')
             raise custom_exceptions.ScoreExtractionError("Error occurred while extracting scores from analysis") from e
 
         try:
             # Extract the anticipated next move from the analysis
             anticipated_next_move = analysis_result[0]['pv'][0]
         except Exception as e:
-            self.logger.error(f'An error occurred while extracting the anticipated next move: {e}\n')
+            self.error_logger.error(f'An error occurred while extracting the anticipated next move: {e}\n')
             raise MoveExtractionError("Error occurred while extracting the anticipated next move") from e
         
         return {
@@ -897,9 +897,9 @@ class Bradley:
         try:
             curr_state = self.environ.get_curr_state()
         except Exception as e:
-            self.logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
-            self.logger.error(f'curr board is:\n{self.environ.board}\n\n')
-            self.logger.error(f'at game: {game_num_str}\n')
+            self.error_logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
+            self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
+            self.error_logger.error(f'at game: {game_num_str}\n')
             return game_num_str
 
         ### LOOP PLAYS THROUGH ONE GAME ###
@@ -907,26 +907,26 @@ class Bradley:
             ##################### WHITE'S TURN ####################
             W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
             if not W_chess_move:
-                self.logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                self.logger.error(f'W_chess_move is empty at state: {curr_state}\n')
-                self.logger.error(f'at game: {game_num_str}\n')
+                self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
+                self.error_logger.error(f'W_chess_move is empty at state: {curr_state}\n')
+                self.error_logger.error(f'at game: {game_num_str}\n')
                 return game_num_str
 
             ### WHITE AGENT PLAYS THE SELECTED MOVE ###
             try:
                 self.rl_agent_plays_move(W_chess_move, game_num_str)
             except Exception as e:
-                self.logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
-                self.logger.error(f'at game: {game_num_str}\n')
+                self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
+                self.error_logger.error(f'at game: {game_num_str}\n')
                 return game_num_str
 
             # get latest curr_state since self.rl_agent_plays_move updated the chessboard
             try:
                 curr_state = self.environ.get_curr_state()
             except Exception as e:
-                self.logger.error(f'An error occurred at get_curr_state: {e}\n')
-                self.logger.error(f'curr board is:\n{self.environ.board}\n\n')
-                self.logger.error(f'at game: {game_num_str}\n')
+                self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
+                self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
+                self.error_logger.error(f'at game: {game_num_str}\n')
                 return game_num_str
             
             if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
@@ -935,25 +935,25 @@ class Bradley:
             ##################### BLACK'S TURN ####################
             B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
             if not B_chess_move:
-                self.logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                self.logger.error(f'B_chess_move is empty at state: {curr_state}\n')
-                self.logger.error(f'at: {game_num_str}\n')
+                self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
+                self.error_logger.error(f'B_chess_move is empty at state: {curr_state}\n')
+                self.error_logger.error(f'at: {game_num_str}\n')
                 return game_num_str
 
             ##### BLACK AGENT PLAYS SELECTED MOVE #####
             try:
                 self.rl_agent_plays_move(B_chess_move, game_num_str)
             except Exception as e:
-                self.logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
-                self.logger.error(f'at {game_num_str}\n')
+                self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
+                self.error_logger.error(f'at {game_num_str}\n')
                 return game_num_str
 
             # get latest curr_state since self.rl_agent_plays_move updated the chessboard
             try:
                 curr_state = self.environ.get_curr_state()
             except Exception as e:
-                self.logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
-                self.logger.error(f'at: {game_num_str}\n')
+                self.error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
+                self.error_logger.error(f'at: {game_num_str}\n')
                 return game_num_str
 
             if self.environ.board.is_game_over() or not curr_state['legal_moves']:
@@ -962,9 +962,9 @@ class Bradley:
             try:
                 curr_state = self.environ.get_curr_state()
             except Exception as e:
-                self.logger.error(f'An error occurred: {e}\n')
-                self.logger.error("failed to get_curr_state\n") 
-                self.logger.error(f'at: {game_num_str}\n')
+                self.error_logger.error(f'An error occurred: {e}\n')
+                self.error_logger.error("failed to get_curr_state\n") 
+                self.error_logger.error(f'at: {game_num_str}\n')
                 return game_num_str
         ### END OF CURRENT GAME LOOP ###
 
@@ -1039,8 +1039,8 @@ class Bradley:
                 try:
                     curr_state = self.environ.get_curr_state()
                 except Exception as e:
-                    self.logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
-                    self.logger.error(f'at: {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
+                    self.error_logger.error(f'at: {game_num_str}\n')
                     break
                 
                 q_est_vals_file.write(f'{game_num_str}\n')
@@ -1051,8 +1051,8 @@ class Bradley:
                     # choose action a from state s, using policy
                     W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
                     if not W_chess_move:
-                        self.logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                        self.logger.error(f'W_chess_move is empty at state: {curr_state}\n')
+                        self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
+                        self.error_logger.error(f'W_chess_move is empty at state: {curr_state}\n')
                         break
 
                     # assign curr turn to new var for now. once agent plays move, turn will be updated, but we need 
@@ -1064,16 +1064,16 @@ class Bradley:
                     try:
                         self.rl_agent_plays_move(W_chess_move, game_num_str)
                     except Exception as e:
-                        self.logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
-                        self.logger.error(f'at: {game_num_str}\n')
+                        self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
+                        self.error_logger.error(f'at: {game_num_str}\n')
                         break # and go to the next game. this game is over.
 
                     # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                     try:
                         curr_state = self.environ.get_curr_state()
                     except Exception as e:
-                        self.logger.error(f'An error occurred at get_curr_state: {e}\n')
-                        self.logger.error(f'at: {game_num_str}\n')
+                        self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
+                        self.error_logger.error(f'at: {game_num_str}\n')
                         break
                     
                     # find the estimated Q value for White, but first check if game ended
@@ -1084,18 +1084,18 @@ class Bradley:
                             W_est_Qval: int = self.find_estimated_Q_value()
                             q_est_vals_file.write(f'{curr_turn_for_q_est}, {W_est_Qval}\n')
                         except Exception as e:
-                            self.logger.error(f'An error occurred while retrieving W_est_Qval: {e}\n')
-                            self.logger.error(f"at White turn, failed to find_estimated_Q_value\n")
-                            self.logger.error(f'curr state is:{curr_state}\n')
+                            self.error_logger.error(f'An error occurred while retrieving W_est_Qval: {e}\n')
+                            self.error_logger.error(f"at White turn, failed to find_estimated_Q_value\n")
+                            self.error_logger.error(f'curr state is:{curr_state}\n')
                             break
 
                     ##################### BLACK'S TURN ####################
                     # choose action a from state s, using policy
                     B_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
                     if not B_chess_move:
-                        self.logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                        self.logger.error(f'B_chess_move is empty at state: {curr_state}\n')
-                        self.logger.error(f'at: {game_num_str}\n')
+                        self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
+                        self.error_logger.error(f'B_chess_move is empty at state: {curr_state}\n')
+                        self.error_logger.error(f'at: {game_num_str}\n')
                         break
 
                     # assign curr turn to new var for now. once agent plays move, turn will be updated, but we need 
@@ -1107,16 +1107,16 @@ class Bradley:
                     try:
                         self.rl_agent_plays_move(B_chess_move, game_num_str)
                     except Exception as e:
-                        self.logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
-                        self.logger.error(f'at: {game_num_str}\n')
+                        self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
+                        self.error_logger.error(f'at: {game_num_str}\n')
                         break 
 
                     # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                     try:
                         curr_state = self.environ.get_curr_state()
                     except Exception as e:
-                        self.logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
-                        self.logger.error(f'at: {game_num_str}\n')
+                        self.error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
+                        self.error_logger.error(f'at: {game_num_str}\n')
                         break
 
                     # find the estimated Q value for Black, but first check if game ended
@@ -1127,17 +1127,17 @@ class Bradley:
                             B_est_Qval: int = self.find_estimated_Q_value()
                             q_est_vals_file.write(f'{curr_turn_for_q_est}, {B_est_Qval}\n') 
                         except Exception as e:
-                            self.logger.error(f"at Black turn, failed to find_estimated_Qvalue because error: {e}\n")
-                            self.logger.error(f'curr state is :{curr_state}\n')
-                            self.logger.error(f'at : {game_num_str}\n')
+                            self.error_logger.error(f"at Black turn, failed to find_estimated_Qvalue because error: {e}\n")
+                            self.error_logger.error(f'curr state is :{curr_state}\n')
+                            self.error_logger.error(f'at : {game_num_str}\n')
                             break
 
                     try:
                         curr_state = self.environ.get_curr_state()
                     except Exception as e:
-                        self.logger.error(f'An error occurred: {e}\n')
-                        self.logger.error("failed to get_curr_state\n") 
-                        self.logger.error(f'at: {game_num_str}\n')
+                        self.error_logger.error(f'An error occurred: {e}\n')
+                        self.error_logger.error("failed to get_curr_state\n") 
+                        self.error_logger.error(f'at: {game_num_str}\n')
                         break
                 ### END OF CURRENT GAME LOOP ###
 
@@ -1174,9 +1174,9 @@ class Bradley:
                 if game_settings.PRINT_STEP_BY_STEP:
                     self.step_by_step_logger.debug(f'curr_state is: {curr_state}\n')
             except Exception as e:
-                self.logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
-                self.logger.error(f'curr board is:\n{self.environ.board}\n\n')
-                self.logger.error(f'at game: {game_num_str}\n')
+                self.error_logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
+                self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
+                self.error_logger.error(f'at game: {game_num_str}\n')
                 break
 
             ### LOOP PLAYS THROUGH ONE GAME ###
@@ -1188,9 +1188,9 @@ class Bradley:
                     self.step_by_step_logger.debug(f'W_chess_move is: {W_chess_move}\n')
 
                 if not W_chess_move:
-                    self.logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                    self.logger.error(f'W_chess_move is empty at state: {curr_state}\n')
-                    self.logger.error(f'at game: {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
+                    self.error_logger.error(f'W_chess_move is empty at state: {curr_state}\n')
+                    self.error_logger.error(f'at game: {game_num_str}\n')
                     break # and go to the next game. this game is over.
 
                 ### WHITE AGENT PLAYS THE SELECTED MOVE ###
@@ -1200,8 +1200,8 @@ class Bradley:
                     if game_settings.PRINT_STEP_BY_STEP:
                         self.step_by_step_logger.debug(f'White played move: {W_chess_move}\n')
                 except Exception as e:
-                    self.logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
-                    self.logger.error(f'at game: {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
+                    self.error_logger.error(f'at game: {game_num_str}\n')
                     break # and go to the next game. this game is over.
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
@@ -1211,9 +1211,9 @@ class Bradley:
                     if game_settings.PRINT_STEP_BY_STEP:
                         self.step_by_step_logger.debug(f'curr_state is: {curr_state}\n')
                 except Exception as e:
-                    self.logger.error(f'An error occurred at get_curr_state: {e}\n')
-                    self.logger.error(f'curr board is:\n{self.environ.board}\n\n')
-                    self.logger.error(f'at game: {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
+                    self.error_logger.error(f'curr board is:\n{self.environ.board}\n\n')
+                    self.error_logger.error(f'at game: {game_num_str}\n')
                 
                 if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
                     
@@ -1229,9 +1229,9 @@ class Bradley:
                     self.step_by_step_logger.debug(f'Black chess move: {B_chess_move}\n')
 
                 if not B_chess_move:
-                    self.logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                    self.logger.error(f'B_chess_move is empty at state: {curr_state}\n')
-                    self.logger.error(f'at: {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
+                    self.error_logger.error(f'B_chess_move is empty at state: {curr_state}\n')
+                    self.error_logger.error(f'at: {game_num_str}\n')
                     break # game is over, go to next game.
 
                 ##### BLACK AGENT PLAYS SELECTED MOVE #####
@@ -1241,8 +1241,8 @@ class Bradley:
                     if game_settings.PRINT_STEP_BY_STEP:
                         self.step_by_step_logger.debug(f'black agent played their move\n')
                 except Exception as e:
-                    self.logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
-                    self.logger.error(f'at {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
+                    self.error_logger.error(f'at {game_num_str}\n')
                     break 
 
                 # get latest curr_state since self.rl_agent_plays_move updated the chessboard
@@ -1252,8 +1252,8 @@ class Bradley:
                     if game_settings.PRINT_STEP_BY_STEP:
                         self.step_by_step_logger.debug(f'curr_state is: {curr_state}\n')
                 except Exception as e:
-                    self.logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
-                    self.logger.error(f'at: {game_num_str}\n')
+                    self.error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
+                    self.error_logger.error(f'at: {game_num_str}\n')
                     break
 
                 if self.environ.board.is_game_over() or not curr_state['legal_moves']:
