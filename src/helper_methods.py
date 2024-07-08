@@ -1,9 +1,8 @@
-import Bradley
 import pandas as pd
 import game_settings
 import random
 
-def play_game(bubs: Bradley.Bradley, rl_agent_color: str) -> None:
+def play_game(bubs, rl_agent_color: str) -> None:
     def handle_move(player_color):
         if player_color == rl_agent.color:
             print('=== RL AGENT\'S TURN ===\n')
@@ -38,7 +37,7 @@ def play_game(bubs: Bradley.Bradley, rl_agent_color: str) -> None:
         bubs.reset_environ()
 ### end of play_game
 
-def agent_vs_agent(bubs: Bradley.Bradley) -> None:
+def agent_vs_agent(bubs) -> None:
     def play_turn(agent_color: str):
         try:
             chess_move = bubs.rl_agent_selects_chess_move(agent_color)
@@ -66,7 +65,7 @@ def agent_vs_agent(bubs: Bradley.Bradley) -> None:
         bubs.reset_environ()
 ### end of agent_vs_agent
 
-def pikl_q_table(bubs: Bradley.Bradley, rl_agent_color: str, q_table_path: str) -> None:
+def pikl_q_table(bubs, rl_agent_color: str, q_table_path: str) -> None:
     """Save the Q-table of a trained RL agent to a file.
     Args:
         bubs (Bradley.Bradley): An object of the `Bradley` class representing the chess game environment.
@@ -83,7 +82,7 @@ def pikl_q_table(bubs: Bradley.Bradley, rl_agent_color: str, q_table_path: str) 
     rl_agent.Q_table.to_pickle(q_table_path, compression = 'zip')
 ### end of pikl_Q_table
 
-def bootstrap_agent(bubs: Bradley.Bradley, rl_agent_color: str, existing_q_table_path: str) -> None:
+def bootstrap_agent(bubs, rl_agent_color: str, existing_q_table_path: str) -> None:
     """
         Assign an agent's Q-table to an existing Q-table.
         Args:
@@ -103,7 +102,7 @@ def bootstrap_agent(bubs: Bradley.Bradley, rl_agent_color: str, existing_q_table
     rl_agent.is_trained = True
 ### end of bootstrap_agent
 
-def bootstrap_agent_fill_q_table(bubs: Bradley.Bradley, rl_agent_color: str, existing_q_table_path: str) -> None:
+def bootstrap_agent_fill_q_table(bubs, rl_agent_color: str, existing_q_table_path: str) -> None:
     if rl_agent_color == 'W':
         rl_agent = bubs.W_rl_agent
     else:

@@ -565,7 +565,6 @@ class Bradley:
         except custom_exceptions.ChessboardLoadError as e:
             self.errors_file.write(f'at Bradley.rl_agent_plays_move. An error occurred at {curr_game}: {e}\n')
             self.errors_file.write(f"failed to load_chessboard with move {chess_move}\n")
-            # self.corrupted_games_list.append(curr_game)
             raise Exception from e
 
         try:
@@ -961,9 +960,7 @@ class Bradley:
         with Pool(cpu_count()) as pool:
             corrupted_games = pool.map(process_game, chess_data.iterrows())
 
-        self.corrupted_games.update(game for game in corrupted_games if game is not None)
-        print(f"Number of corrupted games: {len(self.corrupted_games)}")
-        print(f"Corrupted games: {self.corrupted_games}")
+        self.corrupted_games_list.update(game for game in corrupted_games if game is not None)
     # end of identify_corrupted_games
 
     def profile_corrupted_games_identification(self, chess_data):
