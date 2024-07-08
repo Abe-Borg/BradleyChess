@@ -36,7 +36,6 @@ def identifying_corrupted_games(chess_data_filepath):
     print('corrupted games identification is complete')
     print(f'it took: {total_time} seconds\n')
     print(f'number of corrupted games: {len(bradley.corrupted_games_list)}')
-    print(f'corrupted games: {bradley.corrupted_games_list}\n')
 
     chess_data.to_pickle(chess_data_filepath, compression = 'zip')
     quit()
