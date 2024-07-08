@@ -553,7 +553,7 @@ class Bradley:
                 self.B_rl_agent.change_Q_table_pts(chess_move, curr_turn, curr_Qval)
     # enf of assign_points_to_Q_table
 
-    def rl_agent_plays_move(self, chess_move: str, curr_game) -> None:
+    def rl_agent_plays_move(self, chess_move: str, curr_game, process_environ) -> None:
         """
             Loads the chessboard with the given move and updates the current state of the environment.
             This method is used during training. It first attempts to load the chessboard with the given move. If an 
@@ -576,17 +576,17 @@ class Bradley:
         """
 
         try:
-            self.environ.load_chessboard(chess_move, curr_game)
+            process_environ.load_chessboard(chess_move, curr_game)
         except custom_exceptions.ChessboardLoadError as e:
             self.error_logger.error(f'at Bradley.rl_agent_plays_move. An error occurred at {curr_game}: {e}\n')
             self.error_logger.error(f"failed to load_chessboard with move {chess_move}\n")
             raise Exception from e
 
         try:
-            self.environ.update_curr_state()
+            process_environ.update_curr_state()
         except custom_exceptions.StateUpdateError as e:
             self.error_logger.error(f'at Bradley.rl_agent_plays_move. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
-            self.error_logger.error(f'Current state is: {self.environ.get_curr_state()}\n')
+            self.error_logger.error(f'Current state is: {process_environ.get_curr_state()}\n')
             raise Exception from e
     # end of rl_agent_plays_move
 
@@ -883,7 +883,6 @@ class Bradley:
             corrupted_games = pool.map(partial_process_game, chess_data.iterrows())
 
         corrupted_games = [game for game in corrupted_games if game is not None]
-
         self.corrupted_games_list.update(corrupted_games)
     # end of identify_corrupted_games 
 
@@ -906,13 +905,12 @@ class Bradley:
             W_chess_move = self.W_rl_agent.choose_action(curr_state, game_num_str)
             if not W_chess_move:
                 self.error_logger.error(f'An error occurred at self.W_rl_agent.choose_action\n')
-                self.error_logger.error(f'W_chess_move is empty at state: {curr_state}\n')
                 self.error_logger.error(f'at game: {game_num_str}\n')
                 return game_num_str
 
             ### WHITE AGENT PLAYS THE SELECTED MOVE ###
             try:
-                self.rl_agent_plays_move(W_chess_move, game_num_str)
+                self.rl_agent_plays_move(W_chess_move, game_num_str, process_environ)
             except Exception as e:
                 self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
                 self.error_logger.error(f'at game: {game_num_str}\n')
@@ -923,7 +921,6 @@ class Bradley:
                 curr_state = process_environ.get_curr_state()
             except Exception as e:
                 self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
-                self.error_logger.error(f'curr board is:\n{process_environ.board}\n\n')
                 self.error_logger.error(f'at game: {game_num_str}\n')
                 return game_num_str
             
@@ -940,7 +937,7 @@ class Bradley:
 
             ##### BLACK AGENT PLAYS SELECTED MOVE #####
             try:
-                self.rl_agent_plays_move(B_chess_move, game_num_str)
+                self.rl_agent_plays_move(B_chess_move, game_num_str, process_environ)
             except Exception as e:
                 self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
                 self.error_logger.error(f'at {game_num_str}\n')
