@@ -53,13 +53,6 @@ class Bradley:
     ### end of Bradley constructor ###
 
     def __del__(self):
-        if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_logger.debug('hi and bye from Bradley.__del__')   
-
-        # Close the Stockfish engine if it's still open
-        # if hasattr(self, 'engine') and self.engine is not None:
-            # self.engine.quit()
-        
         # Remove handlers from loggers to ensure they're properly closed
         for logger in [self.error_logger, self.initial_training_logger, self.additional_training_logger, self.step_by_step_logger]:
             for handler in logger.handlers[:]:
