@@ -840,52 +840,6 @@ class Bradley:
         return total_reward
     ## end of get_reward
 
-    def identify_corrupted_games(self, chess_data) -> None:
-        """
-            Identifies corrupted games in the chess database and logs them in the errors file.
-
-            This method iterates over each game in the chess database and tries to play through the game using the 
-            reinforcement learning agents. If an error occurs at any point during the game, the game number is added to 
-            the list of corrupted games and the error is logged in the errors file.
-
-            The method first tries to get the current state of the game. If an error occurs, it logs the error and the 
-            current board state in the errors file, adds the game number to the list of corrupted games, and moves on to 
-            the next game.
-
-            The method then enters a loop where it alternates between the white and black agents choosing and playing 
-            moves. If an error occurs while choosing or playing a move, the method logs the error and the current state 
-            in the errors file, adds the game number to the list of corrupted games, and breaks out of the loop to move 
-            on to the next game.
-
-            After each move, the method tries to get the latest state of the game. If an error occurs, it logs the error 
-            and the current board state in the errors file, adds the game number to the list of corrupted games, and 
-            breaks out of the loop to move on to the next game.
-
-            The loop continues until the game is over, there are no more legal moves, or the maximum number of moves for 
-            the current training game has been reached.
-
-            After each game, the method resets the environment to prepare for the next game. It also prints a progress 
-            notification every 1000 games.
-
-            Args:
-                chess_data: The chess database containing the games to check for corruption. a pandas dataframe.
-            Returns:
-                None.
-            Raises:
-                None.
-
-            Side Effects:
-                Modifies the list of corrupted games and writes to the errors file if an error occurs.
-        """
-        partial_process_game = functools.partial(self.process_game)
-
-        with Pool(cpu_count()) as pool:
-            corrupted_games = pool.map(partial_process_game, chess_data.iterrows())
-
-        corrupted_games = [game for game in corrupted_games if game is not None]
-        self.corrupted_games_list.update(corrupted_games)
-    # end of identify_corrupted_games 
-
     def generate_Q_est_df(self, q_est_vals_file_path) -> None:
         """
             Generates a dataframe containing the estimated Q-values for each chess move in the chess database.
