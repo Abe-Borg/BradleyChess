@@ -19,16 +19,16 @@ class Agent:
             - learn_rate (float): A float between 0 and 1 that represents the learning rate.
             - discount_factor (float): A float between 0 and 1 that represents the discount factor.
             - is_trained (bool): A boolean indicating whether the agent has been trained.
-            - Q_table (pd.DataFrame): A Pandas DataFrame containing the Q-values for the agent.
+            - q_table (pd.DataFrame): A Pandas DataFrame containing the Q-values for the agent.
     """
-    def __init__(self, color: str, learn_rate = 0.6, discount_factor = 0.35):
+    def __init__(self, color: str, learn_rate = 0.6, discount_factor = 0.35, q_table: pd.DataFrame = None):
         """
             Initializes an Agent object with a color, a learning rate, a discount factor
             This method initializes an Agent object by setting the color, the learning rate, and the 
             discount factor. It also initializes the Q-table.
             
             Side Effects: 
-            Modifies the learn_rate, discount_factor, color, is_trained, and Q_table attributes.
+            Modifies the learn_rate, discount_factor, color, is_trained, and q_table attributes.
         """
         self.error_logger = logging.getLogger(__name__)
         self.error_logger.setLevel(logging.ERROR)
@@ -44,7 +44,7 @@ class Agent:
         self.discount_factor = discount_factor
         self.color = color
         self.is_trained: bool = False
-        self.Q_table: pd.DataFrame = None # Q table will be assigned at program execution.
+        self.q_table: pd.DataFrame = q_table # Q table will be assigned at program execution.
 
         if game_settings.PRINT_STEP_BY_STEP:
             self.step_by_step_logger.debug(f'Agent.__init__: color: {color}, learn_rate: {learn_rate}, discount_factor: {discount_factor}, is_trained: {self.is_trained}\n')
@@ -82,7 +82,7 @@ class Agent:
             return ''
 
         # check if any of the legal moves is not already in the Q table
-        # moves_not_in_Q_table: list[str] = [move for move in environ_state['legal_moves'] if move not in self.Q_table.index]
+        # moves_not_in_Q_table: list[str] = [move for move in environ_state['legal_moves'] if move not in self.q_table.index]
 
         # if moves_not_in_Q_table:
             # if game_settings.PRINT_STEP_BY_STEP:
@@ -142,7 +142,7 @@ class Agent:
                 None.
         """
         dice_roll = helper_methods.get_number_with_probability(game_settings.chance_for_random_move)
-        legal_moves_in_q_table = self.Q_table[curr_turn].loc[self.Q_table[curr_turn].index.intersection(legal_moves)]
+        legal_moves_in_q_table = self.q_table[curr_turn].loc[self.q_table[curr_turn].index.intersection(legal_moves)]
 
         if dice_roll == 1:
             chess_move = legal_moves_in_q_table.sample().index[0]
@@ -167,7 +167,7 @@ class Agent:
             Side Effects:
                 Modifies the Q-table by adding points to the cell determined by the chess move and the current turn.
         """
-        self.Q_table.at[chess_move, curr_turn] += pts
+        self.q_table.at[chess_move, curr_turn] += pts
     ### end of change_Q_table_pts ###
 
     def update_Q_table(self, new_chess_moves: list[str]) -> None:
@@ -184,12 +184,12 @@ class Agent:
             Side Effects:
                 Modifies the Q-table by appending a new DataFrame with the new chess moves.
         """
-        q_table_new_values: pd.DataFrame = pd.DataFrame(0, index = new_chess_moves, columns = self.Q_table.columns, dtype = np.int64)
-        self.Q_table = pd.concat([self.Q_table, q_table_new_values])
+        q_table_new_values: pd.DataFrame = pd.DataFrame(0, index = new_chess_moves, columns = self.q_table.columns, dtype = np.int64)
+        self.q_table = pd.concat([self.q_table, q_table_new_values])
     ### update_Q_table ###
 
     def reset_Q_table(self) -> None:
         """Resets the Q table to all zeros.
         """
-        self.Q_table.iloc[:, :] = 0    
+        self.q_table.iloc[:, :] = 0    
     ### end of reset_Q_table ###

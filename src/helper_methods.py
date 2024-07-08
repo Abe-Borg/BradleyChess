@@ -79,7 +79,7 @@ def pikl_q_table(bubs, rl_agent_color: str, q_table_path: str) -> None:
     else:
         rl_agent = bubs.B_rl_agent
 
-    rl_agent.Q_table.to_pickle(q_table_path, compression = 'zip')
+    rl_agent.q_table.to_pickle(q_table_path, compression = 'zip')
 ### end of pikl_Q_table
 
 def bootstrap_agent(bubs, rl_agent_color: str, existing_q_table_path: str) -> None:
@@ -97,7 +97,7 @@ def bootstrap_agent(bubs, rl_agent_color: str, existing_q_table_path: str) -> No
     else:
         rl_agent = bubs.B_rl_agent
 
-    rl_agent.Q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
+    rl_agent.q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
     
     rl_agent.is_trained = True
 ### end of bootstrap_agent
@@ -108,7 +108,7 @@ def bootstrap_agent_fill_q_table(bubs, rl_agent_color: str, existing_q_table_pat
     else:
         rl_agent = bubs.B_rl_agent
 
-    rl_agent.Q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
+    rl_agent.q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
 
 
 def get_number_with_probability(probability: float) -> int:

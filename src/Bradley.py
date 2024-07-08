@@ -1006,8 +1006,8 @@ class Bradley:
         """
         if game_settings.PRINT_STEP_BY_STEP:
             self.step_by_step_logger.debug(f'hi from simply_play_games\n')
-            self.step_by_step_logger.debug(f'White Q table size before games: {self.W_rl_agent.Q_table.shape}\n')
-            self.step_by_step_logger.debug(f'Black Q table size before games: {self.B_rl_agent.Q_table.shape}\n')
+            self.step_by_step_logger.debug(f'White Q table size before games: {self.W_rl_agent.q_table.shape}\n')
+            self.step_by_step_logger.debug(f'Black Q table size before games: {self.B_rl_agent.q_table.shape}\n')
         
         ### FOR EACH GAME IN THE CHESS DB ###
         game_count = 0
@@ -1117,8 +1117,8 @@ class Bradley:
             if game_settings.PRINT_STEP_BY_STEP:
                 self.step_by_step_logger.debug(f'game {game_num_str} is over\n')
                 self.step_by_step_logger.debug(f'agent q tables sizes are: \n')
-                self.step_by_step_logger.debug(f'White Q table: {self.W_rl_agent.Q_table.shape}\n')
-                self.step_by_step_logger.debug(f'Black Q table: {self.B_rl_agent.Q_table.shape}\n')
+                self.step_by_step_logger.debug(f'White Q table: {self.W_rl_agent.q_table.shape}\n')
+                self.step_by_step_logger.debug(f'Black Q table: {self.B_rl_agent.q_table.shape}\n')
 
             # this curr game is done, reset environ to prepare for the next game
             self.environ.reset_environ() # reset and go to next game in chess database
