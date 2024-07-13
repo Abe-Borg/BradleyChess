@@ -179,9 +179,3 @@ class Agent:
         q_table_new_values: pd.DataFrame = pd.DataFrame(0, index = new_chess_moves, columns = self.q_table.columns, dtype = np.int64)
         self.q_table = pd.concat([self.q_table, q_table_new_values])
     ### update_Q_table ###
-
-    def reset_Q_table(self) -> None:
-        """Resets the Q table to all zeros.
-        """
-        self.q_table.iloc[:, :] = 0    
-    ### end of reset_Q_table ###
