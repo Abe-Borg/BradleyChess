@@ -3,6 +3,7 @@ import game_settings
 import random
 import chess.engine
 import logging
+import Agent
 
 def play_game(bubs, chess_agent) -> None:
     player_turn = 'W'
@@ -67,7 +68,7 @@ def pikl_q_table(bubs, chess_agent, q_table_path: str) -> None:
     chess_agent.q_table.to_pickle(q_table_path, compression = 'zip')
 ### end of pikl_Q_table
 
-def bootstrap_agent(chess_agent, existing_q_table_path: str) -> None:
+def bootstrap_agent(chess_agent, existing_q_table_path: str) -> Agent.Agent:
     chess_agent.q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
     chess_agent.is_trained = True
     return chess_agent
