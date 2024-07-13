@@ -5,18 +5,6 @@ import chess.engine
 import logging
 
 def play_game(bubs, chess_agent) -> None:
-    def handle_move(player_color):
-        if player_color == chess_agent.color:
-            print('=== RL AGENT\'S TURN ===\n')
-            return bubs.rl_agent_selects_chess_move(player_color, chess_agent)
-        else:
-            print('=== OPPONENT\'S TURN ===')
-            move = input('Enter chess move: ')
-            while not bubs.receive_opp_move(move):
-                print('Invalid move, try again.')
-                move = input('Enter chess move: ')
-            return move
-
     player_turn = 'W'
     while bubs.is_game_over() == False:
         try:
@@ -33,6 +21,18 @@ def play_game(bubs, chess_agent) -> None:
     print(f'The game ended because of: {bubs.get_game_termination_reason()}')
     bubs.reset_environ()
 ### end of play_game
+
+def handle_move(player_color):
+    if player_color == chess_agent.color:
+        print('=== RL AGENT\'S TURN ===\n')
+        return bubs.rl_agent_selects_chess_move(player_color, chess_agent)
+    else:
+        print('=== OPPONENT\'S TURN ===')
+        move = input('Enter chess move: ')
+        while not bubs.receive_opp_move(move):
+            print('Invalid move, try again.')
+            move = input('Enter chess move: ')
+        return move
 
 def agent_vs_agent(bubs, w_agent, b_agent) -> None:
     def play_turn(chess_agent):
