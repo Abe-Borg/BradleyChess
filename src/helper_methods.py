@@ -136,3 +136,8 @@ def get_number_with_probability(probability: float) -> int:
         # debug_file.close()
         return 0
 ### end of get_number_with_probability
+
+    def reset_q_table(q_table) -> None:
+        q_table.iloc[:, :] = 0
+        return q_table    
+    ### end of reset_Q_table ###
