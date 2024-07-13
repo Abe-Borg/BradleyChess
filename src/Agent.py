@@ -126,12 +126,10 @@ class Agent:
             Args:
                 legal_moves (list[str]): A list of strings representing the legal moves for the current turn.
                 curr_turn (str): A string representing the current turn, e.g. 'W1'.
-
             Returns:
                 str: A string representing the chess move chosen by the agent. The move is either the one with the 
                 highest Q-value or a random move from the Q-table, depending on a probability defined in the game 
                 settings.
-
             Side Effects:
                 None.
         """
