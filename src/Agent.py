@@ -25,7 +25,7 @@ class Agent:
         """
             Initializes an Agent object with a color, a learning rate, a discount factor
             This method initializes an Agent object by setting the color, the learning rate, and the 
-            discount factor. It also initializes the Q-table.
+            discount factor.
             
             Side Effects: 
             Modifies the learn_rate, discount_factor, color, is_trained, and q_table attributes.
@@ -34,7 +34,6 @@ class Agent:
         self.error_logger.setLevel(logging.ERROR)
         error_handler = logging.FileHandler(game_settings.agent_errors_filepath)
         self.error_logger.addHandler(error_handler)
-
         self.step_by_step_logger = logging.getLogger(__name__ + '.step_by_step')
         self.step_by_step_logger.setLevel(logging.DEBUG)
         step_by_step_handler = logging.FileHandler(game_settings.agent_step_by_step_filepath)
@@ -59,13 +58,8 @@ class Agent:
             uses either the game mode policy or the training mode policy to choose the next move.
 
             Args:
-                environ_state (dict[str, str, list[str]]): A dictionary representing the current state of the 
-                environment. The dictionary has the following keys:
-                    - 'turn_index': The current turn index.
-                    - 'curr_turn': The current turn, represented as a string.
-                    - 'legal_moves': A list of strings, where each string is a legal move at the current turn.
+                environ_state (dict[str, str, list[str]]): A dictionary representing the current state of the environment.
                 curr_game (str, optional): A string representing the current game being played. Defaults to 'Game 1'.
-
             Returns:
                 str: A string representing the chess move chosen by the agent. If there are no legal moves, returns an 
                 empty string.
@@ -82,7 +76,7 @@ class Agent:
             return ''
 
         # check if any of the legal moves is not already in the Q table
-        # moves_not_in_Q_table: list[str] = [move for move in environ_state['legal_moves'] if move not in self.q_table.index]
+        moves_not_in_Q_table: list[str] = [move for move in environ_state['legal_moves'] if move not in self.q_table.index]
 
         if moves_not_in_Q_table:
             if game_settings.PRINT_STEP_BY_STEP:
