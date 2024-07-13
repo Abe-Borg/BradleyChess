@@ -32,10 +32,10 @@ class Environ:
                 Opens the errors file in append mode.
                 Modifies the turn list and the turn index. 
         """
-        self.error_logger = logging.getLogger(__name__)
-        self.error_logger.setLevel(logging.ERROR)
-        error_handler = logging.FileHandler(game_settings.environ_errors_filepath)
-        self.error_logger.addHandler(error_handler)
+        # self.error_logger = logging.getLogger(__name__)
+        # self.error_logger.setLevel(logging.ERROR)
+        # error_handler = logging.FileHandler(game_settings.environ_errors_filepath)
+        # self.error_logger.addHandler(error_handler)
 
         self.board: chess.Board = chess.Board()
         
@@ -67,7 +67,7 @@ class Environ:
                 Writes into the errors file if an IndexError is encountered.
         """
         if not (0 <= self.turn_index < len(self.turn_list)):
-            self.error_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
+            # self.error_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
             raise IndexError(f'Turn index out of range: {self.turn_index}')
     
         curr_turn = self.get_curr_turn()
@@ -93,11 +93,11 @@ class Environ:
                 Writes into the errors file if the maximum turn index is reached or exceeded.
         """
         if self.turn_index >= game_settings.max_turn_index:
-            self.error_logger.error(f'ERROR: max_turn_index reached: {self.turn_index} >= {game_settings.max_turn_index}\n')
+            # self.error_logger.error(f'ERROR: max_turn_index reached: {self.turn_index} >= {game_settings.max_turn_index}\n')
             raise IndexError(f"Maximum turn index ({game_settings.max_turn_index}) reached!")
     
         if self.turn_index >= len(self.turn_list):
-            self.error_logger.error(f'ERROR: turn index out of bounds: {self.turn_index} >= {len(self.turn_list)}\n')
+            # self.error_logger.error(f'ERROR: turn index out of bounds: {self.turn_index} >= {len(self.turn_list)}\n')
             raise IndexError(f"Turn index out of bounds: {self.turn_index}")
     
         self.turn_index += 1
@@ -122,7 +122,7 @@ class Environ:
                 Writes into the errors file if an IndexError is encountered.
         """
         if not (0 <= self.turn_index < len(self.turn_list)):
-            self.error_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
+            # self.error_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
             raise IndexError(f'Turn index out of range: {self.turn_index}')
         
         return self.turn_list[self.turn_index]
@@ -152,8 +152,6 @@ class Environ:
         try:
             self.board.push_san(chess_move_str)
         except ValueError as e:
-            self.error_logger.error(f'An error occurred at environ.load_chessboard() for {curr_game}: {e}, unable to load chessboard with {chess_move_str}')
-            self.error_logger.error(f'========== End of Environ.load_chessboard ==========\n\n\n')
             raise ValueError(e) from e
     ### end of load_chessboard    
 
@@ -175,7 +173,7 @@ class Environ:
         try:
             self.board.pop() # this raises an IndexError if the move stack is empty
         except IndexError as e:
-            self.error_logger.error(f'An error occurred: {e}, unable to pop chessboard')
+            # self.error_logger.error(f'An error occurred: {e}, unable to pop chessboard')
             raise IndexError(f"An error occurred: {e}, unable to pop chessboard'")
     ### end of pop_chessboard
 
@@ -199,8 +197,8 @@ class Environ:
             if self.turn_index > 0:
                 self.turn_index -= 1
         except IndexError as e:
-            self.error_logger.error(f'at, undo_move, An error occurred: {e}, unable to undo move')
-            self.error_logger.error(f'turn index: {self.turn_index}\n')
+            # self.error_logger.error(f'at, undo_move, An error occurred: {e}, unable to undo move')
+            # self.error_logger.error(f'turn index: {self.turn_index}\n')
             raise IndexError(e) from e
     ### end of undo_move
 
@@ -232,7 +230,7 @@ class Environ:
             move = chess.Move.from_uci(anticipated_chess_move)
             self.board.push(move)    
         except ValueError as e:
-            self.error_logger.error(f'at, load_chessboard_for_Q_est, An error occurred: {e}, unable to load chessboard with {anticipated_chess_move}')
+            # self.error_logger.error(f'at, load_chessboard_for_Q_est, An error occurred: {e}, unable to load chessboard with {anticipated_chess_move}')
             raise ValueError(e) from e
 
     ### end of load_chessboard_for_Q_est

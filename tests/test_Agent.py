@@ -32,7 +32,7 @@ class TestAgent(unittest.TestCase):
         In this case, it sets up a subset of chess game data, an instance of the Agent class, and a dictionary representing the environment state for the agent.
         """        
         self.agent = Agent(color='W')
-        self.agent.Q_table = pd.read_pickle(game_settings.bradley_agent_q_table_path, compression = 'zip')
+        self.agent.q_table = pd.read_pickle(game_settings.bradley_agent_q_table_path, compression = 'zip')
         self.environ_state = {
             'turn_index': 0,
             'curr_turn': 'W1',
@@ -64,7 +64,7 @@ class TestAgent(unittest.TestCase):
         self.assertEqual(self.agent.discount_factor, 0.35)
         self.assertEqual(self.agent.is_trained, False)
         # assert that q_table was assigned and is not None
-        self.assertIsNotNone(self.agent.Q_table)
+        self.assertIsNotNone(self.agent.q_table)
 
     def test_invalid_move_handling(self):
         """
@@ -124,9 +124,9 @@ class TestAgent(unittest.TestCase):
                 AssertionError: If the move chosen by the agent when it is trained is the same as the move chosen when it is not trained.
         """
         # Generate random integers between 1 and 1000
-        random_integers = np.random.randint(1, 1001, size=self.agent.Q_table.shape)
+        random_integers = np.random.randint(1, 1001, size=self.agent.q_table.shape)
         # Assign the random integers to the q table
-        self.agent.Q_table.iloc[:, :] = random_integers
+        self.agent.q_table.iloc[:, :] = random_integers
 
         # Ensure behavior changes based on the agent being trained or not
         self.agent.is_trained = False
@@ -149,9 +149,9 @@ class TestAgent(unittest.TestCase):
         move = 'e4'
         turn = 'W1'
         points = 10
-        initial_value = self.agent.Q_table.at[move, turn]
+        initial_value = self.agent.q_table.at[move, turn]
         self.agent.change_Q_table_pts(move, turn, points)
-        updated_value = self.agent.Q_table.at[move, turn]
+        updated_value = self.agent.q_table.at[move, turn]
         self.assertEqual(updated_value, initial_value + points)
 
     def test_invalid_move_handling_in_change_Q_table_pts(self):
@@ -177,8 +177,8 @@ class TestAgent(unittest.TestCase):
         new_moves = ['gk4', 'hk4']
         self.agent.update_Q_table(new_moves)
         for move in new_moves:
-            self.assertTrue(move in self.agent.Q_table.index)
-            self.assertTrue((self.agent.Q_table.loc[move] == 0).all())
+            self.assertTrue(move in self.agent.q_table.index)
+            self.assertTrue((self.agent.q_table.loc[move] == 0).all())
                 
     
 if __name__ == '__main__':
