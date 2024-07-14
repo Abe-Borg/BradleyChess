@@ -24,9 +24,6 @@ class Bradley:
             none
         Attributes:
             environ (Environ.Environ): An Environ object representing the chessboard environment.
-            w_agent (Agent.Agent): A white RL Agent object.
-            B_rl_agent (Agent.Agent): A black RL Agent object.
-            corrupted_games_list (list): A list of games that are corrupted and cannot be used for training.
     """
     def __init__(self):
         self.error_logger = logging.getLogger(__name__)
@@ -79,7 +76,6 @@ class Bradley:
             Side Effects:
                 Modifies the chessboard and the current state of the environment by loading the chess move and updating 
                 the current state.
-                Writes to the errors file if an error occurs.
         """
         try:
             self.environ.load_chessboard(chess_move)
@@ -117,7 +113,6 @@ class Bradley:
         Side Effects:
             Modifies the chessboard and the current state of the environment by loading the chess move and updating 
             the current state.
-            Writes to the errors file if an error occurs.
         """
         try:
             curr_state = self.environ.get_curr_state()
@@ -149,62 +144,21 @@ class Bradley:
             raise Exception from e
     ### end of rl_agent_selects_chess_move
 
-    def is_game_over(self) -> bool:
-        """
-        Determines whether the game is over.
-        This method determines whether the game is over based on three conditions: if the game is over according to 
-        the chessboard, if the current turn index has reached the maximum turn index defined in the game settings, 
-        or if there are no legal moves left. This method is used during phase 2 of training and also during human 
-        vs agent play.
-
-        Returns:
-            bool: A boolean value indicating whether the game is over. Returns True if any of the three conditions 
-            are met, and False otherwise.
-        Side Effects:
-            None.
-        """
-        return (
-            self._is_game_over_by_rules() or
-            self._is_max_turns_reached() or
-            self._is_no_legal_moves_left()
-        )
-    ### end of is_game_over
-
-    ### helper methods for is_game_over ###
-    def _is_game_over_by_rules(self) -> bool:
-        """Check if the game is over according to chess rules."""
-        return self.environ.board.is_game_over()
-
-    def _is_max_turns_reached(self) -> bool:
-        """Check if the maximum number of turns has been reached."""
-        return self.environ.turn_index >= game_settings.max_turn_index
-
-    def _is_no_legal_moves_left(self) -> bool:
-        """Check if there are no legal moves left."""
-        return len(self._get_legal_moves()) == 0
-
-    def _get_legal_moves(self) -> list[str]:
-        """Get the list of legal moves from the environment."""
-        return self.environ.get_legal_moves()
-    ### end of helper methods for is_game_over ###
-        
     def get_game_outcome(self) -> str:
         """
-        Returns the outcome of the chess game.
-        This method returns the outcome of the chess game. It calls the `outcome` method on the chessboard, which 
-        returns an instance of the `chess.Outcome` class, and then calls the `result` method on this instance to 
-        get the outcome of the game. If an error occurs while getting the game outcome, an error message is 
-        returned.
+            Returns the outcome of the chess game.
+            This method returns the outcome of the chess game. It calls the `outcome` method on the chessboard, which 
+            returns an instance of the `chess.Outcome` class, and then calls the `result` method on this instance to 
+            get the outcome of the game. If an error occurs while getting the game outcome, an error message is 
+            returned.
 
-        Returns:
-            str: A string representing the outcome of the game. The outcome is a string in the format '1-0', '0-1', 
-            or '1/2-1/2', representing a win for white, a win for black, or a draw, respectively. If an error 
-            occurred while getting the game outcome, the returned string starts with 'error at get_game_outcome: ' 
-            and includes the error message.
-        Raises:
-            GameOutcomeError: If the game outcome cannot be determined.
-        Side Effects:
-            None.
+            Returns:
+                str: A string representing the outcome of the game. The outcome is a string in the format '1-0', '0-1', 
+                or '1/2-1/2', representing a win for white, a win for black, or a draw, respectively. If an error 
+                occurred while getting the game outcome, the returned string starts with 'error at get_game_outcome: ' 
+                and includes the error message.
+            Raises:
+                GameOutcomeError: If the game outcome cannot be determined.
         """
         try:
             return self.environ.board.outcome().result()
@@ -222,8 +176,7 @@ class Bradley:
             returned.
 
             Returns:
-                str: A string representing the reason for the game ending. The termination reason is one of the 
-                following: 'normal', 'abandoned', 'death', 'emergency', 'rules infraction', 'time forfeit', or 'unknown'. 
+                str: A string representing the reason for the game ending. 
                 If an error occurred while getting the termination reason, the returned string starts with 'error at 
                 get_game_termination_reason: ' and includes the error message.
             Raises:

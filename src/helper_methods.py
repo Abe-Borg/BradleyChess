@@ -95,3 +95,24 @@ def get_number_with_probability(probability: float) -> int:
 def start_chess_engine(): 
     chess_engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
     return chess_engine
+
+def is_game_over(environ) -> bool:
+    """
+        This method determines whether the game is over based on three conditions: if the game is over according to 
+        the chessboard, if the current turn index has reached the maximum turn index defined in the game settings, 
+        or if there are no legal moves left.
+
+        Arg: environ object, which manages a chessboard
+
+        Returns:
+            bool: A boolean value indicating whether the game is over. Returns True if any of the three conditions 
+            are met, and False otherwise.
+        Side Effects:
+            None.
+    """
+    return (
+        environ.board.is_game_over() or
+        environ.turn_index >= game_settings.max_turn_index or
+        (len(environ.get_legal_moves()) == 0)
+    )
+### end of is_game_over
