@@ -1,0 +1,44 @@
+
+'''
+Script for Initializing Q-Tables for Chess Moves
+
+This script initializes Q-tables for a chess-playing reinforcement learning (RL) agent. It processes a dataset of chess games to extract unique moves for both white and black pieces, and creates Q-tables with these moves as indices. The Q-tables are then saved for future use in training the RL agent.
+
+Dependencies:
+- game_settings
+- pandas
+- time
+- numpy
+
+Main Variables:
+    chess_data_file_path: Path to the chess data pickle file.
+    game_settings.CHESS_DATA: Loaded chess data stored in a DataFrame.
+    white_color: Character representing white pieces.
+    black_color: Character representing black pieces.
+
+Main Execution:
+    - The script is designed to be run as a standalone program.
+    - It initializes Q-tables for both white and black pieces based on unique moves extracted from the chess data.
+    - Measures the time taken for the initialization process.
+
+Function Details:
+
+def main():
+    '''
+    Initializes Q-tables for a chess-playing RL agent.
+
+    This function performs the following steps:
+    1. Loads the chess data from a pickle file specified in game_settings.
+    2. Defines the characters representing white and black pieces.
+    3. Generates lists of turn columns for both white and black pieces based on the maximum number of turns per player.
+    4. Extracts the columns related to moves for both white and black pieces from the chess data.
+    5. Flattens the arrays of moves and finds unique moves for both white and black pieces.
+    6. Creates Q-tables with the unique moves as indices and turn columns, initializing all values to zero.
+    7. Saves the Q-tables to specified file paths in game_settings.
+    8. Logs any errors encountered during the process.
+    9. Prints the total time taken for the initialization process.
+    '''
+    
+if __name__ == '__main__':
+    main()
+'''
