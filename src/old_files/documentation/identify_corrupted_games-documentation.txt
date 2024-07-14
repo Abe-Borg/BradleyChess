@@ -1,0 +1,49 @@
+
+'''
+Script for Identifying and Removing Corrupted Chess Games from Dataset
+
+This script identifies and removes corrupted games from a chess dataset stored in a pickle file. It utilizes a custom `Bradley` class for identifying corrupted games based on certain criteria. The cleaned dataset is then saved back to the original file.
+
+Dependencies:
+- game_settings
+- pandas
+- time
+- Bradley
+- logging
+
+Functions:
+    identifying_corrupted_games(chess_data_filepath):
+        Identifies and removes corrupted games from the chess dataset.
+        Args:
+            chess_data_filepath (str): The path to the chess data pickle file.
+
+Main Execution:
+    - The script is designed to be run as a standalone program.
+    - It processes a specified pickle file, identifies corrupted games, removes them, and saves the cleaned data.
+    - Measures the time taken for the identification and cleanup process.
+
+Function Details:
+
+def identifying_corrupted_games(chess_data_filepath):
+    '''
+    Identifies and removes corrupted games from the chess dataset.
+
+    Parameters:
+        chess_data_filepath (str): The path to the chess data pickle file.
+
+    This function performs the following steps:
+    1. Loads the chess data from a pickle file.
+    2. Initializes an instance of the Bradley class.
+    3. Prints the total number of rows in the dataset before cleanup.
+    4. Identifies corrupted games using the Bradley class's profile_corrupted_games_identification method.
+    5. If corrupted games are found, they are removed from the dataset.
+    6. Prints the total number of rows in the dataset after cleanup.
+    7. Saves the cleaned dataset back to the original file.
+    8. Prints the total time taken for the process and the number of corrupted games found.
+    9. Logs any errors encountered during the process.
+    '''
+
+if __name__ == '__main__':
+    # Calls the identifying_corrupted_games function with the specified chess data filepath.
+    identifying_corrupted_games(game_settings.chess_games_filepath_part_40)
+'''
