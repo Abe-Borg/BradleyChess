@@ -14,6 +14,7 @@ import pstats
 import io
 import functools
 import logging
+import helper_methods
 
 class Bradley:
     """
@@ -143,29 +144,6 @@ class Bradley:
             self.error_logger.error(f'Error: {e}, failed to update_curr_state\n')
             raise Exception from e
     ### end of rl_agent_selects_chess_move
-
-    def get_game_outcome(self) -> str:
-        """
-            Returns the outcome of the chess game.
-            This method returns the outcome of the chess game. It calls the `outcome` method on the chessboard, which 
-            returns an instance of the `chess.Outcome` class, and then calls the `result` method on this instance to 
-            get the outcome of the game. If an error occurs while getting the game outcome, an error message is 
-            returned.
-
-            Returns:
-                str: A string representing the outcome of the game. The outcome is a string in the format '1-0', '0-1', 
-                or '1/2-1/2', representing a win for white, a win for black, or a draw, respectively. If an error 
-                occurred while getting the game outcome, the returned string starts with 'error at get_game_outcome: ' 
-                and includes the error message.
-            Raises:
-                GameOutcomeError: If the game outcome cannot be determined.
-        """
-        try:
-            return self.environ.board.outcome().result()
-        except custom_exceptions.GameOutcomeError as e:
-            self.error_logger.error('hello from Bradley.get_game_outcome\n')
-            return f'error at get_game_outcome: {e}'
-    ### end of get_game_outcome
     
     def get_game_termination_reason(self) -> str:
         """
@@ -416,7 +394,7 @@ class Bradley:
             self.initial_training_logger.info(f'{game_num_str} is over.\n')
             self.initial_training_logger.info(f'\nThe Chessboard looks like this:\n')
             self.initial_training_logger.info(f'\n{environ.board}\n\n')
-            self.initial_training_logger.info(f'Game result is: {self.get_game_outcome()}\n')    
+            self.initial_training_logger.info(f'Game result is: {helper_methods.get_game_outcome(environ)}\n')    
             self.initial_training_logger.info(f'The game ended because of: {self.get_game_termination_reason()}\n')
             self.initial_training_logger.info(f'DB shows game ended b/c: {chess_data.at[game_num_str, "Result"]}\n')
 
