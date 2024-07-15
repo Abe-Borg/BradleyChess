@@ -116,3 +116,26 @@ def is_game_over(environ) -> bool:
         (len(environ.get_legal_moves()) == 0)
     )
 ### end of is_game_over
+
+def get_game_outcome(environ) -> str:
+    """
+        Returns the outcome of the chess game.
+        This method returns the outcome of the chess game. It calls the `outcome` method on the chessboard, which 
+        returns an instance of the `chess.Outcome` class, and then calls the `result` method on this instance to 
+        get the outcome of the game. If an error occurs while getting the game outcome, an error message is 
+        returned.
+
+        Returns:
+            str: A string representing the outcome of the game. The outcome is a string in the format '1-0', '0-1', 
+            or '1/2-1/2', representing a win for white, a win for black, or a draw, respectively. If an error 
+            occurred while getting the game outcome, the returned string starts with 'error at get_game_outcome: ' 
+            and includes the error message.
+        Raises:
+            GameOutcomeError: If the game outcome cannot be determined.
+    """
+    try:
+        return environ.board.outcome().result()
+    except custom_exceptions.GameOutcomeError as e:
+        # self.error_logger.error('hello from Bradley.get_game_outcome\n')
+        return f'error at get_game_outcome: {e}'
+### end of get_game_outcome
