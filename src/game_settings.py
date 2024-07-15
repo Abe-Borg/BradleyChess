@@ -27,7 +27,7 @@ training_sample_size = 50_000
 max_num_turns_per_player = 200
 max_turn_index = max_num_turns_per_player * 2 - 1
 
-initial_q_val = 50 # this is relevant when first training an agent. SARSA algorithm requires an initial value
+initial_q_val = 1 # this is relevant when training an agent. SARSA algorithm requires an initial value
 chance_for_random_move = 0.05 # 10% chance that RL agent selects random chess move
         
 # The following values are for the chess engine analysis of moves.
