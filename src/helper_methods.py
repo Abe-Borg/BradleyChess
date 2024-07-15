@@ -629,3 +629,37 @@ def assign_points_to_Q_table(chess_move: str, curr_turn: str, curr_q_val: int, c
         chess_agent.update_Q_table([chess_move])
         chess_agent.change_Q_table_pts(chess_move, curr_turn, curr_q_val)
 # enf of assign_points_to_Q_table
+
+def rl_agent_plays_move(chess_move: str, curr_game, environ) -> None:
+    """
+        Loads the chessboard with the given move and updates the current state of the environment.
+        This method is used during training. It first attempts to load the chessboard with the given move. If an 
+        error occurs while loading the chessboard, it writes an error message to the errors file and raises an 
+        exception. It then attempts to update the current state of the environment. If an error occurs while 
+        updating the current state, it writes an error message to the errors file and raises an exception.
+
+        Args: 
+            chess_move (str): A string representing the chess move in standard algebraic notation.
+            curr_game: The current game being played during training.
+        Raises:
+            Exception: An exception is raised if an error occurs while loading the chessboard or updating the 
+            current state. The original exception is included in the raised exception.
+        Side Effects:
+            Modifies the chessboard and the current state of the environment by loading the chess move and updating 
+            the current state.
+            Writes to the errors file if an error occurs.
+    """
+    try:
+        environ.load_chessboard(chess_move, curr_game)
+    except custom_exceptions.ChessboardLoadError as e:
+        # self.error_logger.error(f'at Bradley.rl_agent_plays_move. An error occurred at {curr_game}: {e}\n')
+        # self.error_logger.error(f"failed to load_chessboard with move {chess_move}\n")
+        raise Exception from e
+
+    try:
+        environ.update_curr_state()
+    except custom_exceptions.StateUpdateError as e:
+        # self.error_logger.error(f'at Bradley.rl_agent_plays_move. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
+        # self.error_logger.error(f'Current state is: {environ.get_curr_state()}\n')
+        raise Exception from e
+# end of rl_agent_plays_move
