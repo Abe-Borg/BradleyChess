@@ -589,3 +589,10 @@ def generate_Q_est_df(chess_data) -> None:
 
     environ.reset_environ()
 # end of generate_Q_est_df
+
+def continue_training_rl_agents(self, num_games_to_play: int) -> None:
+    """ continues to train the agent, this time the agents make their own decisions instead 
+        of playing through the database.
+    """ 
+    ### placeholder, will implement this function later.
+### end of continue_training_rl_agents

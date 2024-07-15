@@ -145,13 +145,6 @@ class Bradley:
             raise Exception from e
     ### end of rl_agent_selects_chess_move
         
-    def continue_training_rl_agents(self, num_games_to_play: int) -> None:
-        """ continues to train the agent, this time the agents make their own decisions instead 
-            of playing through the database.
-        """ 
-        ### placeholder, will implement this function later.
-    ### end of continue_training_rl_agents
-    
     def assign_points_to_Q_table(chess_move: str, curr_turn: str, curr_q_val: int, chess_agent) -> None:
         """
             Assigns points to the Q table for the given chess move, current turn, current Q value, and RL agent color.
