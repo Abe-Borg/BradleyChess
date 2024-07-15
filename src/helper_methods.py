@@ -165,7 +165,7 @@ def get_game_termination_reason(environ) -> str:
         return f'error at get_game_termination_reason: {e}'
     ### end of get_game_termination_reason
 
-def train_rl_agents(self, est_q_val_table, chess_data, w_agent, b_agent):
+def train_rl_agents(est_q_val_table, chess_data, w_agent, b_agent):
     """
         Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
         This method trains two RL agents by having them play games from a database exactly as shown, and learning from that. 
@@ -528,8 +528,7 @@ def generate_Q_est_df(chess_data) -> None:
                 return
             else: # current game continues
                 try:
-                    W_est_Qval: int = self.find_estimated_Q_value()
-                    q_est_vals_file.write(f'{curr_turn_for_q_est}, {W_est_Qval}\n')
+                    W_est_Qval: int = helper_methods.find_estimated_Q_value()
                 except Exception as e:
                     # self.error_logger.error(f'An error occurred while retrieving W_est_Qval: {e}\n')
                     # self.error_logger.error(f"at White turn, failed to find_estimated_Q_value\n")
@@ -538,7 +537,7 @@ def generate_Q_est_df(chess_data) -> None:
 
             ##################### BLACK'S TURN ####################
             # choose action a from state s, using policy
-            b_chess_move = self.B_rl_agent.choose_action(curr_state, game_num_str)
+            b_chess_move = b_agent.choose_action(curr_state, game_num_str)
             if not b_chess_move:
                 # self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
                 # self.error_logger.error(f'b_chess_move is empty at state: {curr_state}\n')
@@ -590,7 +589,7 @@ def generate_Q_est_df(chess_data) -> None:
     environ.reset_environ()
 # end of generate_Q_est_df
 
-def continue_training_rl_agents(self, num_games_to_play: int) -> None:
+def continue_training_rl_agents(num_games_to_play: int) -> None:
     """ continues to train the agent, this time the agents make their own decisions instead 
         of playing through the database.
     """ 
