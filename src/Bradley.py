@@ -425,7 +425,7 @@ class Bradley:
         }
     ### end of analyze_board_state
  
-    def generate_Q_est_df(self, q_est_vals_file_path) -> None:
+    def generate_Q_est_df(chess_data) -> None:
         """
             Generates a dataframe containing the estimated Q-values for each chess move in the chess database.
 
@@ -453,31 +453,26 @@ class Bradley:
             After each game, the method resets the environment to prepare for the next game.
 
             Args:
-                q_est_vals_file_path (str): The path to the file where the estimated Q-values will be written.
-
+                chess_data (pd.DataFrame): A DataFrame containing the chess database.
             Returns:
-                None.
+                estimated_q_values (pd.DataFrame): A DataFrame containing the estimated Q-values for each chess move.
 
-            Raises:
-                None.
-
-            Side Effects:
-                Writes to the errors file if an error occurs.
-                Writes to the Q-values file.
-                Modifies the current state of the environment.
         """
-        q_est_vals_file = open(q_est_vals_file_path, 'a')
+        environ = Environ.Environ()
+        estimated_q_values = chess_data.copy(deep = True)
+        estimated_q_values = estimated_q_values.astype('int64')
+        estimated_q_values.iloc[:, 1:] = 0
 
         try:
             ### FOR EACH GAME IN THE TRAINING SET ###
-            for game_num_str in game_settings.chess_data.index:
-                num_chess_moves_curr_training_game: int = game_settings.chess_data.at[game_num_str, 'PlyCount']
+            for game_num_str in chess_data.index:
+                num_chess_moves_curr_training_game: int = chess_data.at[game_num_str, 'PlyCount']
 
                 try:
-                    curr_state = self.environ.get_curr_state()
+                    curr_state = environ.get_curr_state()
                 except Exception as e:
-                    self.error_logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
-                    self.error_logger.error(f'at: {game_num_str}\n')
+                    # self.error_logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
+                    # self.error_logger.error(f'at: {game_num_str}\n')
                     break
                 
                 q_est_vals_file.write(f'{game_num_str}\n')
@@ -488,8 +483,8 @@ class Bradley:
                     # choose action a from state s, using policy
                     w_chess_move = w_agent.choose_action(curr_state, game_num_str)
                     if not w_chess_move:
-                        self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
-                        self.error_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
+                        # self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
+                        # self.error_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
                         break
 
                     # assign curr turn to new var for now. once agent plays move, turn will be updated, but we need 
@@ -499,22 +494,22 @@ class Bradley:
                     ### WHITE AGENT PLAYS THE SELECTED MOVE ###
                     # take action a, observe r, s', and load chessboard
                     try:
-                        self.rl_agent_plays_move(w_chess_move, game_num_str)
+                        game_settings.rl_agent_plays_move(w_chess_move, game_num_str)
                     except Exception as e:
-                        self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
-                        self.error_logger.error(f'at: {game_num_str}\n')
+                        # self.error_logger.error(f'An error occurred at rl_agent_plays_move: {e}\n')
+                        # self.error_logger.error(f'at: {game_num_str}\n')
                         break # and go to the next game. this game is over.
 
                     # get latest curr_state since self.rl_agent_plays_move updated the chessboard
                     try:
-                        curr_state = self.environ.get_curr_state()
+                        curr_state = environ.get_curr_state()
                     except Exception as e:
-                        self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
-                        self.error_logger.error(f'at: {game_num_str}\n')
+                        # self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
+                        # self.error_logger.error(f'at: {game_num_str}\n')
                         break
                     
                     # find the estimated Q value for White, but first check if game ended
-                    if self.environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
+                    if environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
                         break # and go to next game
                     else: # current game continues
                         try:
