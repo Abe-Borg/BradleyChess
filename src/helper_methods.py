@@ -139,3 +139,28 @@ def get_game_outcome(environ) -> str:
         # self.error_logger.error('hello from Bradley.get_game_outcome\n')
         return f'error at get_game_outcome: {e}'
 ### end of get_game_outcome
+
+def get_game_termination_reason(environ) -> str:
+    """
+        Returns a string that describes the reason for the game ending.
+        This method returns a string that describes the reason for the game ending. It calls the `outcome` method 
+        on the chessboard, which returns an instance of the `chess.Outcome` class, and then gets the termination 
+        reason from this instance. If an error occurs while getting the termination reason, an error message is 
+        returned.
+
+        Returns:
+            str: A string representing the reason for the game ending. 
+            If an error occurred while getting the termination reason, the returned string starts with 'error at 
+            get_game_termination_reason: ' and includes the error message.
+        Raises:
+            GameTerminationError: If the termination reason cannot be determined.
+        Side Effects:
+            None.
+    """
+    try:
+        return str(environ.board.outcome().termination)
+    except custom_exceptions.GameTerminationError as e:
+        # self.error_logger.error('hello from Bradley.get_game_termination_reason\n')
+        # self.error_logger.error(f'Error: {e}, failed to get game end reason\n')
+        return f'error at get_game_termination_reason: {e}'
+    ### end of get_game_termination_reason

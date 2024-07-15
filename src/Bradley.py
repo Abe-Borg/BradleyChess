@@ -144,32 +144,7 @@ class Bradley:
             self.error_logger.error(f'Error: {e}, failed to update_curr_state\n')
             raise Exception from e
     ### end of rl_agent_selects_chess_move
-    
-    def get_game_termination_reason(self) -> str:
-        """
-            Returns a string that describes the reason for the game ending.
-            This method returns a string that describes the reason for the game ending. It calls the `outcome` method 
-            on the chessboard, which returns an instance of the `chess.Outcome` class, and then gets the termination 
-            reason from this instance. If an error occurs while getting the termination reason, an error message is 
-            returned.
-
-            Returns:
-                str: A string representing the reason for the game ending. 
-                If an error occurred while getting the termination reason, the returned string starts with 'error at 
-                get_game_termination_reason: ' and includes the error message.
-            Raises:
-                GameTerminationError: If the termination reason cannot be determined.
-            Side Effects:
-                None.
-        """
-        try:
-            return str(self.environ.board.outcome().termination)
-        except custom_exceptions.GameTerminationError as e:
-            self.error_logger.error('hello from Bradley.get_game_termination_reason\n')
-            self.error_logger.error(f'Error: {e}, failed to get game end reason\n')
-            return f'error at get_game_termination_reason: {e}'
-    ### end of get_game_termination_reason
-    
+        
     def train_rl_agents(self, est_q_val_table: pd.DataFrame, chess_data: pd.DataFrame, w_agent, b_agent) -> None:
         """
             Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
@@ -395,7 +370,7 @@ class Bradley:
             self.initial_training_logger.info(f'\nThe Chessboard looks like this:\n')
             self.initial_training_logger.info(f'\n{environ.board}\n\n')
             self.initial_training_logger.info(f'Game result is: {helper_methods.get_game_outcome(environ)}\n')    
-            self.initial_training_logger.info(f'The game ended because of: {self.get_game_termination_reason()}\n')
+            self.initial_training_logger.info(f'The game ended because of: {helper_methods.get_game_termination_reason()}\n')
             self.initial_training_logger.info(f'DB shows game ended b/c: {chess_data.at[game_num_str, "Result"]}\n')
 
         if game_settings.PRINT_STEP_BY_STEP:
