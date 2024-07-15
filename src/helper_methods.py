@@ -596,3 +596,36 @@ def continue_training_rl_agents(self, num_games_to_play: int) -> None:
     """ 
     ### placeholder, will implement this function later.
 ### end of continue_training_rl_agents
+
+def assign_points_to_Q_table(chess_move: str, curr_turn: str, curr_q_val: int, chess_agent) -> None:
+    """
+        Assigns points to the Q table for the given chess move, current turn, current Q value, and RL agent color.
+        This method assigns points to the Q table for the RL agent of the given color. It calls the 
+        `change_Q_table_pts` method on the RL agent, passing in the chess move, the current turn, and the current Q 
+        value. If a KeyError is raised because the chess move is not represented in the Q table, the method writes 
+        an error message to the errors file, updates the Q table to include the chess move, and tries to assign 
+        points to the Q table again.
+
+        Args:
+            chess_move (str): The chess move to assign points to in the Q table.
+            curr_turn (str): The current turn of the game.
+            curr_Qval (int): The current Q value for the given chess move.
+            rl_agent_color (str): The color of the RL agent making the move.
+
+        Raises:
+            QTableUpdateError: is raised if the chess move is not represented in the Q table. The exception is 
+            written to the errors file.
+
+        Side Effects:
+            Modifies the Q table of the RL agent by assigning points to the given chess move.
+            Writes to the errors file if a exception is raised.
+    """
+    try:
+        chess_agent.change_Q_table_pts(chess_move, curr_turn, curr_q_val)
+    except custom_exceptions.QTableUpdateError as e: 
+        # chess move is not represented in the Q table, update Q table and try again.
+        # self.error_logger.error(f'caught exception: {e} at assign_points_to_Q_table\n')
+        # self.error_logger.error(f'Chess move is not represented in the White Q table, updating Q table and trying again...\n')
+        chess_agent.update_Q_table([chess_move])
+        chess_agent.change_Q_table_pts(chess_move, curr_turn, curr_q_val)
+# enf of assign_points_to_Q_table
