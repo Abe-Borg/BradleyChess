@@ -746,3 +746,46 @@ def find_estimated_Q_value(environ) -> int:
 
     return est_Qval
 # end of find_estimated_Q_value
+
+def find_next_Qval(curr_Qval: int, learn_rate: float, reward: int, discount_factor: float, est_Qval: int) -> int:
+    """
+    Calculates the next Q-value using the SARSA (State-Action-Reward-State-Action) algorithm.
+
+    This method calculates the next Q-value based on the current Q-value, the learning rate, the reward, the 
+    discount factor, and the estimated Q-value for the next state-action pair. The formula used is:
+
+        next_Qval = curr_Qval + learn_rate * (reward + (discount_factor * est_Qval) - curr_Qval)
+
+    This formula is derived from the SARSA algorithm, which is a model-free reinforcement learning method used 
+    to estimate the Q-values for state-action pairs in an environment.
+
+    Args:
+        curr_Qval (int): The current Q-value for the state-action pair.
+        learn_rate (float): The learning rate, a value between 0 and 1. This parameter controls how much the 
+        Q-value is updated on each iteration.
+        reward (int): The reward obtained from the current action.
+        discount_factor (float): The discount factor, a value between 0 and 1. This parameter determines the 
+        importance of future rewards.
+        est_Qval (int): The estimated Q-value for the next state-action pair.
+
+    Returns:
+        int: The next Q-value, calculated using the SARSA algorithm.
+
+    Raises:
+        QValueCalculationError: If an error or overflow occurs during the calculation of the next Q-value.
+
+    Side Effects:
+        None.
+    """
+    try:
+        next_Qval = int(curr_Qval + learn_rate * (reward + ((discount_factor * est_Qval) - curr_Qval)))
+        return next_Qval
+    except OverflowError:
+        # self.error_logger.error(f'@ Bradley.find_next_Qval. An error occurred: OverflowError\n')
+        # self.error_logger.error(f'curr_Qval: {curr_Qval}\n')
+        # self.error_logger.error(f'learn_rate: {learn_rate}\n')
+        # self.error_logger.error(f'reward: {reward}\n')
+        # self.error_logger.error(f'discount_factor: {discount_factor}\n')
+        # self.error_logger.error(f'est_Qval: {est_Qval}\n')
+        raise custom_exceptions.QValueCalculationError("Overflow occurred during Q-value calculation") from OverflowError
+# end of find_next_Qval
