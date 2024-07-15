@@ -425,52 +425,6 @@ class Bradley:
         }
     ### end of analyze_board_state
  
-    def get_reward(self, chess_move: str) -> int:
-        """
-            Calculates the reward for a given chess move based on the type of move.
-
-            This method calculates the reward for a given chess move by checking for specific patterns in the move string 
-            that correspond to different types of moves. The reward is calculated as follows:
-
-            1. If the move involves the development of a piece (N, R, B, Q), the reward is increased by the value 
-            associated with 'piece_development' in the game settings.
-            2. If the move involves a capture (indicated by 'x' in the move string), the reward is increased by the value 
-            associated with 'capture' in the game settings.
-            3. If the move involves a promotion (indicated by '=' in the move string), the reward is increased by the value 
-            associated with 'promotion' in the game settings. If the promotion is to a queen (indicated by '=Q' in the 
-            move string), the reward is further increased by the value associated with 'promotion_queen' in the game 
-            settings.
-
-            Args:
-                chess_move (str): A string representing the selected chess move in standard algebraic notation.
-
-            Returns:
-                int: The total reward for the given chess move, calculated based on the type of move.
-
-            Raises:
-                ValueError: If the chess_move string is empty or invalid.
-
-            Side Effects:
-                None.
-        """
-        if not chess_move or not isinstance(chess_move, str):
-            raise ValueError("Invalid chess move input")
-
-        total_reward = 0
-        # Check for piece development (N, R, B, Q)
-        if re.search(r'[NRBQ]', chess_move):
-            total_reward += game_settings.CHESS_MOVE_VALUES['piece_development']
-        # Check for capture
-        if 'x' in chess_move:
-            total_reward += game_settings.CHESS_MOVE_VALUES['capture']
-        # Check for promotion (with additional reward for queen promotion)
-        if '=' in chess_move:
-            total_reward += game_settings.CHESS_MOVE_VALUES['promotion']
-            if '=Q' in chess_move:
-                total_reward += game_settings.CHESS_MOVE_VALUES['promotion_queen']
-        return total_reward
-    ## end of get_reward
-
     def generate_Q_est_df(self, q_est_vals_file_path) -> None:
         """
             Generates a dataframe containing the estimated Q-values for each chess move in the chess database.
