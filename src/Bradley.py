@@ -32,31 +32,8 @@ class Bradley:
         error_handler = logging.FileHandler(game_settings.bradley_errors_filepath)
         self.error_logger.addHandler(error_handler)
 
-        self.initial_training_logger = logging.getLogger(__name__ + '.initial_training')
-        self.initial_training_logger.setLevel(logging.INFO)
-        initial_training_handler = logging.FileHandler(game_settings.initial_training_results_filepath)
-        self.initial_training_logger.addHandler(initial_training_handler)
-
-        self.additional_training_logger = logging.getLogger(__name__ + '.additional_training')
-        self.additional_training_logger.setLevel(logging.INFO)
-        additional_training_handler = logging.FileHandler(game_settings.additional_training_results_filepath)
-        self.additional_training_logger.addHandler(additional_training_handler)
-
-        self.step_by_step_logger = logging.getLogger(__name__ + '.step_by_step')
-        self.step_by_step_logger.setLevel(logging.DEBUG)
-        step_by_step_handler = logging.FileHandler(game_settings.bradley_step_by_step_filepath)
-        self.step_by_step_logger.addHandler(step_by_step_handler)
-
         self.environ = Environ.Environ()       
     ### end of Bradley constructor ###
-
-    def __del__(self):
-        # Remove handlers from loggers to ensure they're properly closed
-        for logger in [self.error_logger, self.initial_training_logger, self.additional_training_logger, self.step_by_step_logger]:
-            for handler in logger.handlers[:]:
-                handler.close()
-                logger.removeHandler(handler)
-    ### end of Bradley destructor ###
 
     def receive_opp_move(self, chess_move: str) -> bool:                                                                                 
         """
