@@ -5,37 +5,6 @@ import chess.engine
 import logging
 import Agent
 
-def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_game = 0) -> None:
-    try:
-        # play all moves in a single game
-        while is_game_over(environ) == False:
-            if print_to_screen:
-                print(f'\nCurrent turn: {environ.get_curr_turn()}')
-                chess_move = agent_selects_and_plays_chess_move(chess_agent, environ)
-                time.sleep(3)
-                print(f'White agent played {chess_move} curr board is:\n{environ.board}\n')
-            else:
-                pass
-                # make a log file that will record the game moves. and track the current game
-            
-            # sometimes game ends after white's turn
-            if is_game_over(environ) == False:
-                if print_to_screen:
-                    print(f'\nCurrent turn: {environ.get_curr_turn()}')
-                    chess_move = agent_selects_and_plays_chess_move(chess_agent, environ)
-                    time.sleep(3)
-                    print(f'Black agent played {chess_move} curr board is:\n{environ.board}\n')
-                else:
-                    pass
-                    # make a log file that will record the game moves.
-    except Exception as e:
-        # agent_vs_agent_file.write(f'An unhandled error occurred: {e}\n')
-        raise Exception from e
-
-    # game is over, reset environ
-    reset_environ(environ)
-### end of agent_vs_agent
-
 def play_game(environ, chess_agent) -> None:
     """
         precondition: environ object is initialized to new game, chess_agent is initialized and trained
@@ -54,7 +23,7 @@ def play_game(environ, chess_agent) -> None:
 
     print(f'Game is over, result is: {get_game_outcome(environ)}')
     print(f'The game ended because of: {get_game_termination_reason(environ)}')
-    reset_environ(environ)
+    environ.reset_environ()
 ### end of play_game
 
 def handle_move(player_color: str, chess_agent) -> str:
