@@ -18,13 +18,24 @@ import helper_methods
 
 class Bradley:
     """
-        Acts as the single point of communication between the RL agent and the player.
-        This class trains the agent and helps to manage the chessboard during play between the computer and the user.
+        A class representing the main game controller for a chess AI system.
 
-        Args:
-            none
+        The Bradley class manages the game environment, handles opponent moves,
+        and coordinates the AI agent's move selection. It interfaces with the
+        Environ class to maintain the game state and uses logging to track errors.
+
         Attributes:
-            environ (Environ.Environ): An Environ object representing the chessboard environment.
+            error_logger (logging.Logger): Logger for error tracking and reporting.
+            environ (Environ): An instance of the Environ class representing the game environment.
+
+        Methods:
+            __init__(): Initializes the Bradley instance with error logging and game environment.
+            receive_opp_move(chess_move: str) -> bool: Processes and applies the opponent's move.
+            rl_agent_selects_chess_move(chess_agent) -> str: Selects and applies the AI agent's move.
+
+        The class is designed to handle the flow of a chess game, including move validation,
+        state updates, and error handling. It serves as the central controller for the
+        chess AI system, coordinating between the game environment and the AI agent.
     """
     def __init__(self):
         self.error_logger = logging.getLogger(__name__)
@@ -121,5 +132,3 @@ class Bradley:
             self.error_logger.error(f'Error: {e}, failed to update_curr_state\n')
             raise Exception from e
     ### end of rl_agent_selects_chess_move
-        
-    
