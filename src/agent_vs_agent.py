@@ -10,7 +10,7 @@ if __name__ == '__main__':
     try:
         helper_methods.bootstrap_agent(bradley, 'W', game_settings.bradley_agent_q_table_path)
         helper_methods.bootstrap_agent(bradley, 'B', game_settings.imman_agent_q_table_path)
-        helper_methods.agent_vs_agent(bradley)
+        agent_vs_agent(bradley)
         bradley.engine.quit()
     except Exception as e:
         print(f'agent vs agent interrupted because of:  {e}')
