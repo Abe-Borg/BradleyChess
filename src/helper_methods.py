@@ -4,40 +4,7 @@ import random
 import chess.engine
 import logging
 import Agent
-
-def play_game(environ, chess_agent) -> None:
-    """
-        precondition: environ object is initialized to new game, chess_agent is initialized and trained
-    """
-    player_turn = 'W'
-    while is_game_over() == False:
-        try:
-            print(f'\nCurrent turn is :  {environ.get_curr_turn()}\n')
-            chess_move = handle_move(player_turn, chess_agent)
-            print(f'{player_turn} played {chess_move}\n')
-        except Exception as e:
-            # put in logger here.
-            raise Exception from e
-
-        player_turn = 'B' if player_turn == 'W' else 'W'
-
-    print(f'Game is over, result is: {get_game_outcome(environ)}')
-    print(f'The game ended because of: {get_game_termination_reason(environ)}')
-    environ.reset_environ()
-### end of play_game
-
-def handle_move(player_color: str, chess_agent) -> str:
-    if player_color == chess_agent.color:
-        print('=== RL AGENT\'S TURN ===\n')
-        agent_selects_and_plays_chess_move(player_color, chess_agent)
-    else:
-        print('=== OPPONENT\'S TURN ===')
-        chess_move = input('Enter chess move: ')
-        while not receive_opponent_move(chess_move):
-            print('Invalid move, try again.')
-            chess_move = input('Enter chess move: ')
-        return chess_move
-### end of handle_move
+import custom_exceptions
 
 def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
     """
@@ -66,11 +33,6 @@ def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
         # self.error_logger.error("agent_selects_and_plays_chess_move, an error occurred\n")
         # self.error_logger.error(f'Error: {e}, failed to get_curr_state\n')
         raise Exception from e
-    
-    if curr_state['legal_moves'] == []:
-        # self.error_logger.error('hello agent_selects_and_plays_chess_move, legal_moves is empty\n')
-        # self.error_logger.error(f'curr state is: {curr_state}\n')
-        raise custom_exceptions.NoLegalMovesError(f'agent_selects_and_plays_chess_move, legal_moves is empty\n')
     
     chess_move: str = chess_agent.choose_action(curr_state)
 

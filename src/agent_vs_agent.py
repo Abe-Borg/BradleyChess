@@ -43,8 +43,8 @@ if __name__ == '__main__':
     imman = Agent.Agent('B')
 
     try:
-        helper_methods.bootstrap_agent(bradley, game_settings.bradley_agent_q_table_path)
-        helper_methods.bootstrap_agent(imman, game_settings.imman_agent_q_table_path)
+        bradley = helper_methods.bootstrap_agent(bradley, game_settings.bradley_agent_q_table_path)
+        imman = helper_methods.bootstrap_agent(imman, game_settings.imman_agent_q_table_path)
 
         # ask user to input number of games to play
         number_of_games = int(input('How many games do you want the agents to play? '))
