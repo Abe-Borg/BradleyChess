@@ -1,28 +1,23 @@
 import helper_methods
 import game_settings
 import time
-import Bradley
-
-# !!! MAKE SURE to set desired chess_data path in game settings before executing this script !!! #
-
+import training_functions
 
 if __name__ == '__main__':
     start_time = time.time()
-    bradley = Bradley.Bradley()
-    
+    bradley = Agent.Agent('W')
+    imman = Agent.Agent('B')
+    helper_methods.bootstrap_agent(bradley, game_settings.bradley_agent_q_table_path)
+    helper_methods.bootstrap_agent(imman, game_settings.imman_agent_q_table_path)
+    num_games_to_play = game_settings.agent_vs_agent_num_games
+
     try:
-        helper_methods.bootstrap_agent(bradley, 'W', game_settings.bradley_agent_q_table_path)
-        helper_methods.bootstrap_agent(bradley, 'B', game_settings.imman_agent_q_table_path)
+        training_functions.continue_training_rl_agents(num_games_to_play, bradley, imman)
+        helper_methods.pikl_q_table(bradley, game_settings.bradley_agent_q_table_path)
+        helper_methods.pikl_q_table(imman, game_settings.imman_agent_q_table_path)
 
-        bradley.continue_training_rl_agents(game_settings.agent_vs_agent_num_games)
-
-        helper_methods.pikl_q_table(bradley, 'W', game_settings.bradley_agent_q_table_path)
-        helper_methods.pikl_q_table(bradley, 'B', game_settings.imman_agent_q_table_path)
-
-        bradley.engine.quit()
     except Exception as e:
         print(f'training interrupted because of:  {e}')
-        bradley.engine.quit()
         quit()
         
     end_time = time.time()

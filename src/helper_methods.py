@@ -88,7 +88,7 @@ def receive_opponent_move(chess_move: str, environ) -> bool:
         raise Exception from e
 ### end of receive_opp_move
 
-def pikl_q_table(bubs, chess_agent, q_table_path: str) -> None:
+def pikl_q_table(chess_agent, q_table_path: str) -> None:
     chess_agent.q_table.to_pickle(q_table_path, compression = 'zip')
 ### end of pikl_q_table
 
