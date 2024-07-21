@@ -1,6 +1,5 @@
 import helper_methods
 import game_settings
-import Bradley
 import time
 import Environ
 import Agent
@@ -10,7 +9,7 @@ def play_game_vs_human(environ, chess_agent) -> None:
         precondition: environ object is initialized to new game, chess_agent is initialized and trained
     """
     player_turn = 'W'
-    while is_game_over() == False:
+    while helper_methods.is_game_over(environ) == False:
         try:
             print(f'\nCurrent turn is :  {environ.get_curr_turn()}\n')
             chess_move = handle_move(player_turn, chess_agent)

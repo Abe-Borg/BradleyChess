@@ -83,7 +83,6 @@ class QTableUpdateError(ChessError):
         self.message = message
         super().__init__(self.message)
 
-
 class BoardAnalysisError(ChessError):
     """Exception raised when there's an error analyzing the board state."""
     def __init__(self, message="Error analyzing board state"):

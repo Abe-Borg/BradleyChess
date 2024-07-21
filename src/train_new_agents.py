@@ -2,21 +2,24 @@ import helper_methods
 import game_settings
 import pandas as pd
 import time
-import Bradley
-
-# !!! MAKE SURE to set desired chess_data path in game settings before executing this script !!! #
-
+import Environ
+import training_functions
+import Agent
+import chess
 
 if __name__ == '__main__':
     start_time = time.time()
-    bradley = Bradley.Bradley()
-    
+    environ = Environ.Environ()
+    bradley = Agent.Agent('W')
+    imman = Agent.Agent('B')
+
+    # change this each time for new section of the database
+    chess_data = pd.read_pickle(game_settings.chess_games_filepath_part_1, compression = 'zip')
+
     try:
-        bradley.train_rl_agents()
-        bradley.engine.quit()
+        training_functions.train_rl_agents(chess_data, bradley, imman, environ)
     except Exception as e:
         print(f'training interrupted because of:  {e}')
-        bradley.engine.quit()
         quit()
         
     end_time = time.time()

@@ -115,14 +115,14 @@ class Environ:
         return self.turn_list[self.turn_index]
         ### end of get_curr_turn
     
-    def load_chessboard(self, chess_move_str: str, curr_game = 'Game 1') -> None:
+    def load_chessboard(self, chess_move: str, curr_game = 'Game 1') -> None:
         """
             This method takes a string representing a chess move in Standard Algebraic Notation (SAN), and attempts to 
             apply it to the current state of the chessboard. If the move is invalid or cannot be applied, a ValueError 
             is raised and logged into the errors file.
 
             Args:
-                chess_move_str (str): A string representing the chess move in SAN, such as 'Nf3'.
+                chess_move (str): A string representing the chess move in SAN, such as 'Nf3'.
                 curr_game (str, optional): A string representing the current game. Defaults to 'Game 1'.
             Raises:
                 ValueError: Raised when the provided move is invalid or cannot be applied to the current chessboard 
@@ -132,7 +132,7 @@ class Environ:
                 Modifies the chessboard's state by applying the provided move.
         """
         try:
-            self.board.push_san(chess_move_str)
+            self.board.push_san(chess_move)
         except ValueError as e:
             raise ValueError(e) from e
     ### end of load_chessboard    

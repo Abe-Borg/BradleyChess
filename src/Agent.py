@@ -76,7 +76,7 @@ class Agent:
             self.error_logger.error(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             return ''
         
-        self.update_q_table(environ_state['legal_moves'])
+        self.update_q_table(environ_state['legal_moves']) # this func also checks if there are any new unique move strings
 
         if self.is_trained:
             return self.policy_game_mode(environ_state['legal_moves'], environ_state['curr_turn'])

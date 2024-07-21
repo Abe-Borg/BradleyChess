@@ -1,3 +1,5 @@
+import helper_methods
+
 def train_rl_agents(chess_data, w_agent, b_agent):
     """
         Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
@@ -35,6 +37,8 @@ def train_rl_agents(chess_data, w_agent, b_agent):
 def train_one_game(game_num_str, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, num_chess_moves_curr_training_game) -> None:
     # est_q_val_table should probably be a dictionary of lists, where the key is the game number and the value is a list of est q values for each turn.
     environ = Environ.Environ()
+    engine = start_chess_engine()
+    
 
     # if game_settings.PRINT_STEP_BY_STEP:
         # self.step_by_step_logger.debug(f'At game: {game_num_str}\n')
@@ -376,7 +380,7 @@ def generate_q_est_df(chess_data) -> None:
     environ.reset_environ()
 # end of generate_q_est_df
 
-def continue_training_rl_agents(num_games_to_play: int, w_agent, b_agent) -> None:
+def continue_training_rl_agents(num_games_to_play: int, w_agent, b_agent, environ) -> None:
     """ continues to train the agent, this time the agents make their own decisions instead 
         of playing through the database.
 

@@ -34,7 +34,7 @@ def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
         # self.error_logger.error(f'Error: {e}, failed to get_curr_state\n')
         raise Exception from e
     
-    chess_move: str = chess_agent.choose_action(curr_state)
+    chess_move: str = chess_agent.choose_action(curr_state) # we're not training, so we don't need to pass current_game
 
     try:
         environ.load_chessboard(chess_move)
