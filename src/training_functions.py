@@ -280,7 +280,7 @@ def generate_q_est_df(chess_data, w_agent, b_agent) -> pd.DataFrame:
 # end of generate_q_est_df
 
 
-def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_chess_moves_curr_training_game):
+def generate_q_est_df_one_game(chess_data, engine, game_num_str, w_agent, b_agent, num_chess_moves_curr_training_game):
     environ = Environ.Environ()
     engine = start_chess_engine()
     
@@ -328,7 +328,7 @@ def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_c
             break
         else: # current game continues
             try:
-                w_est_q_value: int = find_estimated_q_value(environ)
+                w_est_q_value: int = find_estimated_q_value(environ, engine)
             except Exception as e:
                 # self.error_logger.error(f'An error occurred while retrieving w_est_q_value: {e}\n')
                 # self.error_logger.error(f"at White turn, failed to find_estimated_q_value\n")
@@ -370,7 +370,7 @@ def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_c
             break
         else: # current game continues
             try:
-                b_est_q_val: int = find_estimated_q_value(environ)
+                b_est_q_val: int = find_estimated_q_value(environ, engine)
             except Exception as e:
                 # self.error_logger.error(f"at Black turn, failed to find_estimated_q_valueue because error: {e}\n")
                 # self.error_logger.error(f'curr state is :{curr_state}\n')
@@ -689,8 +689,12 @@ def get_reward(chess_move: str) -> int:
 ## end of get_reward
 
 def start_chess_engine(): 
-    chess_engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
-    return chess_engine
+    try:
+        chess_engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
+        return chess_engine
+    except Exception as e:
+        # error_logger.error(f'An error occurred at start_chess_engine: {e}\n')
+        raise Exception from e
 # end of start_chess_engine
 
 
