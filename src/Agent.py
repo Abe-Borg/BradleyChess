@@ -50,7 +50,7 @@ class Agent:
             self.step_by_step_logger.debug(f'Agent.__init__: color: {color}, learn_rate: {learn_rate}, discount_factor: {discount_factor}, is_trained: {self.is_trained}\n')
     ### end of __init__ ###
 
-    def choose_action(self, environ_state: dict[str, str, list[str]], curr_game: str = 'Game 1') -> str:
+    def choose_action(self, chess_data, environ_state: dict[str, str, list[str]], curr_game: str = 'Game 1') -> str:
         """
             Chooses the next chess move for the agent based on the current state.
             This method chooses the next chess move for the agent based on the current state of the environment. If 
@@ -81,7 +81,7 @@ class Agent:
         if self.is_trained:
             return self.policy_game_mode(environ_state['legal_moves'], environ_state['curr_turn'])
         else:
-            return self.policy_training_mode(curr_game, environ_state["curr_turn"])
+            return self.policy_training_mode(chess_data, curr_game, environ_state["curr_turn"])
     ### end of choose_action ###
     
     def policy_training_mode(self, chess_data, curr_game: str, curr_turn: str) -> str:
