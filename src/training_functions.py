@@ -280,7 +280,7 @@ def generate_q_est_df(chess_data, w_agent, b_agent) -> pd.DataFrame:
 # end of generate_q_est_df
 
 
-def generate_q_est_df_one_game(chess_data, engine, game_num_str, w_agent, b_agent, num_chess_moves_curr_training_game):
+def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_chess_moves_curr_training_game):
     environ = Environ.Environ()
     engine = start_chess_engine()
     
