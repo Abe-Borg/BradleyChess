@@ -489,7 +489,7 @@ def find_estimated_q_value(environ, engine) -> int:
     return est_qval
 # end of find_estimated_q_value
 
-def find_next_qval(curr_qval: int, learn_rate: float, reward: int, discount_factor: float, est_qval: int) -> int:
+def find_next_q_value(curr_qval: int, learn_rate: float, reward: int, discount_factor: float, est_qval: int) -> int:
     """
     Calculates the next q-value using the SARSA (State-Action-Reward-State-Action) algorithm.
 
@@ -523,14 +523,14 @@ def find_next_qval(curr_qval: int, learn_rate: float, reward: int, discount_fact
         next_qval = int(curr_qval + learn_rate * (reward + ((discount_factor * est_qval) - curr_qval)))
         return next_qval
     except OverflowError:
-        # error_logger.error(f'@ Bradley.find_next_qval. An error occurred: OverflowError\n')
+        # error_logger.error(f'@ Bradley.find_next_q_value. An error occurred: OverflowError\n')
         # error_logger.error(f'curr_qval: {curr_qval}\n')
         # error_logger.error(f'learn_rate: {learn_rate}\n')
         # error_logger.error(f'reward: {reward}\n')
         # error_logger.error(f'discount_factor: {discount_factor}\n')
         # error_logger.error(f'est_qval: {est_qval}\n')
         raise custom_exceptions.QValueCalculationError("Overflow occurred during q-value calculation") from OverflowError
-# end of find_next_qval
+# end of find_next_q_value
 
 def analyze_board_state(board, engine) -> dict:
     """
