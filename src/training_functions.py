@@ -89,7 +89,7 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
             rl_agent_plays_move_during_training(w_chess_move, game_number, environ)
         except Exception as e:
             # error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
-            # error_logger.error(f'at curr_game: {game_number}\n')
+            # error_logger.error(f'at game_number: {game_number}\n')
             # error_logger.error(f'at state: {curr_state}\n')
             break # game is over, exit function.
 
@@ -154,7 +154,7 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
             rl_agent_plays_move_during_training(b_chess_move, game_number, environ)
         except Exception as e:
             # error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
-            # error_logger.error(f'at curr_game: {game_number}\n')
+            # error_logger.error(f'at game_number: {game_number}\n')
             # error_logger.error(f'at state: {curr_state}\n')
             break # game is over, exit function
 
@@ -284,7 +284,6 @@ def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent, num_ch
     environ = Environ.Environ()
     engine = start_chess_engine()
     
-    ### FOR EACH GAME IN THE TRAINING SET ###
     try:
         curr_state = environ.get_curr_state()
     except Exception as e:
@@ -386,6 +385,9 @@ def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent, num_ch
             break
     ### END OF CURRENT GAME LOOP ###
     environ.reset_environ()
+    engine.quit()
+# end of generate_q_est_df_one_game
+
 
 def continue_training_rl_agents(num_games_to_play: int, w_agent, b_agent, environ) -> None:
     """ continues to train the agent, this time the agents make their own decisions instead 
@@ -463,7 +465,7 @@ def find_estimated_q_value(environ, engine) -> int:
         
     # this is the q estimated value due to what the opposing agent is likely to play in response to our move.    
     try:
-        est_qval_analysis = analyze_board_state(environ.board)
+        est_qval_analysis = analyze_board_state(environ.board, engine)
     except Exception as e:
         # error_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
         # error_logger.error(f'failed at analyze_board_state\n')
@@ -608,7 +610,7 @@ def analyze_board_state(board, engine) -> dict:
     }
 ### end of analyze_board_state
 
-def rl_agent_plays_move_during_training(chess_move: str, curr_game, environ) -> None:
+def rl_agent_plays_move_during_training(chess_move: str, game_number, environ) -> None:
     """
         Loads the chessboard with the given move and updates the current state of the environment.
         This method is used during training. It first attempts to load the chessboard with the given move. If an 
@@ -618,7 +620,7 @@ def rl_agent_plays_move_during_training(chess_move: str, curr_game, environ) -> 
 
         Args: 
             chess_move (str): A string representing the chess move in standard algebraic notation.
-            curr_game: The current game being played during training.
+            game_number: The current game being played during training.
         Raises:
             Exception: An exception is raised if an error occurs while loading the chessboard or updating the 
             current state. The original exception is included in the raised exception.
@@ -628,9 +630,9 @@ def rl_agent_plays_move_during_training(chess_move: str, curr_game, environ) -> 
             Writes to the errors file if an error occurs.
     """
     try:
-        environ.load_chessboard(chess_move, curr_game)
+        environ.load_chessboard(chess_move, game_number)
     except custom_exceptions.ChessboardLoadError as e:
-        # error_logger.error(f'at Bradley.rl_agent_plays_move_during_training. An error occurred at {curr_game}: {e}\n')
+        # error_logger.error(f'at Bradley.rl_agent_plays_move_during_training. An error occurred at {game_number}: {e}\n')
         # error_logger.error(f"failed to load_chessboard with move {chess_move}\n")
         raise Exception from e
 
