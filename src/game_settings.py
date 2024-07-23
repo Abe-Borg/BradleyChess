@@ -44,14 +44,10 @@ bradley_agent_q_table_path = base_directory / ".." / "Q_Tables" / "bradley_agent
 imman_agent_q_table_path = base_directory / ".." / "Q_Tables" / "imman_agent_q_table.pkl"
 unique_chess_moves_list_path = base_directory / ".." / "Q_Tables" / "unique_chess_moves_list.pkl"
 
-helper_methods_errors_filepath = base_directory / ".." / "debug" / "helper_methods_errors_log.txt"
-agent_errors_filepath = base_directory / ".." / "debug" / "agent_errors_log.txt"
-bradley_errors_filepath = base_directory / ".." / "debug" / "bradley_errors_log.txt"
-environ_errors_filepath = base_directory / ".." / "debug" / "environ_errors_log.txt"
-
-agent_step_by_step_filepath = base_directory / ".." / "debug" / "agent_step_by_step_log.txt"
-bradley_step_by_step_filepath = base_directory / ".." / "debug" / "bradley_step_by_step_log.txt"
-environ_step_by_step_filepath = base_directory / ".." / "debug" / "environ_step_by_step_log.txt"
+helper_methods_logger_filepath = base_directory / ".." / "debug" / "helper_methods_logger_file.txt"
+agent_logger_filepath = base_directory / ".." / "debug" / "agent_logger_file.txt"
+environ_logger_filepath = base_directory / ".." / "debug" / "environ_logger_file.txt"
+training_functions_logger_filepath = base_directory / ".." / "debug" / "training_functions_logger_file.txt"
 
 initial_training_results_filepath = base_directory / ".." / "training_results" / "initial_training_results.txt"
 additional_training_results_filepath = base_directory / ".." / "training_results" / "additional_training_results.txt"

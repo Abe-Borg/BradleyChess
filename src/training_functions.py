@@ -1,5 +1,13 @@
 import helper_methods
 
+# Logger Initialization
+training_functions_logger = logging.getLogger(__name__)
+training_functions_logger.setLevel(logging.ERROR)
+error_handler = logging.FileHandler(game_settings.training_functions_logger_filepath)   ### <<< ====== create this filepath
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+error_handler.setFormatter(formatter)
+training_functions_logger.addHandler(error_handler)
+
 def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
     """
         Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.

@@ -30,10 +30,10 @@ class Environ:
             Side Effects:
                 Modifies the turn list and the turn index. 
         """
-        # self.environ_logger = logging.getLogger(__name__)
-        # self.environ_logger.setLevel(logging.ERROR)
-        # error_handler = logging.FileHandler(game_settings.environ_errors_filepath)
-        # self.environ_logger.addHandler(error_handler)
+        self.environ_logger = logging.getLogger(__name__)
+        self.environ_logger.setLevel(logging.ERROR)
+        error_handler = logging.FileHandler(game_settings.environ_errors_filepath)
+        self.environ_logger.addHandler(error_handler)
 
         self.board: chess.Board = chess.Board()
         
