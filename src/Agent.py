@@ -31,10 +31,10 @@ class Agent:
             Side Effects: 
             Modifies the learn_rate, discount_factor, color, is_trained, and q_table attributes.
         """
-        self.error_logger = logging.getLogger(__name__)
-        self.error_logger.setLevel(logging.ERROR)
+        self.agent_logger = logging.getLogger(__name__)
+        self.agent_logger.setLevel(logging.ERROR)
         error_handler = logging.FileHandler(game_settings.agent_errors_filepath)
-        self.error_logger.addHandler(error_handler)
+        self.agent_logger.addHandler(error_handler)
         self.step_by_step_logger = logging.getLogger(__name__ + '.step_by_step')
         self.step_by_step_logger.setLevel(logging.DEBUG)
         step_by_step_handler = logging.FileHandler(game_settings.agent_step_by_step_filepath)
@@ -73,7 +73,7 @@ class Agent:
             self.step_by_step_logger.debug(f'Agent.choose_action: environ_state: {environ_state}, curr_game: {curr_game}\n')
 
         if environ_state['legal_moves'] == []:
-            self.error_logger.error(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
+            self.agent_logger.error(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             return ''
         
         self.update_q_table(environ_state['legal_moves']) # this func also checks if there are any new unique move strings

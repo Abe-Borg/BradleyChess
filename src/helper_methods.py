@@ -6,6 +6,14 @@ import logging
 import Agent
 import custom_exceptions
 
+# Logger Initialization
+helper_methods_logger = logging.getLogger(__name__)
+helper_methods_logger.setLevel(logging.ERROR)
+error_handler = logging.FileHandler(game_settings.helper_methods_errors_filepath)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+error_handler.setFormatter(formatter)
+helper_methods_logger.addHandler(error_handler)
+
 def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
     """
         The Agent selects a chess move and loads it onto the chessboard.
@@ -30,8 +38,8 @@ def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
     try:
         curr_state = environ.get_curr_state()
     except custom_exceptions.StateRetrievalError as e:
-        # error_logger.error("agent_selects_and_plays_chess_move, an error occurred\n")
-        # error_logger.error(f'Error: {e}, failed to get_curr_state\n')
+        # helper_methods_logger.error("agent_selects_and_plays_chess_move, an error occurred\n")
+        # helper_methods_logger.error(f'Error: {e}, failed to get_curr_state\n')
         raise Exception from e
     
     chess_move: str = chess_agent.choose_action(curr_state) # we're not training, so we don't need to pass current_game
@@ -39,16 +47,16 @@ def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
     try:
         environ.load_chessboard(chess_move)
     except custom_exceptions.ChessboardLoadError as e:
-        # error_logger.error('hello agent_selects_and_plays_chess_move\n')
-        # error_logger.error(f'Error {e}: failed to load chessboard with move: {chess_move}\n')
+        # helper_methods_logger.error('hello agent_selects_and_plays_chess_move\n')
+        # helper_methods_logger.error(f'Error {e}: failed to load chessboard with move: {chess_move}\n')
         raise Exception from e
 
     try:
         environ.update_curr_state()
         return chess_move
     except custom_exceptions.StateUpdateError as e:
-        # error_logger.error('hello from agent_selects_and_plays_chess_move\n')
-        # error_logger.error(f'Error: {e}, failed to update_curr_state\n')
+        # helper_methods_logger.error('hello from agent_selects_and_plays_chess_move\n')
+        # helper_methods_logger.error(f'Error: {e}, failed to update_curr_state\n')
         raise Exception from e
 ### end of agent_selects_and_plays_chess_move
 
@@ -75,16 +83,16 @@ def receive_opponent_move(chess_move: str, environ) -> bool:
     try:
         environ.load_chessboard(chess_move)
     except custom_exceptions.ChessboardLoadError as e:
-        # error_logger.error("hello from Bradley.receive_opp_move, an error occurred\n")
-        # error_logger.error(f'Error: {e}, failed to load chessboard with move: {chess_move}\n')
+        # helper_methods_logger.error("hello from Bradley.receive_opp_move, an error occurred\n")
+        # helper_methods_logger.error(f'Error: {e}, failed to load chessboard with move: {chess_move}\n')
         raise Exception from e
 
     try:
         environ.update_curr_state()
         return True
     except custom_exceptions.StateUpdateError as e:
-        # error_logger.error(f'hello from Bradley.receive_opp_move, an error occurrd\n')
-        # error_logger.error(f'Error: {e}, failed to update_curr_state\n') 
+        # helper_methods_logger.error(f'hello from Bradley.receive_opp_move, an error occurrd\n')
+        # helper_methods_logger.error(f'Error: {e}, failed to update_curr_state\n') 
         raise Exception from e
 ### end of receive_opp_move
 
@@ -156,7 +164,7 @@ def get_game_outcome(environ) -> str:
     try:
         return environ.board.outcome().result()
     except custom_exceptions.GameOutcomeError as e:
-        # error_logger.error('hello from Bradley.get_game_outcome\n')
+        # helper_methods_logger.error('hello from Bradley.get_game_outcome\n')
         return f'error at get_game_outcome: {e}'
 ### end of get_game_outcome
 
@@ -180,7 +188,7 @@ def get_game_termination_reason(environ) -> str:
     try:
         return str(environ.board.outcome().termination)
     except custom_exceptions.GameTerminationError as e:
-        # error_logger.error('hello from Bradley.get_game_termination_reason\n')
-        # error_logger.error(f'Error: {e}, failed to get game end reason\n')
+        # helper_methods_logger.error('hello from Bradley.get_game_termination_reason\n')
+        # helper_methods_logger.error(f'Error: {e}, failed to get game end reason\n')
         return f'error at get_game_termination_reason: {e}'
 ### end of get_game_termination_reason
