@@ -26,7 +26,7 @@ def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
 
     # training is complete, all games in database have been processed
     # if game_settings.PRINT_STEP_BY_STEP:
-        # self.step_by_step_logger.debug(f'training is complete\n')
+        # step_by_step_logger.debug(f'training is complete\n')
     
     ### !!! somehow I need to collect all values to be input to the q tables and then return the agents with their updated q tables.
     
@@ -39,25 +39,25 @@ def train_one_game(game_num_str, est_q_val_table, chess_data, w_agent, b_agent, 
     environ = Environ.Environ()
     
     # if game_settings.PRINT_STEP_BY_STEP:
-        # self.step_by_step_logger.debug(f'At game: {game_num_str}\n')
-        # self.step_by_step_logger.debug(f'num_chess_moves_curr_training_game: {num_chess_moves_curr_training_game}\n')
-        # self.step_by_step_logger.debug(f'w_curr_q_value: {w_curr_q_value}\n')
-        # self.step_by_step_logger.debug(f'b_curr_q_value: {b_curr_q_value}\n')
+        # step_by_step_logger.debug(f'At game: {game_num_str}\n')
+        # step_by_step_logger.debug(f'num_chess_moves_curr_training_game: {num_chess_moves_curr_training_game}\n')
+        # step_by_step_logger.debug(f'w_curr_q_value: {w_curr_q_value}\n')
+        # step_by_step_logger.debug(f'b_curr_q_value: {b_curr_q_value}\n')
     
     # if game_settings.PRINT_TRAINING_RESULTS:
-        # self.initial_training_logger.info(f'\nStart of {game_num_str} training\n\n')
+        # initial_training_logger.info(f'\nStart of {game_num_str} training\n\n')
 
     try:
         curr_state = environ.get_curr_state()
     except Exception as e:
-        # self.error_logger.error(f'An error occurred environ.get_curr_state: {e}\n')
-        # self.error_logger.error(f'curr board is:\n{environ.board}\n\n')
-        # self.error_logger.error(f'at game: {game_num_str}\n')
-        # self.error_logger.error(f'at turn: {curr_state['turn_index']}')
+        # error_logger.error(f'An error occurred environ.get_curr_state: {e}\n')
+        # error_logger.error(f'curr board is:\n{environ.board}\n\n')
+        # error_logger.error(f'at game: {game_num_str}\n')
+        # error_logger.error(f'at turn: {curr_state['turn_index']}')
         return
     
     # if game_settings.PRINT_STEP_BY_STEP:
-        # self.step_by_step_logger.debug(f'curr_state: {curr_state}\n')
+        # step_by_step_logger.debug(f'curr_state: {curr_state}\n')
 
     ### THIS WHILE LOOP PLAYS THROUGH ONE GAME ###
     while curr_state['turn_index'] < (num_chess_moves_curr_training_game):
@@ -66,11 +66,11 @@ def train_one_game(game_num_str, est_q_val_table, chess_data, w_agent, b_agent, 
         w_chess_move = w_agent.choose_action(chess_data, curr_state, game_num_str)
 
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'w_chess_move: {w_chess_move}\n')
+            # step_by_step_logger.debug(f'w_chess_move: {w_chess_move}\n')
 
         if not w_chess_move:
-            # self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
-            # self.error_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
+            # error_logger.error(f'An error occurred at w_agent.choose_action\n')
+            # error_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
             break # game is over, exit function.
 
         ### ASSIGN POINTS TO q TABLE FOR WHITE AGENT ###
@@ -81,41 +81,41 @@ def train_one_game(game_num_str, est_q_val_table, chess_data, w_agent, b_agent, 
         curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
 
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
+            # step_by_step_logger.debug(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
 
         ### WHITE AGENT PLAYS THE SELECTED MOVE ###
         # take action a, observe r, s', and load chessboard
         try:
             rl_agent_plays_move_during_training(w_chess_move, game_num_str, environ)
         except Exception as e:
-            # self.error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
-            # self.error_logger.error(f'at curr_game: {game_num_str}\n')
-            # self.error_logger.error(f'at state: {curr_state}\n')
+            # error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
+            # error_logger.error(f'at curr_game: {game_num_str}\n')
+            # error_logger.error(f'at state: {curr_state}\n')
             break # game is over, exit function.
 
         w_reward = get_reward(w_chess_move)
 
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'w_reward: {w_reward}\n')
+            # step_by_step_logger.debug(f'w_reward: {w_reward}\n')
 
         # get latest curr_state since rl_agent_plays_move_during_training updated the chessboard
         try:
             curr_state = environ.get_curr_state()
         except Exception as e:
-            # self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
-            # self.error_logger.error(f'curr board is:\n{environ.board}\n\n')
-            # self.error_logger.error(f'At game: {game_num_str}\n')
-            # self.error_logger.error(f'at state: {curr_state}\n')
+            # error_logger.error(f'An error occurred at get_curr_state: {e}\n')
+            # error_logger.error(f'curr board is:\n{environ.board}\n\n')
+            # error_logger.error(f'At game: {game_num_str}\n')
+            # error_logger.error(f'at state: {curr_state}\n')
             break # game is over, exit function.
         
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'curr_state: {curr_state}\n')
+            # step_by_step_logger.debug(f'curr_state: {curr_state}\n')
 
         # find the estimated q value for White, but first check if game ended
         if environ.board.is_game_over() or curr_state['turn_index'] >= (num_chess_moves_curr_training_game) or not curr_state['legal_moves']:
             
             # if game_settings.PRINT_STEP_BY_STEP:
-                # self.step_by_step_logger.debug(f'game {game_num_str} is over\n')
+                # step_by_step_logger.debug(f'game {game_num_str} is over\n')
             break # game is over, exit function.
 
         else: # current game continues
@@ -124,7 +124,7 @@ def train_one_game(game_num_str, est_q_val_table, chess_data, w_agent, b_agent, 
             w_est_q_value: int = est_q_val_table.at[game_num_str, curr_turn_for_q_est]
 
             # if game_settings.PRINT_STEP_BY_STEP:
-                # self.step_by_step_logger.debug(f'w_est_q_value: {w_est_q_value}\n')
+                # step_by_step_logger.debug(f'w_est_q_value: {w_est_q_value}\n')
 
 
         ##################### BLACK'S TURN ####################
@@ -132,12 +132,12 @@ def train_one_game(game_num_str, est_q_val_table, chess_data, w_agent, b_agent, 
         b_chess_move = b_agent.choose_action(chess_data, curr_state, game_num_str)
 
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'b_chess_move: {b_chess_move}\n')
+            # step_by_step_logger.debug(f'b_chess_move: {b_chess_move}\n')
         
         if not b_chess_move:
-            # self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
-            # self.error_logger.error(f'b_chess_move is empty at state: {curr_state}\n')
-            # self.error_logger.error(f'at: {game_num_str}\n')
+            # error_logger.error(f'An error occurred at w_agent.choose_action\n')
+            # error_logger.error(f'b_chess_move is empty at state: {curr_state}\n')
+            # error_logger.error(f'at: {game_num_str}\n')
             break # game is over, exit function
 
         # assign points to q table
@@ -146,62 +146,62 @@ def train_one_game(game_num_str, est_q_val_table, chess_data, w_agent, b_agent, 
         curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
 
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
+            # step_by_step_logger.debug(f'curr_turn_for_q_est: {curr_turn_for_q_est}\n')
 
         ##### BLACK AGENT PLAYS SELECTED MOVE #####
         # take action a, observe r, s', and load chessboard
         try:
             rl_agent_plays_move_during_training(b_chess_move, game_num_str, environ)
         except Exception as e:
-            # self.error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
-            # self.error_logger.error(f'at curr_game: {game_num_str}\n')
-            # self.error_logger.error(f'at state: {curr_state}\n')
+            # error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
+            # error_logger.error(f'at curr_game: {game_num_str}\n')
+            # error_logger.error(f'at state: {curr_state}\n')
             break # game is over, exit function
 
         b_reward = get_reward(b_chess_move)
 
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'b_reward: {b_reward}\n')
+            # step_by_step_logger.debug(f'b_reward: {b_reward}\n')
 
-        # get latest curr_state since self.rl_agent_plays_move_during_training updated the chessboard
+        # get latest curr_state since rl_agent_plays_move_during_training updated the chessboard
         try:
             curr_state = environ.get_curr_state()
         except Exception as e:
-            # self.error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
-            # self.error_logger.error(f'curr board is:\n{environ.board}\n\n')
-            # self.error_logger.error(f'At game: {game_num_str}\n')
+            # error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
+            # error_logger.error(f'curr board is:\n{environ.board}\n\n')
+            # error_logger.error(f'At game: {game_num_str}\n')
             break # game is over, exit function
 
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'curr_state: {curr_state}\n')
+            # step_by_step_logger.debug(f'curr_state: {curr_state}\n')
 
         # find the estimated q value for Black, but first check if game ended
         if environ.board.is_game_over() or not curr_state['legal_moves']:
             
             # if game_settings.PRINT_STEP_BY_STEP:
-                # self.step_by_step_logger.debug(f'game {game_num_str} is over\n')
+                # step_by_step_logger.debug(f'game {game_num_str} is over\n')
             break # game is over, exit function
         else: # current game continues
             b_est_q_value: int = est_q_val_table.at[game_num_str, curr_turn_for_q_est]
 
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'b_est_q_value: {b_est_q_value}\n')
-            # self.step_by_step_logger.debug(f'about to calc next q values\n')
-            # self.step_by_step_logger.debug(f'w_curr_q_value: {w_curr_q_value}\n')
-            # self.step_by_step_logger.debug(f'b_curr_q_value: {b_curr_q_value}\n')
-            # self.step_by_step_logger.debug(f'w_reward: {w_reward}\n')
-            # self.step_by_step_logger.debug(f'b_reward: {b_reward}\n')
-            # self.step_by_step_logger.debug(f'w_est_q_value: {w_est_q_value}\n')
-            # self.step_by_step_logger.debug(f'b_est_q_value: {b_est_q_value}\n\n')
+            # step_by_step_logger.debug(f'b_est_q_value: {b_est_q_value}\n')
+            # step_by_step_logger.debug(f'about to calc next q values\n')
+            # step_by_step_logger.debug(f'w_curr_q_value: {w_curr_q_value}\n')
+            # step_by_step_logger.debug(f'b_curr_q_value: {b_curr_q_value}\n')
+            # step_by_step_logger.debug(f'w_reward: {w_reward}\n')
+            # step_by_step_logger.debug(f'b_reward: {b_reward}\n')
+            # step_by_step_logger.debug(f'w_est_q_value: {w_est_q_value}\n')
+            # step_by_step_logger.debug(f'b_est_q_value: {b_est_q_value}\n\n')
 
         # ***CRITICAL STEP***, this is the main part of the SARSA algorithm.
         w_next_q_value: int = find_next_q_value(w_curr_q_value, w_agent.learn_rate, w_reward, w_agent.discount_factor, w_est_q_value)
         b_next_q_value: int = find_next_q_value(b_curr_q_value, b_agent.learn_rate, b_reward, b_agent.discount_factor, b_est_q_value)
     
         # if game_settings.PRINT_STEP_BY_STEP:
-            # self.step_by_step_logger.debug(f'sarsa calc complete\n')
-            # self.step_by_step_logger.debug(f'w_next_q_value: {w_next_q_value}\n')
-            # self.step_by_step_logger.debug(f'b_next_q_value: {b_next_q_value}\n')
+            # step_by_step_logger.debug(f'sarsa calc complete\n')
+            # step_by_step_logger.debug(f'w_next_q_value: {w_next_q_value}\n')
+            # step_by_step_logger.debug(f'b_next_q_value: {b_next_q_value}\n')
 
         # on the next turn, w_next_q_value and b_next_q_value will be added to the q table. so if this is the end of the first round,
         # next round it will be W2 and then we assign the q value at W2 col
@@ -212,24 +212,24 @@ def train_one_game(game_num_str, est_q_val_table, chess_data, w_agent, b_agent, 
             curr_state = environ.get_curr_state()
             
             # if game_settings.PRINT_STEP_BY_STEP:
-                # self.step_by_step_logger.debug(f'curr_state: {curr_state}\n')
+                # step_by_step_logger.debug(f'curr_state: {curr_state}\n')
         except Exception as e:
-            # self.error_logger.error(f'An error occurred: {e}\n')
-            # self.error_logger.error("failed to get_curr_state\n") 
-            # self.error_logger.error(f'At game: {game_num_str}\n')
+            # error_logger.error(f'An error occurred: {e}\n')
+            # error_logger.error("failed to get_curr_state\n") 
+            # error_logger.error(f'At game: {game_num_str}\n')
             break
     ### END OF CURRENT GAME LOOP ###
 
     # if game_settings.PRINT_TRAINING_RESULTS:
-        # self.initial_training_logger.info(f'{game_num_str} is over.\n')
-        # self.initial_training_logger.info(f'\nThe Chessboard looks like this:\n')
-        # self.initial_training_logger.info(f'\n{environ.board}\n\n')
-        # self.initial_training_logger.info(f'Game result is: {helper_methods.get_game_outcome(environ)}\n')    
-        # self.initial_training_logger.info(f'The game ended because of: {helper_methods.get_game_termination_reason()}\n')
-        # self.initial_training_logger.info(f'DB shows game ended b/c: {chess_data.at[game_num_str, "Result"]}\n')
+        # initial_training_logger.info(f'{game_num_str} is over.\n')
+        # initial_training_logger.info(f'\nThe Chessboard looks like this:\n')
+        # initial_training_logger.info(f'\n{environ.board}\n\n')
+        # initial_training_logger.info(f'Game result is: {helper_methods.get_game_outcome(environ)}\n')    
+        # initial_training_logger.info(f'The game ended because of: {helper_methods.get_game_termination_reason()}\n')
+        # initial_training_logger.info(f'DB shows game ended b/c: {chess_data.at[game_num_str, "Result"]}\n')
 
     # if game_settings.PRINT_STEP_BY_STEP:
-        # self.step_by_step_logger.debug(f'game {game_num_str} is over\n')
+        # step_by_step_logger.debug(f'game {game_num_str} is over\n')
     
     environ.reset_environ()
 ### end of train_one_game
@@ -288,8 +288,8 @@ def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_c
     try:
         curr_state = environ.get_curr_state()
     except Exception as e:
-        # self.error_logger.error(f'An error occurred at self.environ.get_curr_state: {e}\n')
-        # self.error_logger.error(f'at: {game_num_str}\n')
+        # error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
+        # error_logger.error(f'at: {game_num_str}\n')
         break
     
     ### LOOP PLAYS THROUGH ONE GAME ###
@@ -298,8 +298,8 @@ def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_c
         # choose action a from state s, using policy
         w_chess_move = w_agent.choose_action(chess_data, curr_state, game_num_str)
         if not w_chess_move:
-            # self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
-            # self.error_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
+            # error_logger.error(f'An error occurred at w_agent.choose_action\n')
+            # error_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
             break
 
         # assign curr turn to new var for now. once agent plays move, turn will be updated, but we need 
@@ -311,16 +311,16 @@ def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_c
         try:
             rl_agent_plays_move_during_training(w_chess_move, game_num_str, environ)
         except Exception as e:
-            # self.error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
-            # self.error_logger.error(f'at: {game_num_str}\n')
+            # error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
+            # error_logger.error(f'at: {game_num_str}\n')
             break
 
-        # get latest curr_state since self.rl_agent_plays_move_during_training updated the chessboard
+        # get latest curr_state since rl_agent_plays_move_during_training updated the chessboard
         try:
             curr_state = environ.get_curr_state()
         except Exception as e:
-            # self.error_logger.error(f'An error occurred at get_curr_state: {e}\n')
-            # self.error_logger.error(f'at: {game_num_str}\n')
+            # error_logger.error(f'An error occurred at get_curr_state: {e}\n')
+            # error_logger.error(f'at: {game_num_str}\n')
             break
         
         # find the estimated q value for White, but first check if game ended
@@ -330,18 +330,18 @@ def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_c
             try:
                 w_est_q_value: int = find_estimated_q_value(environ, engine)
             except Exception as e:
-                # self.error_logger.error(f'An error occurred while retrieving w_est_q_value: {e}\n')
-                # self.error_logger.error(f"at White turn, failed to find_estimated_q_value\n")
-                # self.error_logger.error(f'curr state is:{curr_state}\n')
+                # error_logger.error(f'An error occurred while retrieving w_est_q_value: {e}\n')
+                # error_logger.error(f"at White turn, failed to find_estimated_q_value\n")
+                # error_logger.error(f'curr state is:{curr_state}\n')
                 break
 
         ##################### BLACK'S TURN ####################
         # choose action a from state s, using policy
         b_chess_move = b_agent.choose_action(chess_data, curr_state, game_num_str)
         if not b_chess_move:
-            # self.error_logger.error(f'An error occurred at w_agent.choose_action\n')
-            # self.error_logger.error(f'b_chess_move is empty at state: {curr_state}\n')
-            # self.error_logger.error(f'at: {game_num_str}\n')
+            # error_logger.error(f'An error occurred at w_agent.choose_action\n')
+            # error_logger.error(f'b_chess_move is empty at state: {curr_state}\n')
+            # error_logger.error(f'at: {game_num_str}\n')
             break
 
         # assign curr turn to new var for now. once agent plays move, turn will be updated, but we need 
@@ -353,16 +353,16 @@ def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_c
         try:
             rl_agent_plays_move_during_training(b_chess_move, game_num_str, environ)
         except Exception as e:
-            # self.error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
-            # self.error_logger.error(f'at: {game_num_str}\n')
+            # error_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
+            # error_logger.error(f'at: {game_num_str}\n')
             break
 
-        # get latest curr_state since self.rl_agent_plays_move_during_training updated the chessboard
+        # get latest curr_state since rl_agent_plays_move_during_training updated the chessboard
         try:
             curr_state = environ.get_curr_state()
         except Exception as e:
-            # self.error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
-            # self.error_logger.error(f'at: {game_num_str}\n')
+            # error_logger.error(f'An error occurred at environ.get_curr_state: {e}\n')
+            # error_logger.error(f'at: {game_num_str}\n')
             break
 
         # find the estimated q value for Black, but first check if game ended
@@ -372,17 +372,17 @@ def generate_q_est_df_one_game(chess_data, game_num_str, w_agent, b_agent, num_c
             try:
                 b_est_q_val: int = find_estimated_q_value(environ, engine)
             except Exception as e:
-                # self.error_logger.error(f"at Black turn, failed to find_estimated_q_valueue because error: {e}\n")
-                # self.error_logger.error(f'curr state is :{curr_state}\n')
-                # self.error_logger.error(f'at : {game_num_str}\n')
+                # error_logger.error(f"at Black turn, failed to find_estimated_q_valueue because error: {e}\n")
+                # error_logger.error(f'curr state is :{curr_state}\n')
+                # error_logger.error(f'at : {game_num_str}\n')
                 break
 
         try:
             curr_state = environ.get_curr_state()
         except Exception as e:
-            # self.error_logger.error(f'An error occurred: {e}\n')
-            # self.error_logger.error("failed to get_curr_state\n") 
-            # self.error_logger.error(f'at: {game_num_str}\n')
+            # error_logger.error(f'An error occurred: {e}\n')
+            # error_logger.error("failed to get_curr_state\n") 
+            # error_logger.error(f'at: {game_num_str}\n')
             break
     ### END OF CURRENT GAME LOOP ###
     environ.reset_environ()
@@ -439,16 +439,16 @@ def find_estimated_q_value(environ, engine) -> int:
     try:
         analysis_results = analyze_board_state(environ.board, engine)
     except Exception as e:
-        # self.error_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
-        # self.error_logger.error(f'failed to analyze_board_state\n')
+        # error_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
+        # error_logger.error(f'failed to analyze_board_state\n')
         raise Exception from e
     
     # load up the chess board with opponent's anticipated chess move 
     try:
         environ.load_chessboard_for_q_est(analysis_results)
     except Exception as e:
-        # self.error_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
-        # self.error_logger.error(f'failed to load_chessboard_for_q_est\n')
+        # error_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
+        # error_logger.error(f'failed to load_chessboard_for_q_est\n')
         raise Exception from e
     
     # check if the game would be over with the anticipated next move
@@ -456,8 +456,8 @@ def find_estimated_q_value(environ, engine) -> int:
         try:
             environ.pop_chessboard()
         except Exception as e:
-            # self.error_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
-            # self.error_logger.error(f'failed at self.environ.pop_chessboard\n')
+            # error_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
+            # error_logger.error(f'failed at environ.pop_chessboard\n')
             raise Exception from e
         return 1 # just return some value, doesn't matter.
         
@@ -465,8 +465,8 @@ def find_estimated_q_value(environ, engine) -> int:
     try:
         est_qval_analysis = analyze_board_state(environ.board)
     except Exception as e:
-        # self.error_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
-        # self.error_logger.error(f'failed at self.analyze_board_state\n')
+        # error_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
+        # error_logger.error(f'failed at analyze_board_state\n')
         raise Exception from e
 
     # get pts for est_qval 
@@ -480,8 +480,8 @@ def find_estimated_q_value(environ, engine) -> int:
     try:
         environ.pop_chessboard()
     except Exception as e:
-        # self.error_logger.error(f'@ Bradley.find_estimated_q_value. An error occurred: {e}\n')
-        # self.error_logger.error("failed to pop_chessboard\n")
+        # error_logger.error(f'@ Bradley.find_estimated_q_value. An error occurred: {e}\n')
+        # error_logger.error("failed to pop_chessboard\n")
         raise Exception from e
 
     return est_qval
@@ -521,12 +521,12 @@ def find_next_qval(curr_qval: int, learn_rate: float, reward: int, discount_fact
         next_qval = int(curr_qval + learn_rate * (reward + ((discount_factor * est_qval) - curr_qval)))
         return next_qval
     except OverflowError:
-        # self.error_logger.error(f'@ Bradley.find_next_qval. An error occurred: OverflowError\n')
-        # self.error_logger.error(f'curr_qval: {curr_qval}\n')
-        # self.error_logger.error(f'learn_rate: {learn_rate}\n')
-        # self.error_logger.error(f'reward: {reward}\n')
-        # self.error_logger.error(f'discount_factor: {discount_factor}\n')
-        # self.error_logger.error(f'est_qval: {est_qval}\n')
+        # error_logger.error(f'@ Bradley.find_next_qval. An error occurred: OverflowError\n')
+        # error_logger.error(f'curr_qval: {curr_qval}\n')
+        # error_logger.error(f'learn_rate: {learn_rate}\n')
+        # error_logger.error(f'reward: {reward}\n')
+        # error_logger.error(f'discount_factor: {discount_factor}\n')
+        # error_logger.error(f'est_qval: {est_qval}\n')
         raise custom_exceptions.QValueCalculationError("Overflow occurred during q-value calculation") from OverflowError
 # end of find_next_qval
 
@@ -630,15 +630,15 @@ def rl_agent_plays_move_during_training(chess_move: str, curr_game, environ) -> 
     try:
         environ.load_chessboard(chess_move, curr_game)
     except custom_exceptions.ChessboardLoadError as e:
-        # self.error_logger.error(f'at Bradley.rl_agent_plays_move_during_training. An error occurred at {curr_game}: {e}\n')
-        # self.error_logger.error(f"failed to load_chessboard with move {chess_move}\n")
+        # error_logger.error(f'at Bradley.rl_agent_plays_move_during_training. An error occurred at {curr_game}: {e}\n')
+        # error_logger.error(f"failed to load_chessboard with move {chess_move}\n")
         raise Exception from e
 
     try:
         environ.update_curr_state()
     except custom_exceptions.StateUpdateError as e:
-        # self.error_logger.error(f'at Bradley.rl_agent_plays_move_during_training. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
-        # self.error_logger.error(f'Current state is: {environ.get_curr_state()}\n')
+        # error_logger.error(f'at Bradley.rl_agent_plays_move_during_training. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
+        # error_logger.error(f'Current state is: {environ.get_curr_state()}\n')
         raise Exception from e
 # end of rl_agent_plays_move_during_training
 
@@ -725,7 +725,7 @@ def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, c
         chess_agent.update_q_table([chess_move])
         chess_agent.change_q_table_pts(chess_move, curr_turn, curr_q_val)
     except custom_exceptions.QTableUpdateError as e: 
-        # self.error_logger.error(f'caught exception: {e} at assign_points_to_q_table\n')
+        # error_logger.error(f'caught exception: {e} at assign_points_to_q_table\n')
         # may need additional logging here.
         pass
 # enf of assign_points_to_q_table
