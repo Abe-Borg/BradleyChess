@@ -59,6 +59,8 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
         w_chess_move = w_agent.choose_action(chess_data, curr_state, game_number)
 
         if not w_chess_move:
+            # training_functions_logger.error(f'An error occurred at w_agent.choose_action\n')
+            # training_functions_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
             break # game is over, exit function.
 
         ### ASSIGN POINTS TO q TABLE FOR WHITE AGENT ###
@@ -173,17 +175,13 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
             break
     ### END OF CURRENT GAME LOOP ###
 
-    # if game_settings.PRINT_TRAINING_RESULTS:
-        # initial_training_logger.info(f'{game_number} is over.\n')
-        # initial_training_logger.info(f'\nThe Chessboard looks like this:\n')
-        # initial_training_logger.info(f'\n{environ.board}\n\n')
-        # initial_training_logger.info(f'Game result is: {helper_methods.get_game_outcome(environ)}\n')    
-        # initial_training_logger.info(f'The game ended because of: {helper_methods.get_game_termination_reason()}\n')
-        # initial_training_logger.info(f'DB shows game ended b/c: {chess_data.at[game_number, "Result"]}\n')
+    # training_functions_logger.info(f'{game_number} is over.\n')
+    # training_functions_logger.info(f'\nThe Chessboard looks like this:\n')
+    # training_functions_logger.info(f'\n{environ.board}\n\n')
+    # training_functions_logger.info(f'Game result is: {helper_methods.get_game_outcome(environ)}\n')    
+    # training_functions_logger.info(f'The game ended because of: {helper_methods.get_game_termination_reason()}\n')
+    # training_functions_logger.info(f'DB shows game ended b/c: {chess_data.at[game_number, "Result"]}\n')
 
-    # if game_settings.PRINT_STEP_BY_STEP:
-        # step_by_step_logger.debug(f'game {game_number} is over\n')
-    
     environ.reset_environ()
 ### end of train_one_game
 
