@@ -26,7 +26,6 @@ def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
     """
     ### FOR EACH GAME IN THE TRAINING SET ###
     for game_number in chess_data.index:
-        num_chess_moves_curr_training_game: int = chess_data.at[game_number, 'PlyCount']
         w_curr_q_value: int = game_settings.initial_q_val
         b_curr_q_value: int = game_settings.initial_q_val
 
@@ -40,7 +39,8 @@ def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
     return w_agent, b_agent
 ### end of train_rl_agents
 
-def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, num_chess_moves_curr_training_game) -> None:
+def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value) -> None:
+    num_chess_moves_curr_training_game: int = chess_data.at[game_number, 'PlyCount']
     environ = Environ.Environ()
 
     try:
