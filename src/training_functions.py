@@ -29,7 +29,7 @@ def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
         w_curr_q_value: int = game_settings.initial_q_val
         b_curr_q_value: int = game_settings.initial_q_val
 
-        train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, num_chess_moves_curr_training_game)
+        train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value)
 
     # training is complete, all games in database have been processed
     ### I will need to use a pool.Queue to collect all the values to be input to the q table at the end of training.
@@ -222,14 +222,14 @@ def generate_q_est_df(chess_data, w_agent, b_agent) -> pd.DataFrame:
     estimated_q_values.iloc[:, 1:] = 0
 
     for game_number in chess_data.index:
-        num_chess_moves_curr_training_game: int = chess_data.at[game_number, 'PlyCount']
-        generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent, num_chess_moves_curr_training_game)
+        generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent)
     
     # i will need to use a pool.Queue to collect all the values to be input to the q est table.
     return estimated_q_values
 # end of generate_q_est_df
 
-def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent, num_chess_moves_curr_training_game):
+def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent) -> None:
+    num_chess_moves_curr_training_game: int = chess_data.at[game_number, 'PlyCount']
     environ = Environ.Environ()
     engine = start_chess_engine()
     
@@ -388,7 +388,7 @@ def find_estimated_q_value(environ, engine) -> int:
     # We also need the points for the ANTICIPATED next state, 
     # given the ACTICIPATED next action. In this case, the anticipated response from opposing agent.
     try:
-        analysis_results = analyze_board_state(environ.board, engine)
+        oppenent_anticipated_next_move = analyze_board_state(environ.board, engine)
     except Exception as e:
         # training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
         # training_functions_logger.error(f'failed to analyze_board_state\n')
@@ -396,13 +396,13 @@ def find_estimated_q_value(environ, engine) -> int:
     
     # load up the chess board with opponent's anticipated chess move 
     try:
-        environ.load_chessboard_for_q_est(analysis_results)
+        environ.load_chessboard_for_q_est(oppenent_anticipated_next_move)
     except Exception as e:
         # training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
         # training_functions_logger.error(f'failed to load_chessboard_for_q_est\n')
         raise Exception from e
     
-    # check if the game would be over with the anticipated next move
+    # check if the game would be over with the anticipated next move, like unstopable checkmate.
     if environ.board.is_game_over() or not environ.get_legal_moves():
         try:
             environ.pop_chessboard()
