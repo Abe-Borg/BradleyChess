@@ -1,4 +1,11 @@
 import helper_methods
+import chess
+import logging
+import game_settings
+import Environ
+import pandas as pd
+import copy
+import custom_exceptions
 
 # Logger Initialization
 training_functions_logger = logging.getLogger(__name__)
@@ -388,7 +395,7 @@ def find_estimated_q_value(environ, engine) -> int:
     # We also need the points for the ANTICIPATED next state, 
     # given the ACTICIPATED next action. In this case, the anticipated response from opposing agent.
     try:
-        oppenent_anticipated_next_move = analyze_board_state(environ.board, engine)
+        anticipated_next_move = analyze_board_state(environ.board, engine)
     except Exception as e:
         # training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
         # training_functions_logger.error(f'failed to analyze_board_state\n')
@@ -396,7 +403,7 @@ def find_estimated_q_value(environ, engine) -> int:
     
     # load up the chess board with opponent's anticipated chess move 
     try:
-        environ.load_chessboard_for_q_est(oppenent_anticipated_next_move)
+        environ.load_chessboard_for_q_est(anticipated_next_move)
     except Exception as e:
         # training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
         # training_functions_logger.error(f'failed to load_chessboard_for_q_est\n')
@@ -410,8 +417,7 @@ def find_estimated_q_value(environ, engine) -> int:
             # training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
             # training_functions_logger.error(f'failed at environ.pop_chessboard\n')
             raise Exception from e
-        return 1 # just return some value, doesn't matter.
-        
+
     # this is the q estimated value due to what the opposing agent is likely to play in response to our move.    
     try:
         est_qval_analysis = analyze_board_state(environ.board, engine)
@@ -559,7 +565,7 @@ def analyze_board_state(board, engine) -> dict:
     }
 ### end of analyze_board_state
 
-def rl_agent_plays_move_during_training(chess_move: str, game_number, environ) -> None:
+def rl_agent_plays_move_during_training(chess_move: str, game_number, environ: Environ.Environ) -> None:
     """
         Loads the chessboard with the given move and updates the current state of the environment.
         This method is used during training. It first attempts to load the chessboard with the given move. If an 
@@ -622,7 +628,7 @@ def get_reward(chess_move: str) -> int:
             None.
     """
     if not chess_move or not isinstance(chess_move, str):
-        raise ValueError("Invalid chess move input")
+        raise ValueError("Invalid chess move input")    # <<<<<<<< !!!!!! put custom exception here later
 
     total_reward = 0
     # Check for piece development (N, R, B, Q)
@@ -643,7 +649,7 @@ def start_chess_engine():
     try:
         chess_engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
         return chess_engine
-    except Exception as e:
+    except Exception as e:             # <<<<< !!!!!! Need a custom exception here later
         # training_functions_logger.error(f'An error occurred at start_chess_engine: {e}\n')
         raise Exception from e
 # end of start_chess_engine
@@ -677,6 +683,9 @@ def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, c
         chess_agent.change_q_table_pts(chess_move, curr_turn, curr_q_val)
     except custom_exceptions.QTableUpdateError as e: 
         # training_functions_logger.error(f'caught exception: {e} at assign_points_to_q_table\n')
-        # may need additional logging here.
+        # training_functions_logger.error(f'chess_move: {chess_move}\n')
+        # training_functions_logger.error(f'curr_turn: {curr_turn}\n')
+        # training_functions_logger.error(f'curr_q_val: {curr_q_val}\n')
+        # training_functions_logger.error(f'chess_agent: {chess_agent}\n')   <<<< !!!!!!!! need a methd here to prin tout the agent data
         pass
 # enf of assign_points_to_q_table
