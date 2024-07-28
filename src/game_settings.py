@@ -53,6 +53,7 @@ agent_vs_agent_logger_filepath = base_directory / ".." / "debug" / "agent_vs_age
 initial_training_results_filepath = base_directory / ".." / "training_results" / "initial_training_results.txt"
 additional_training_results_filepath = base_directory / ".." / "training_results" / "additional_training_results.txt"
 agent_vs_agent_filepath = base_directory / ".." / "training_results" / "agent_vs_agent_games.txt"
+agent_vs_human_logger_filepath = base_directory / ".." / "training_results" / "agent_vs_human_logger_file.txt"
 
 chess_games_pgn_filepath_part_32 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_32.pgn"
 chess_games_pgn_filepath_part_33 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_33.pgn"
