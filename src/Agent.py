@@ -149,7 +149,11 @@ class Agent:
             Side Effects:
                 Modifies the q-table by adding points to the cell determined by the chess move and the current turn.
         """
-        self.q_table.at[chess_move, curr_turn] += pts
+        try:    
+            self.q_table.at[chess_move, curr_turn] += pts
+        except Exception as e:
+            self.agent_logger.error(f'at change_q_table_pts: failed to change q_table points. chess_move: {chess_move}, curr_turn: {curr_turn}, pts: {pts}\n')
+            raise Exception from e
     ### end of change_q_table_pts ###
 
     def update_q_table(self, new_chess_moves: Union[str, list[str]]) -> None:
