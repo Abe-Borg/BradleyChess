@@ -6,7 +6,10 @@ import custom_exceptions
 environ_logger = logging.getLogger(__name__)
 environ_logger.setLevel(logging.ERROR)
 error_handler = logging.FileHandler(game_settings.environ_errors_filepath)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+error_handler.setFormatter(formatter)
 environ_logger.addHandler(error_handler)
+
 
 class Environ:
     """
@@ -36,12 +39,16 @@ class Environ:
             Side Effects:
                 Modifies the turn list and the turn index. 
         """
-        self.board: chess.Board = chess.Board()
-        
-        # turn_list and turn_index work together to track the current turn (a string like this, 'W1')
-        max_turns = game_settings.max_num_turns_per_player * 2 # 2 players
-        self.turn_list: list[str] = [f'{"W" if i % 2 == 0 else "B"}{i // 2 + 1}' for i in range(max_turns)]
-        self.turn_index: int = 0
+        try: 
+            self.board: chess.Board = chess.Board()
+            
+            # turn_list and turn_index work together to track the current turn (a string like this, 'W1')
+            max_turns = game_settings.max_num_turns_per_player * 2 # 2 players
+            self.turn_list: list[str] = [f'{"W" if i % 2 == 0 else "B"}{i // 2 + 1}' for i in range(max_turns)]
+            self.turn_index: int = 0
+        except Exception as e:
+            environ_logger.error(f'at __init__: failed to initialize environ. Error: {e}\n', exc_info=True)
+            raise custom_exceptions.EnvironInitializationError(f'failed to initialize environ due to error: {e}') from e
     ### end of constructor
 
     def get_curr_state(self) -> dict[str, str, list[str]]:
@@ -69,8 +76,9 @@ class Environ:
             curr_turn = self.get_curr_turn()
             legal_moves = self.get_legal_moves()
         except Exception as e:
-            environ_logger.error(f'at get_curr_state, ERROR: {e}\n')
-            raise Exception from e
+            error_message = f'An error occurred at get_curr_state or get_legal_moves due to error: {str(e)}'
+            environ_logger.error()
+            raise custom_exceptions.StateRetrievalError(error_message) from e
         
         return {'turn_index': self.turn_index, 'curr_turn': curr_turn, 'legal_moves': legal_moves}
     ### end of get_curr_state
@@ -139,9 +147,10 @@ class Environ:
         """
         try:
             self.board.push_san(chess_move)
-        except custom_exceptions.InvalidMoveError as e:
-            environ_logger.error(f'at, load_chessboard, An error occurred: {e}, unable to load chessboard with {chess_move} in {curr_game}\n')
-            raise ValueError(e) from e
+        except Exception as e:
+            error_message = f'An error occurred at load_chessboard: {str(e)}, unable to load chessboard with {chess_move} in {curr_game}'
+            environ_logger.error(error_message)
+            raise custom_exceptions.InvalidMoveError(error_message) from e
     ### end of load_chessboard    
 
     def pop_chessboard(self) -> None:
@@ -159,9 +168,10 @@ class Environ:
         """
         try:
             self.board.pop()
-        except IndexError as e:
-            environ_logger.error(f'An error occurred: {e}, unable to pop chessboard')
-            raise IndexError(f"An error occurred: {e}, unable to pop chessboard'")
+        except Exception as e:
+            error_message = f'An error occurred at pop_chessboard. unable to pop chessboard, due to error: {str(e)}'
+            environ_logger.error(error_message)
+            raise custom_exceptions.ChessboardPopError(error_message) from e
     ### end of pop_chessboard
 
     def undo_move(self) -> None:
@@ -180,10 +190,10 @@ class Environ:
             self.board.pop()
             if self.turn_index > 0:
                 self.turn_index -= 1
-        except IndexError as e:
-            environ_logger.error(f'at, undo_move, An error occurred: {e}, unable to undo move')
-            environ_logger.error(f'turn index: {self.turn_index}\n')
-            raise IndexError(e) from e
+        except Exception as e:
+            error_message = f'An error occurred at undo_move, unable to undo move due to error: {str(e)}, at turn index: {self.turn_index}'
+            environ_logger.error(error_message)
+            raise custom_exceptions.ChessboardPopError(error_message) from e
     ### end of undo_move
 
     def load_chessboard_for_Q_est(self, analysis_results: list[dict]) -> None:
@@ -213,9 +223,10 @@ class Environ:
         try:
             move = chess.Move.from_uci(anticipated_chess_move)
             self.board.push(move)    
-        except ValueError as e:
-            environ_logger.error(f'at, load_chessboard_for_Q_est, An error occurred: {e}, unable to load chessboard with {anticipated_chess_move}')
-            raise ValueError(e) from e
+        except Exception as e:
+            error_message = f'An error occurred at load_chessboard_for_Q_est: {str(e)}, unable to load chessboard with {anticipated_chess_move}'
+            environ_logger.error(error_message)
+            raise custom_exceptions.ChessboardLoadError(error_message) from e
     ### end of load_chessboard_for_Q_est
 
     def reset_environ(self) -> None:
@@ -239,7 +250,8 @@ class Environ:
         try:
             return [self.board.san(move) for move in self.board.legal_moves]
         except Exception as e:
-            environ_logger.error(f'at get_legal_moves, ERROR: {e}\n')
-            raise Exception from e
+            error_message = f'An error occurred at get_legal_moves: {str(e)}, legal moves could not be retrieved, at turn index: {self.turn_index}, current turn: {self.get_curr_turn()}, current board state: {self.board}, current legal moves: {self.board.legal_moves}'
+            environ_logger.error(error_message)
+            raise custom_exceptions.NoLegalMovesError(error_message) from e
     ### end of get_legal_moves
     

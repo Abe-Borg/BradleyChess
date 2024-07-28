@@ -9,7 +9,10 @@ import custom_exceptions
 agent_vs_human_logger = logging.getLogger(__name__)
 agent_vs_human_logger.setLevel(logging.ERROR)
 error_handler = logging.FileHandler(game_settings.agent_vs_human_logger_filepath)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+error_handler.setFormatter(formatter)
 agent_vs_human_logger.addHandler(error_handler)
+
 
 def play_game_vs_human(environ: Environ.Environ, chess_agent: Agent.Agent) -> None:
     player_turn = 'W'

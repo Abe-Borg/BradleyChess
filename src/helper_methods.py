@@ -36,27 +36,27 @@ def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
     """
     try:
         curr_state = environ.get_curr_state()
-    except custom_exceptions.StateRetrievalError as e:
-        helper_methods_logger.error("agent_selects_and_plays_chess_move, an error occurred\n")
-        helper_methods_logger.error(f'Error: {e}, failed to get_curr_state\n')
-        raise Exception from e
+    except Exception as e:
+        error_message = f'error at agent_selects_and_plays_chess_move: {str(e)}, unable to retrieve current state\n'
+        helper_methods_logger.error(error_message)
+        raise custom_exceptions.StateRetrievalError(error_message) from e
     
     chess_move: str = chess_agent.choose_action(curr_state) # we're not training, so we don't need to pass current_game
 
     try:
         environ.load_chessboard(chess_move)
-    except custom_exceptions.ChessboardLoadError as e:
-        helper_methods_logger.error('hello agent_selects_and_plays_chess_move\n')
-        helper_methods_logger.error(f'Error {e}: failed to load chessboard with move: {chess_move}\n')
-        raise Exception from e
+    except Exception as e:
+        error_message = f'error at agent_selects_and_plays_chess_move: {str(e)}, failed to load chessboard with move: {chess_move}\n'
+        helper_methods_logger.error(error_message)
+        raise custom_exceptions.ChessboardLoadError(error_message) from e
 
     try:
         environ.update_curr_state()
         return chess_move
-    except custom_exceptions.StateUpdateError as e:
-        helper_methods_logger.error('hello from agent_selects_and_plays_chess_move\n')
-        helper_methods_logger.error(f'Error: {e}, failed to update_curr_state\n')
-        raise Exception from e
+    except Exception as e:
+        error_message = f'error at agent_selects_and_plays_chess_move: {str(e)}, failed to update current state\n'
+        helper_methods_logger.error(error_message)
+        raise custom_exceptions.StateUpdateError(error_message) from e
 ### end of agent_selects_and_plays_chess_move
 
 def receive_opponent_move(chess_move: str, environ) -> bool:                                                                                 
@@ -81,18 +81,18 @@ def receive_opponent_move(chess_move: str, environ) -> bool:
     """
     try:
         environ.load_chessboard(chess_move)
-    except custom_exceptions.ChessboardLoadError as e:
-        helper_methods_logger.error("hello from receive_opp_move, an error occurred\n")
-        helper_methods_logger.error(f'Error: {e}, failed to load chessboard with move: {chess_move}\n')
-        raise Exception from e
+    except Exception as e:
+        error_message = f'error at receive_opp_move: {str(e)}, failed to load chessboard with move: {chess_move}\n'
+        helper_methods_logger.error(error_message)
+        raise custom_exceptions.ChessboardLoadError(error_message) from e
 
     try:
         environ.update_curr_state()
         return True
-    except custom_exceptions.StateUpdateError as e:
-        helper_methods_logger.error(f'hello from receive_opp_move, an error occurrd\n')
-        helper_methods_logger.error(f'Error: {e}, failed to update_curr_state\n') 
-        raise Exception from e
+    except Exception as e:
+        error_message = f'error at receive_opp_move: {str(e)}, failed to update current state\n'
+        helper_methods_logger.error(error_message)
+        raise custom_exceptions.StateUpdateError(error_message) from e
 ### end of receive_opp_move
 
 def pikl_q_table(chess_agent, q_table_path: str) -> None:
@@ -144,9 +144,9 @@ def is_game_over(environ) -> bool:
             (len(environ.get_legal_moves()) == 0)
         )
     except Exception as e:
-        helper_methods_logger.error('hello from is_game_over\n')
-        helper_methods_logger.error(f'Error: {e}, failed to determine if game is over\n')
-        raise Exception from e
+        error_message = f'error at is_game_over: {str(e)}, failed to determine if game is over\n'
+        helper_methods_logger.error(error_message)
+        raise custom_exceptions.GameOverError(error_message) from e
 ### end of is_game_over
 
 def get_game_outcome(environ) -> str:
@@ -167,10 +167,10 @@ def get_game_outcome(environ) -> str:
     """
     try:
         return environ.board.outcome().result()
-    except custom_exceptions.GameOutcomeError as e:
-        helper_methods_logger.error('hello from get_game_outcome\n')
-        helper_methods_logger.error(f'Error: {e}, failed to get game outcome\n')
-        raise Exception from e
+    except Exception as e:
+        error_message = f'error at get_game_outcome: {str(e)}, failed to get game outcome\n'
+        helper_methods_logger.error(error_message)
+        raise custom_exceptions.GameOutcomeError(error_message) from e
 ### end of get_game_outcome
 
 def get_game_termination_reason(environ) -> str:
@@ -192,8 +192,8 @@ def get_game_termination_reason(environ) -> str:
     """
     try:
         return str(environ.board.outcome().termination)
-    except custom_exceptions.GameTerminationError as e:
-        helper_methods_logger.error('hello from get_game_termination_reason\n')
-        helper_methods_logger.error(f'Error: {e}, failed to get game end reason\n')
-        raise Exception from e
+    except Exception as e:
+        error_message = f'error at get_game_termination_reason: {str(e)}, failed to get game end reason\n'
+        helper_methods_logger.error(error_message)
+        raise custom_exceptions.GameTerminationError(error_message) from e
 ### end of get_game_termination_reason

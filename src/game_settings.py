@@ -284,12 +284,3 @@ chess_games_filepath_part_97 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_98 = base_directory / ".." / "chess_data" / "chess_games_part_98.pkl"
 chess_games_filepath_part_99 = base_directory / ".." / "chess_data" / "chess_games_part_99.pkl"
 chess_games_filepath_part_100 = base_directory / ".." / "chess_data" / "chess_games_part_100.pkl"
-
-############################################################################################################
-
-
-# chess_data = pd.read_pickle(chess_games_filepath_part_40, compression = 'zip')
-
-# est_q_vals_file_path = 
-
-

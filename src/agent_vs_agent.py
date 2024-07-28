@@ -9,6 +9,8 @@ import custom_exceptions
 agent_vs_agent_logger = logging.getLogger(__name__)
 agent_vs_agent_logger.setLevel(logging.ERROR)
 error_handler = logging.FileHandler(game_settings.agent_vs_agent_logger_filepath)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+error_handler.setFormatter(formatter)
 agent_vs_agent_logger.addHandler(error_handler)
 
 def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_game = 0) -> None:
