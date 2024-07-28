@@ -4,6 +4,7 @@ import time
 import Environ
 import Agent
 import logging
+import custom_exceptions
 
 agent_vs_agent_logger = logging.getLogger(__name__)
 agent_vs_agent_logger.setLevel(logging.ERROR)
@@ -32,8 +33,9 @@ def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_g
                 else:
                     agent_vs_agent_logger.info(f'Black agent played {chess_move} curr board is:\n{environ.board}\n')
     except Exception as e:
-        agent_vs_agent_logger.error(f'An error occurred: {e}\n')
-        raise Exception from e
+        error_message = f'An error occurred at agent_vs_agent: {e}'
+        agent_vs_agent_logger.error(error_message)
+        raise custom_exceptions.GamePlayError(error_message) from e
 
     # game is over, reset environ
     agent_vs_agent_logger.info('Game is over\n')

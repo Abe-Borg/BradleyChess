@@ -1,6 +1,7 @@
 import game_settings
 import chess
 import logging
+import custom_exceptions
 
 environ_logger = logging.getLogger(__name__)
 environ_logger.setLevel(logging.ERROR)
@@ -62,9 +63,8 @@ class Environ:
         """
         if not (0 <= self.turn_index < len(self.turn_list)):
             environ_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
-            raise IndexError(f'Turn index out of range: {self.turn_index}')
+            raise custom_exceptions.TurnIndexError(f'Turn index out of range: {self.turn_index}')
     
-        
         try:
             curr_turn = self.get_curr_turn()
             legal_moves = self.get_legal_moves()
@@ -116,7 +116,7 @@ class Environ:
         """
         if not (0 <= self.turn_index < len(self.turn_list)):
             environ_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
-            raise IndexError(f'Turn index out of range: {self.turn_index}')
+            raise custom_exceptions.TurnIndexError(f'Turn index out of range: {self.turn_index}')
         
         return self.turn_list[self.turn_index]
         ### end of get_curr_turn
@@ -139,7 +139,7 @@ class Environ:
         """
         try:
             self.board.push_san(chess_move)
-        except ValueError as e:
+        except custom_exceptions.InvalidMoveError as e:
             environ_logger.error(f'at, load_chessboard, An error occurred: {e}, unable to load chessboard with {chess_move} in {curr_game}\n')
             raise ValueError(e) from e
     ### end of load_chessboard    

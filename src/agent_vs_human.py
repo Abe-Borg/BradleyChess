@@ -4,6 +4,7 @@ import time
 import Environ
 import Agent
 import logging
+import custom_exceptions
 
 agent_vs_human_logger = logging.getLogger(__name__)
 agent_vs_human_logger.setLevel(logging.ERROR)
@@ -12,21 +13,23 @@ agent_vs_human_logger.addHandler(error_handler)
 
 def play_game_vs_human(environ: Environ.Environ, chess_agent: Agent.Agent) -> None:
     player_turn = 'W'
-    while helper_methods.is_game_over(environ) == False:
-        try:
+    try:
+        while helper_methods.is_game_over(environ) == False:
             print(f'\nCurrent turn is :  {environ.get_curr_turn()}\n')
             chess_move = handle_move(player_turn, chess_agent)
             print(f'{player_turn} played {chess_move}\n')
-        except Exception as e:
-            print(f'An error occurred at play_game_vs_human: {e}')
-            agent_vs_human_logger(f'An error occurred at play_game_vs_human: {e}')
-            raise Exception from e
+            player_turn = 'B' if player_turn == 'W' else 'W'
 
-        player_turn = 'B' if player_turn == 'W' else 'W'
-
-    print(f'Game is over, result is: {helper_methods.get_game_outcome(environ)}')
-    print(f'The game ended because of: {helper_methods.get_game_termination_reason(environ)}')
-    environ.reset_environ()
+        print(f'Game is over, result is: {helper_methods.get_game_outcome(environ)}')
+        print(f'The game ended because of: {helper_methods.get_game_termination_reason(environ)}')
+    except Exception as e:
+        print(f'An error occurred at play_game_vs_human: {e}')
+        error_message = f'An error occurred at play_game_vs_human: {str(e)}'
+        agent_vs_human_logger(error_message, exc_info=True)
+        raise custom_exceptions.GamePlayError(error_message) from e
+    
+    finally:
+        environ.reset_environ()
 ### end of play_game
 
 def handle_move(player_color: str, chess_agent: Agent.Agent) -> str:
@@ -43,8 +46,9 @@ def handle_move(player_color: str, chess_agent: Agent.Agent) -> str:
                 chess_move = input('Enter chess move: ')
             return chess_move
         except Exception as e:
-            agent_vs_human_logger.error(f'An error occurred at handle_move: {e}')
-            raise Exception from e
+            error_message = f'An error occurred at handle_move: {e}'
+            agent_vs_human_logger.error(error_message)
+            raise custom_exceptions.GamePlayError(error_message) from e
 ### end of handle_move
 
 if __name__ == '__main__':    

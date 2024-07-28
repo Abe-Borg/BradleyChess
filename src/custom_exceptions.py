@@ -20,6 +20,16 @@ class ChessboardLoadError(ChessboardError):
     def __str__(self):
         return f"{self.message} (Move: {self.move})"
 
+class ChessboardPopError(ChessboardError):
+    """Exception raised when there's an error removing a move from the chessboard."""
+    def __init__(self, move, message=None):
+        self.move = move
+        self.message = message or f"Error removing {move} from chessboard"
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"{self.message} (Move: {self.move})"
+
 class ChessboardManipulationError(ChessboardError):
     """Exception raised when there's an error manipulating the chessboard."""
     def __init__(self, action, message=None):
@@ -171,3 +181,70 @@ class MoveExtractionError(AnalysisError):
 
     def __str__(self):
         return f"{self.message} (Analysis Result: {self.analysis_result})"
+
+
+
+class AgentError(ChessError):
+    """Base class for exceptions in the Agent class."""
+    pass
+
+class InvalidActionError(AgentError):
+    """Exception raised when an invalid action is chosen by agent."""
+    def __init__(self, action, message=None):
+        self.action = action
+        self.message = message or f"Invalid action chosen: {action}"
+        super().__init__(self.message)
+
+class QTableAccessError(AgentError):
+    """Exception raised when there's an error accessing the Q-table."""
+    pass
+
+class FailureToChooseActionError(AgentError):
+    """Exception raised when the agent fails to choose an action."""
+    def __init__(self, message="Agent failed to choose an action"):
+        super().__init__(message)
+
+class AgentInitializationError(AgentError):
+    """Exception raised when there's an error initializing the agent."""
+    def __init__(self, message="Error initializing agent"):
+        super().__init__(message)
+
+class EnvironError(ChessError):
+    """Base class for exceptions in the Environ class."""
+    pass
+
+class TurnIndexError(EnvironError):
+    """Exception raised when there's an issue with the turn index."""
+    pass
+
+class InvalidMoveError(EnvironError):
+    """Exception raised when an invalid move is attempted."""
+    pass
+
+class HelperMethodError(ChessError):
+    """Base class for exceptions in helper methods."""
+    pass
+
+class EngineStartError(HelperMethodError):
+    """Exception raised when there's an error starting the chess engine."""
+    pass
+
+class RewardCalculationError(HelperMethodError):
+    """Exception raised when there's an error calculating rewards."""
+    pass
+
+class TrainingFunctionError(ChessError):
+    """Base class for exceptions in training functions."""
+    pass
+
+class QValueEstimationError(TrainingFunctionError):
+    """Exception raised when there's an error estimating Q-values."""
+    pass
+
+class GameSimulationError(TrainingFunctionError):
+    """Exception raised when there's an error simulating games during training."""
+    pass
+
+class GamePlayError(ChessError):
+    """Exception raised when there's an error playing games between agents and human v agents."""
+    pass

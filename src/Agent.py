@@ -4,6 +4,12 @@ import numpy as np
 import helper_methods
 import logging
 from typing import Union
+import custom_exceptions
+
+agent_logger = logging.getLogger(__name__)
+agent_logger.setLevel(logging.ERROR)
+error_handler = logging.FileHandler(game_settings.agent_errors_filepath)
+agent_logger.addHandler(error_handler)
 
 class Agent:
     """
@@ -31,16 +37,14 @@ class Agent:
             Side Effects: 
             Modifies the learn_rate, discount_factor, color, is_trained, and q_table attributes.
         """
-        self.agent_logger = logging.getLogger(__name__)
-        self.agent_logger.setLevel(logging.ERROR)
-        error_handler = logging.FileHandler(game_settings.agent_errors_filepath)
-        self.agent_logger.addHandler(error_handler)
-        
-        self.learn_rate = learn_rate
-        self.discount_factor = discount_factor
-        self.color = color
-        self.is_trained: bool = False
-        self.q_table: pd.DataFrame = q_table # q table will be assigned at program execution.
+        try:
+            self.learn_rate = learn_rate
+            self.discount_factor = discount_factor
+            self.color = color
+            self.is_trained: bool = False
+            self.q_table: pd.DataFrame = q_table # q table will be assigned at program execution.
+        except Exception as e:
+            raise custom_exceptions.AgentInitializationError(f'failed to initialize agent due to error: {e}')
     ### end of __init__ ###
 
     def choose_action(self, chess_data, environ_state: dict[str, str, list[str]], curr_game: str = 'Game 1') -> str:
@@ -63,22 +67,23 @@ class Agent:
                 Writes into the errors file if there are no legal moves.
         """
         if environ_state['legal_moves'] == []:
-            self.agent_logger.info(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
+            agent_logger.info(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             return ''
         
         try:
             self.update_q_table(environ_state['legal_moves']) # this func also checks if there are any new unique move strings
         except Exception as e:
-            self.agent_logger.error(f'at choose_action: failed to update q_table. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
-            raise Exception from e    
+            error_message = f'Failed to update Q-table. curr_game: {curr_game}, curr_turn: {environ_state["curr_turn"]}'
+            agent_logger.error(error_message)
+            raise custom_exceptions.QTableUpdateError(error_message) from e
 
         try:
             if self.is_trained:
                 return self.policy_game_mode(environ_state['legal_moves'], environ_state['curr_turn'])
             else:
                 return self.policy_training_mode(chess_data, curr_game, environ_state["curr_turn"])
-        except Exception as e:
-            self.agent_logger.error(f'at choose_action: failed to choose action. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
+        except custom_exceptions.FailureToChooseActionError as e:
+            agent_logger.error(f'at choose_action: failed to choose action. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             raise Exception from e
     ### end of choose_action ###
     
@@ -104,7 +109,7 @@ class Agent:
             chess_move = chess_data.at[curr_game, curr_turn]
             return chess_move
         except Exception as e:
-            self.agent_logger.error(f'at policy_training_mode: move not found in chess data. curr_game: {curr_game}, curr_turn: {curr_turn}\n')
+            agent_logger.error(f'at policy_training_mode: move not found in chess data. curr_game: {curr_game}, curr_turn: {curr_turn}\n')
             raise Exception from e
     ### end of policy_training_mode ###
 
@@ -131,7 +136,7 @@ class Agent:
         try:
             legal_moves_in_q_table = self.q_table[curr_turn].loc[self.q_table[curr_turn].index.intersection(legal_moves)]
         except Exception as e:
-            self.agent_logger.error(f'at policy_game_mode: legal moves not found in q_table or legal_moves is empty. curr_turn: {curr_turn}\n')
+            agent_logger.error(f'at policy_game_mode: legal moves not found in q_table or legal_moves is empty. curr_turn: {curr_turn}\n')
             raise Exception from e
 
         if dice_roll == 1:
@@ -160,8 +165,8 @@ class Agent:
         try:    
             self.q_table.at[chess_move, curr_turn] += pts
         except Exception as e:
-            self.agent_logger.error(f'at change_q_table_pts: failed to change q_table points. chess_move: {chess_move}, curr_turn: {curr_turn}, pts: {pts}\n')
-            raise Exception from e
+            agent_logger.error(f'at change_q_table_pts: failed to change q_table points. chess_move: {chess_move}, curr_turn: {curr_turn}, pts: {pts}\n')
+            raise custom_exceptions.QTableAccessError(f'failed to change q_table points for move {chess_move} at turn {curr_turn}, due to error: {str(e)}')
     ### end of change_q_table_pts ###
 
     def update_q_table(self, new_chess_moves: Union[str, list[str]]) -> None:
@@ -201,6 +206,6 @@ class Agent:
 
             self.q_table = pd.concat([self.q_table, q_table_new_values])
         except Exception as e:
-            self.agent_logger.error(f'at update_q_table: failed to update q_table. new_chess_moves: {new_chess_moves}\n')
-            raise Exception from e
+            agent_logger.error(f'at update_q_table: failed to update q_table. new_chess_moves: {new_chess_moves}\n')
+            raise custom_exceptions.QTableUpdateError(f'failed to update q_table for moves {new_chess_moves}, due to error: {str(e)}')
     ### update_q_table ###

@@ -480,7 +480,7 @@ def find_estimated_q_value(environ, engine) -> int:
     # given the ACTICIPATED next action. In this case, the anticipated response from opposing agent.
     try:
         anticipated_next_move = analyze_board_state(environ.board, engine)
-    except Exception as e:
+    except custom_exceptions.BoardAnalysisError as e:
         training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
         training_functions_logger.error(f'failed to analyze_board_state\n')
         raise Exception from e
@@ -488,7 +488,7 @@ def find_estimated_q_value(environ, engine) -> int:
     # load up the chess board with opponent's anticipated chess move 
     try:
         environ.load_chessboard_for_q_est(anticipated_next_move)
-    except Exception as e:
+    except custom_exceptions.ChessboardLoadError as e:
         training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
         training_functions_logger.error(f'failed to load_chessboard_for_q_est\n')
         raise Exception from e
@@ -497,7 +497,7 @@ def find_estimated_q_value(environ, engine) -> int:
     if environ.board.is_game_over() or not environ.get_legal_moves():
         try:
             environ.pop_chessboard()
-        except Exception as e:
+        except custom_exceptions.ChessboardPopError as e:
             training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
             training_functions_logger.error(f'failed at environ.pop_chessboard\n')
             raise Exception from e
@@ -505,7 +505,7 @@ def find_estimated_q_value(environ, engine) -> int:
     # this is the q estimated value due to what the opposing agent is likely to play in response to our move.    
     try:
         est_qval_analysis = analyze_board_state(environ.board, engine)
-    except Exception as e:
+    except custom_exceptions.QValueEstimationError as e:
         training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
         training_functions_logger.error(f'failed at analyze_board_state\n')
         raise Exception from e
@@ -712,7 +712,7 @@ def get_reward(chess_move: str) -> int:
             None.
     """
     if not chess_move or not isinstance(chess_move, str):
-        raise ValueError("Invalid chess move input")    # <<<<<<<< !!!!!! put custom exception here later
+        raise custom_exceptions.RewardCalculationError("Invalid chess move input")
 
     total_reward = 0
     # Check for piece development (N, R, B, Q)
@@ -733,7 +733,7 @@ def start_chess_engine():
     try:
         chess_engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
         return chess_engine
-    except Exception as e:             # <<<<< !!!!!! Need a custom exception here later
+    except custom_exceptions.EngineStartError as e:             # <<<<< !!!!!! Need a custom exception here later
         training_functions_logger.error(f'An error occurred at start_chess_engine: {e}\n')
         raise Exception from e
 # end of start_chess_engine
