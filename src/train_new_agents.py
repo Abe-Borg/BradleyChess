@@ -2,22 +2,22 @@ import helper_methods
 import game_settings
 import pandas as pd
 import time
-import Environ
 import training_functions
 import Agent
 import chess
 
 if __name__ == '__main__':
     start_time = time.time()
-    environ = Environ.Environ()
     bradley = Agent.Agent('W')
     imman = Agent.Agent('B')
 
-    # change this each time for new section of the database
+    # !!!!!!!!!!!!!!!!! change this each time for new section of the database  !!!!!!!!!!!!!!!!!
+    estimated_q_values_table = pd.read_pickle(game_settings.est_q_vals_filepath_part_1, compression = 'zip')
     chess_data = pd.read_pickle(game_settings.chess_games_filepath_part_1, compression = 'zip')
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     try:
-        training_functions.train_rl_agents(chess_data, bradley, imman, environ)
+        training_functions.train_rl_agents(chess_data, estimated_q_values_tables, bradley, imman)
     except Exception as e:
         print(f'training interrupted because of:  {e}')
         quit()
