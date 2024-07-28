@@ -35,19 +35,12 @@ class Agent:
         self.agent_logger.setLevel(logging.ERROR)
         error_handler = logging.FileHandler(game_settings.agent_errors_filepath)
         self.agent_logger.addHandler(error_handler)
-        self.step_by_step_logger = logging.getLogger(__name__ + '.step_by_step')
-        self.step_by_step_logger.setLevel(logging.DEBUG)
-        step_by_step_handler = logging.FileHandler(game_settings.agent_step_by_step_filepath)
-        self.step_by_step_logger.addHandler(step_by_step_handler)
         
         self.learn_rate = learn_rate
         self.discount_factor = discount_factor
         self.color = color
         self.is_trained: bool = False
         self.q_table: pd.DataFrame = q_table # q table will be assigned at program execution.
-
-        if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_logger.debug(f'Agent.__init__: color: {color}, learn_rate: {learn_rate}, discount_factor: {discount_factor}, is_trained: {self.is_trained}\n')
     ### end of __init__ ###
 
     def choose_action(self, chess_data, environ_state: dict[str, str, list[str]], curr_game: str = 'Game 1') -> str:
