@@ -2,6 +2,11 @@ import game_settings
 import chess
 import logging
 
+environ_logger = logging.getLogger(__name__)
+environ_logger.setLevel(logging.ERROR)
+error_handler = logging.FileHandler(game_settings.environ_errors_filepath)
+environ_logger.addHandler(error_handler)
+
 class Environ:
     """
         A class representing the environment of a chess game.
@@ -30,11 +35,6 @@ class Environ:
             Side Effects:
                 Modifies the turn list and the turn index. 
         """
-        self.environ_logger = logging.getLogger(__name__)
-        self.environ_logger.setLevel(logging.ERROR)
-        error_handler = logging.FileHandler(game_settings.environ_errors_filepath)
-        self.environ_logger.addHandler(error_handler)
-
         self.board: chess.Board = chess.Board()
         
         # turn_list and turn_index work together to track the current turn (a string like this, 'W1')
@@ -61,11 +61,17 @@ class Environ:
                 into the errors file before the exception is re-raised. 
         """
         if not (0 <= self.turn_index < len(self.turn_list)):
-            # self.environ_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
+            environ_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
             raise IndexError(f'Turn index out of range: {self.turn_index}')
     
-        curr_turn = self.get_curr_turn()
-        legal_moves = self.get_legal_moves()
+        
+        try:
+            curr_turn = self.get_curr_turn()
+            legal_moves = self.get_legal_moves()
+        except Exception as e:
+            environ_logger.error(f'at get_curr_state, ERROR: {e}\n')
+            raise Exception from e
+        
         return {'turn_index': self.turn_index, 'curr_turn': curr_turn, 'legal_moves': legal_moves}
     ### end of get_curr_state
     
@@ -84,11 +90,11 @@ class Environ:
                 Modifies the turn index by incrementing it by one.
         """
         if self.turn_index >= game_settings.max_turn_index:
-            # self.environ_logger.error(f'ERROR: max_turn_index reached: {self.turn_index} >= {game_settings.max_turn_index}\n')
+            environ_logger.error(f'ERROR: max_turn_index reached: {self.turn_index} >= {game_settings.max_turn_index}\n')
             raise IndexError(f"Maximum turn index ({game_settings.max_turn_index}) reached!")
     
         if self.turn_index >= len(self.turn_list):
-            # self.environ_logger.error(f'ERROR: turn index out of bounds: {self.turn_index} >= {len(self.turn_list)}\n')
+            environ_logger.error(f'ERROR: turn index out of bounds: {self.turn_index} >= {len(self.turn_list)}\n')
             raise IndexError(f"Turn index out of bounds: {self.turn_index}")
     
         self.turn_index += 1
@@ -109,7 +115,7 @@ class Environ:
                 current turn index are written into the errors file before the exception is re-raised. 
         """
         if not (0 <= self.turn_index < len(self.turn_list)):
-            # self.environ_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
+            environ_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
             raise IndexError(f'Turn index out of range: {self.turn_index}')
         
         return self.turn_list[self.turn_index]
@@ -134,6 +140,7 @@ class Environ:
         try:
             self.board.push_san(chess_move)
         except ValueError as e:
+            environ_logger.error(f'at, load_chessboard, An error occurred: {e}, unable to load chessboard with {chess_move} in {curr_game}\n')
             raise ValueError(e) from e
     ### end of load_chessboard    
 
@@ -153,7 +160,7 @@ class Environ:
         try:
             self.board.pop()
         except IndexError as e:
-            # self.environ_logger.error(f'An error occurred: {e}, unable to pop chessboard')
+            environ_logger.error(f'An error occurred: {e}, unable to pop chessboard')
             raise IndexError(f"An error occurred: {e}, unable to pop chessboard'")
     ### end of pop_chessboard
 
@@ -171,12 +178,11 @@ class Environ:
         """
         try:
             self.board.pop()
-
             if self.turn_index > 0:
                 self.turn_index -= 1
         except IndexError as e:
-            # self.environ_logger.error(f'at, undo_move, An error occurred: {e}, unable to undo move')
-            # self.environ_logger.error(f'turn index: {self.turn_index}\n')
+            environ_logger.error(f'at, undo_move, An error occurred: {e}, unable to undo move')
+            environ_logger.error(f'turn index: {self.turn_index}\n')
             raise IndexError(e) from e
     ### end of undo_move
 
@@ -202,13 +208,13 @@ class Environ:
         # this is the anticipated chess move due to opponent's previous chess move. so if White plays Ne4, 
         # what is Black likely to play according to the engine?
         anticipated_chess_move = analysis_results['anticipated_next_move']  # this has the form like this, Move.from_uci('e4f6')
-        self.environ_logger.debug(f'anticipated_chess_move: {anticipated_chess_move}. This should have the form like this, Move.from_uci(\'e4f6\')\n')
+        environ_logger.debug(f'anticipated_chess_move: {anticipated_chess_move}. This should have the form like this, Move.from_uci(\'e4f6\')\n')
 
         try:
             move = chess.Move.from_uci(anticipated_chess_move)
             self.board.push(move)    
         except ValueError as e:
-            # self.environ_logger.error(f'at, load_chessboard_for_Q_est, An error occurred: {e}, unable to load chessboard with {anticipated_chess_move}')
+            environ_logger.error(f'at, load_chessboard_for_Q_est, An error occurred: {e}, unable to load chessboard with {anticipated_chess_move}')
             raise ValueError(e) from e
     ### end of load_chessboard_for_Q_est
 
@@ -230,6 +236,10 @@ class Environ:
                 If it's white's turn and the possible moves are to move the pawn from e2 to e4 or to move the knight 
                 from g1 to f3, the returned list would be ['e4', 'Nf3'].
         """
-        return [self.board.san(move) for move in self.board.legal_moves]
+        try:
+            return [self.board.san(move) for move in self.board.legal_moves]
+        except Exception as e:
+            environ_logger.error(f'at get_legal_moves, ERROR: {e}\n')
+            raise Exception from e
     ### end of get_legal_moves
     

@@ -66,7 +66,11 @@ class Agent:
             self.agent_logger.info(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             return ''
         
-        self.update_q_table(environ_state['legal_moves']) # this func also checks if there are any new unique move strings
+        try:
+            self.update_q_table(environ_state['legal_moves']) # this func also checks if there are any new unique move strings
+        except Exception as e:
+            self.agent_logger.error(f'at choose_action: failed to update q_table. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
+            raise Exception from e    
 
         try:
             if self.is_trained:
@@ -194,7 +198,7 @@ class Agent:
                 columns = self.q_table.columns, 
                 dtype = np.int64
             )
-            
+
             self.q_table = pd.concat([self.q_table, q_table_new_values])
         except Exception as e:
             self.agent_logger.error(f'at update_q_table: failed to update q_table. new_chess_moves: {new_chess_moves}\n')
