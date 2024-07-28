@@ -62,11 +62,8 @@ class Agent:
                 Modifies the q-table if there are legal moves that are not in the q-table.
                 Writes into the errors file if there are no legal moves.
         """
-        if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_logger.debug(f'Agent.choose_action: environ_state: {environ_state}, curr_game: {curr_game}\n')
-
         if environ_state['legal_moves'] == []:
-            self.agent_logger.error(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
+            self.agent_logger.info(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             return ''
         
         self.update_q_table(environ_state['legal_moves']) # this func also checks if there are any new unique move strings
@@ -95,11 +92,12 @@ class Agent:
             Side Effects:
                 None.
         """
-        if game_settings.PRINT_STEP_BY_STEP:
-            self.step_by_step_logger.debug(f'Agent.policy_training_mode: curr_game: {curr_game}, curr_turn: {curr_turn}\n')
-            self.step_by_step_logger.debug(f'chess move: {chess_data.at[curr_game, curr_turn]}\n')
-        
-        return chess_data.at[curr_game, curr_turn]
+        try:
+            chess_move = chess_data.at[curr_game, curr_turn]
+            return chess_move
+        except Exception as e:
+            self.agent_logger.error(f'at policy_training_mode: move not found in chess data. curr_game: {curr_game}, curr_turn: {curr_turn}\n')
+            raise Exception from e
     ### end of policy_training_mode ###
 
     def policy_game_mode(self, legal_moves: list[str], curr_turn: str) -> str:
@@ -121,7 +119,12 @@ class Agent:
                 None.
         """
         dice_roll = helper_methods.get_number_with_probability(game_settings.chance_for_random_move)
-        legal_moves_in_q_table = self.q_table[curr_turn].loc[self.q_table[curr_turn].index.intersection(legal_moves)]
+        
+        try:
+            legal_moves_in_q_table = self.q_table[curr_turn].loc[self.q_table[curr_turn].index.intersection(legal_moves)]
+        except Exception as e:
+            self.agent_logger.error(f'at policy_game_mode: legal moves not found in q_table or legal_moves is empty. curr_turn: {curr_turn}\n')
+            raise Exception from e
 
         if dice_roll == 1:
             chess_move = legal_moves_in_q_table.sample().index[0]

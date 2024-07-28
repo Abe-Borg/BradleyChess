@@ -15,7 +15,7 @@ def play_game_vs_human(environ, chess_agent) -> None:
             chess_move = handle_move(player_turn, chess_agent)
             print(f'{player_turn} played {chess_move}\n')
         except Exception as e:
-            # put in logger here.
+            print(f'An error occurred at play_game_vs_human: {e}')
             raise Exception from e
 
         player_turn = 'B' if player_turn == 'W' else 'W'
