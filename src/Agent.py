@@ -68,10 +68,14 @@ class Agent:
         
         self.update_q_table(environ_state['legal_moves']) # this func also checks if there are any new unique move strings
 
-        if self.is_trained:
-            return self.policy_game_mode(environ_state['legal_moves'], environ_state['curr_turn'])
-        else:
-            return self.policy_training_mode(chess_data, curr_game, environ_state["curr_turn"])
+        try:
+            if self.is_trained:
+                return self.policy_game_mode(environ_state['legal_moves'], environ_state['curr_turn'])
+            else:
+                return self.policy_training_mode(chess_data, curr_game, environ_state["curr_turn"])
+        except Exception as e:
+            self.agent_logger.error(f'at choose_action: failed to choose action. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
+            raise Exception from e
     ### end of choose_action ###
     
     def policy_training_mode(self, chess_data, curr_game: str, curr_turn: str) -> str:
@@ -183,12 +187,16 @@ class Agent:
         if not truly_new_moves:
             return
 
-        q_table_new_values: pd.DataFrame = pd.DataFrame(
-            0, 
-            index = list(truly_new_moves), 
-            columns = self.q_table.columns, 
-            dtype = np.int64
-        )
-
-        self.q_table = pd.concat([self.q_table, q_table_new_values])
+        try:
+            q_table_new_values: pd.DataFrame = pd.DataFrame(
+                0, 
+                index = list(truly_new_moves), 
+                columns = self.q_table.columns, 
+                dtype = np.int64
+            )
+            
+            self.q_table = pd.concat([self.q_table, q_table_new_values])
+        except Exception as e:
+            self.agent_logger.error(f'at update_q_table: failed to update q_table. new_chess_moves: {new_chess_moves}\n')
+            raise Exception from e
     ### update_q_table ###
