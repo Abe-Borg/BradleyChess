@@ -3,6 +3,12 @@ import game_settings
 import time
 import Environ
 import Agent
+import logging
+
+agent_vs_agent_logger = logging.getLogger(__name__)
+agent_vs_agent_logger.setLevel(logging.ERROR)
+error_handler = logging.FileHandler(game_settings.agent_vs_agent_logger_filepath)
+agent_vs_agent_logger.addHandler(error_handler)
 
 def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_game = 0) -> None:
     try:
@@ -10,37 +16,29 @@ def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_g
         print(f'Playing game {current_game}\n')
         while helper_methods.is_game_over(environ) == False:
             if print_to_screen:
-                try: 
-                    print(f'\nCurrent turn: {environ.get_curr_turn()}')
-                    chess_move = helper_methods.agent_selects_and_plays_chess_move(w_agent, environ)
-                    time.sleep(3)
-                    print(f'White agent played {chess_move}')
-                except Exception as e:
-                    # agent_vs_agent_file.write(f'An error occurred: {e}\n')
-                    raise Exception from e
+                print(f'\nCurrent turn: {environ.get_curr_turn()}')
+                chess_move = helper_methods.agent_selects_and_plays_chess_move(w_agent, environ)
+                time.sleep(3)
+                print(f'White agent played {chess_move}')
             else:
-                pass
-                # make a log file that will record the game moves. and track the current game
+                agent_vs_agent_logger.info(f'Current turn is: {environ.get_current_turn()}. \nWhite agent played {chess_move}\n')
             
             # sometimes game ends after white's turn
             if helper_methods.is_game_over(environ) == False:
                 if print_to_screen:
-                    try:
-                        print(f'\nCurrent turn: {environ.get_curr_turn()}')
-                        chess_move = helper_methods.agent_selects_and_plays_chess_move(b_agent, environ)
-                        time.sleep(3)
-                        print(f'Black agent played {chess_move} curr board is:\n{environ.board}\n')
-                    except Exception as e:
-                        # agent_vs_agent_file.write(f'An error occurred: {e}\n')
-                        raise Exception from e
+                    chess_move = helper_methods.agent_selects_and_plays_chess_move(b_agent, environ)
+                    time.sleep(3)
+                    print(f'Black agent played {chess_move} curr board is:\n{environ.board}\n')
                 else:
-                    pass
-                    # make a log file that will record the game moves since we're not printing to screen
+                    agent_vs_agent_logger.info(f'Black agent played {chess_move} curr board is:\n{environ.board}\n')
     except Exception as e:
-        # agent_vs_agent_file.write(f'An unhandled error occurred: {e}\n')
+        agent_vs_agent_logger.error(f'An error occurred: {e}\n')
         raise Exception from e
 
     # game is over, reset environ
+    agent_vs_agent_logger.info('Game is over\n')
+    agent_vs_agent_logger.info(f'Final board is:\n{environ.board}\n')
+    agent_vs_agent_logger.info(f'game result is: {environ.get_game_result()}\n')
     environ.reset_environ()
 ### end of agent_vs_agent
 
@@ -67,6 +65,7 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(f'agent vs agent interrupted because of:  {e}')
+        agent_vs_agent_logger.error(f'An error occurred: {e}\n')        
         quit()
     
     end_time = time.time()
