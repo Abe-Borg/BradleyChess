@@ -3,6 +3,8 @@ import chess
 import logging
 import custom_exceptions
 from utils.logging_config import setup_logger 
+from typing import Dict 
+from typing import Union
 
 # environ_logger = logging.getLogger(__name__)
 # environ_logger.setLevel(logging.ERROR)
@@ -55,7 +57,7 @@ class Environ:
             raise custom_exceptions.EnvironInitializationError(f'failed to initialize environ due to error: {e}') from e
     ### end of constructor
 
-    def get_curr_state(self) -> dict[str, str, list[str]]:
+    def get_curr_state(self) -> Dict[str, Union[int, str, list[str]]]:
         """
             Retrieves the current state of the chessboard, including the turn index, the current turn, and the legal moves.
             This method constructs a dictionary that represents the current state of the chessboard. The dictionary 
