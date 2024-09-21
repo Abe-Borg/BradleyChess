@@ -1,9 +1,9 @@
-import helper_methods
-import game_settings
+from utils import helper_methods
+from utils import game_settings
 import time
-import training_functions
-import Agent
-import Environ
+from training import training_functions
+from agents import Agent
+from environment import Environ
 from utils.logging_config import setup_logger
 
 agent_vs_agent_logger = setup_logger(__name__, game_settings.agent_vs_agent_logger_filepath)

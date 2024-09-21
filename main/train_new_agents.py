@@ -1,9 +1,9 @@
-import helper_methods
-import game_settings
+from utils import helper_methods
+from utils import game_settings
 import pandas as pd
 import time
-import training_functions
-import Agent
+from training import training_functions
+from agents import Agent
 import chess
 from utils.logging_config import setup_logger
 

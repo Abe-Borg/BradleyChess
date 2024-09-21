@@ -1,21 +1,14 @@
-import game_settings
+from utils import game_settings
 import pandas as pd
 import numpy as np
-import helper_methods
+from utils import helper_methods
 import logging
 from typing import Union
 from typing import Dict
 from typing import List
-import custom_exceptions
+from utils import custom_exceptions
 from utils.logging_config import setup_logger
 from typing import Optional
-
-# agent_logger = logging.getLogger(__name__)
-# agent_logger.setLevel(logging.ERROR)
-# error_handler = logging.FileHandler(game_settings.agent_errors_filepath)
-# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# error_handler.setFormatter(formatter)
-# agent_logger.addHandler(error_handler)
 
 # # use DEBUG for detailed internal state information and INFO for high-level events.
 agent_logger = setup_logger(__name__, game_settings.agent_errors_filepath)

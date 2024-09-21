@@ -1,18 +1,11 @@
-import helper_methods
-import game_settings
+from utils import helper_methods
+from utils import game_settings
 import time
-import Environ
-import Agent
+from environment import Environ
+from agents import Agent
 import logging
-import custom_exceptions
+from utils import custom_exceptions
 from utils.logging_config import setup_logger 
-
-# agent_vs_agent_logger = logging.getLogger(__name__)
-# agent_vs_agent_logger.setLevel(logging.ERROR)
-# error_handler = logging.FileHandler(game_settings.agent_vs_agent_logger_filepath)
-# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# error_handler.setFormatter(formatter)
-# agent_vs_agent_logger.addHandler(error_handler)
 
 # # use DEBUG for detailed internal state information and INFO for high-level events.
 agent_vs_agent_logger = setup_logger(__name__, game_settings.agent_vs_agent_logger_filepath)

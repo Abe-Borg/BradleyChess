@@ -1,21 +1,13 @@
-import helper_methods
+from utils import helper_methods
 import chess
 import logging
-import game_settings
-import Environ
+from utils import game_settings
+from environment import Environ
 import pandas as pd
 import copy
-import custom_exceptions
+from utils import custom_exceptions
 import re
 from utils.logging_config import setup_logger
-
-# Logger Initialization
-# training_functions_logger = logging.getLogger(__name__)
-# training_functions_logger.setLevel(logging.ERROR)
-# error_handler = logging.FileHandler(game_settings.training_functions_logger_filepath)   ### <<< ====== create this filepath
-# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# error_handler.setFormatter(formatter)
-# training_functions_logger.addHandler(error_handler)
 
 training_functions_logger = setup_logger(__name__, game_settings.training_functions_logger_filepath)
 

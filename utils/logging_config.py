@@ -1,7 +1,7 @@
 # utils/logging_config.py
 import logging
 from pathlib import Path
-import game_settings
+from utils import game_settings
 
 def setup_logger(name: str, log_file: str, level=logging.ERROR) -> logging.Logger:
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
