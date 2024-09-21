@@ -61,7 +61,7 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
         ##################### WHITE'S TURN ####################
         # choose action a from state s, using policy
         try:
-            w_chess_move = w_agent.choose_action(chess_data, curr_state, game_number)
+            w_chess_move = select_action(w_agent, curr_state, chess_data, game_number)
         except Exception as e:
             training_functions_logger.error(f'Hi from train_one_game. An error occurred at w_agent.choose_action: {e}\n')
             training_functions_logger.error(f'at: {game_number}\n')
@@ -777,8 +777,6 @@ def apply_move_and_update_state(environ, agent, action, game_number):
     try:
         environ.load_chessboard(action, game_number)
         environ.update_curr_state()
-        curr_state = environ.get_curr_state()
-        return curr_state
     except Exception as e:
         training_functions_logger.error(f"Error applying move and updating state: {e}")
         raise
