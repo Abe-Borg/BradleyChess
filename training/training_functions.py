@@ -7,14 +7,17 @@ import pandas as pd
 import copy
 import custom_exceptions
 import re
+from utils.logging_config import setup_logger
 
 # Logger Initialization
-training_functions_logger = logging.getLogger(__name__)
-training_functions_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler(game_settings.training_functions_logger_filepath)   ### <<< ====== create this filepath
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-error_handler.setFormatter(formatter)
-training_functions_logger.addHandler(error_handler)
+# training_functions_logger = logging.getLogger(__name__)
+# training_functions_logger.setLevel(logging.ERROR)
+# error_handler = logging.FileHandler(game_settings.training_functions_logger_filepath)   ### <<< ====== create this filepath
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# error_handler.setFormatter(formatter)
+# training_functions_logger.addHandler(error_handler)
+
+training_functions_logger = setup_logger(__name__, game_settings.training_functions_logger_filepath)
 
 def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
     """

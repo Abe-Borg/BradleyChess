@@ -4,6 +4,9 @@ import time
 import training_functions
 import Agent
 import Environ
+from utils.logging_config import setup_logger
+
+agent_vs_agent_logger = setup_logger(__name__, game_settings.agent_vs_agent_logger_filepath)
 
 if __name__ == '__main__':
     start_time = time.time()

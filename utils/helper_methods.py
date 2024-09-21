@@ -5,13 +5,16 @@ import chess.engine
 import logging
 import Agent
 import custom_exceptions
+from utils.logging_config import setup_logger
 
-helper_methods_logger = logging.getLogger(__name__)
-helper_methods_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler(game_settings.helper_methods_errors_filepath)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-error_handler.setFormatter(formatter)
-helper_methods_logger.addHandler(error_handler)
+# helper_methods_logger = logging.getLogger(__name__)
+# helper_methods_logger.setLevel(logging.ERROR)
+# error_handler = logging.FileHandler(game_settings.helper_methods_errors_filepath)
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# error_handler.setFormatter(formatter)
+# helper_methods_logger.addHandler(error_handler)
+
+helper_methods_logger = setup_logger(__name__, game_settings.helper_methods_errors_filepath)
 
 def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
     """

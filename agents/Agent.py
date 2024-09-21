@@ -5,14 +5,17 @@ import helper_methods
 import logging
 from typing import Union
 import custom_exceptions
+from utils.logging_config import setup_logger 
 
-agent_logger = logging.getLogger(__name__)
-agent_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler(game_settings.agent_errors_filepath)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-error_handler.setFormatter(formatter)
-agent_logger.addHandler(error_handler)
+# agent_logger = logging.getLogger(__name__)
+# agent_logger.setLevel(logging.ERROR)
+# error_handler = logging.FileHandler(game_settings.agent_errors_filepath)
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# error_handler.setFormatter(formatter)
+# agent_logger.addHandler(error_handler)
 
+# # use DEBUG for detailed internal state information and INFO for high-level events.
+agent_logger = setup_logger(__name__, game_settings.agent_errors_filepath)
 
 class Agent:
     """

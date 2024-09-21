@@ -2,13 +2,17 @@ import game_settings
 import chess
 import logging
 import custom_exceptions
+from utils.logging_config import setup_logger 
 
-environ_logger = logging.getLogger(__name__)
-environ_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler(game_settings.environ_errors_filepath)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-error_handler.setFormatter(formatter)
-environ_logger.addHandler(error_handler)
+# environ_logger = logging.getLogger(__name__)
+# environ_logger.setLevel(logging.ERROR)
+# error_handler = logging.FileHandler(game_settings.environ_errors_filepath)
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# error_handler.setFormatter(formatter)
+# environ_logger.addHandler(error_handler)
+
+# use DEBUG for detailed internal state information and INFO for high-level events.
+environ_logger = setup_logger(__name__, game_settings.environ_errors_filepath)
 
 
 class Environ:

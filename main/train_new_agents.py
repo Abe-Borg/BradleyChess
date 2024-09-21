@@ -5,6 +5,9 @@ import time
 import training_functions
 import Agent
 import chess
+from utils.logging_config import setup_logger
+
+train_new_agents_logger = setup_logger(__name__, game_settings.train_new_agents_logger_filepath)
 
 if __name__ == '__main__':
     start_time = time.time()
