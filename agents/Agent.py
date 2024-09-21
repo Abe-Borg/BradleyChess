@@ -121,7 +121,7 @@ class Agent:
             raise custom_exceptions.FailureToChooseActionError(error_message) from e
     ### end of policy_training_mode ###
 
-    def policy_game_mode(self, legal_moves: list[str], curr_turn: str) -> str:
+    def policy_game_mode(self, legal_moves: List[str], curr_turn: str) -> str:
         """
             Determines how the agent chooses a move during a game between a human player and the agent.
             This method determines how the agent chooses a move during a game between a human player and the agent. 
@@ -179,7 +179,7 @@ class Agent:
             raise custom_exceptions.QTableUpdateError(error_message) from e
     ### end of change_q_table_pts ###
 
-    def update_q_table(self, new_chess_moves: Union[str, list[str]]) -> None:
+    def update_q_table(self, new_chess_moves: Union[str, List[str]]) -> None:
         """
             Updates the Q-table with new chess moves, if they are not already present.
 

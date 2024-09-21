@@ -5,6 +5,7 @@ from utils import custom_exceptions
 from utils.logging_config import setup_logger 
 from typing import Dict 
 from typing import Union
+from typing import List
 
 # use DEBUG for detailed internal state information and INFO for high-level events.
 environ_logger = setup_logger(__name__, game_settings.environ_errors_filepath)
@@ -43,14 +44,14 @@ class Environ:
             
             # turn_list and turn_index work together to track the current turn (a string like this, 'W1')
             max_turns = game_settings.max_num_turns_per_player * 2 # 2 players
-            self.turn_list: list[str] = [f'{"W" if i % 2 == 0 else "B"}{i // 2 + 1}' for i in range(max_turns)]
+            self.turn_list: List[str] = [f'{"W" if i % 2 == 0 else "B"}{i // 2 + 1}' for i in range(max_turns)]
             self.turn_index: int = 0
         except Exception as e:
             environ_logger.error(f'at __init__: failed to initialize environ. Error: {e}\n', exc_info=True)
             raise custom_exceptions.EnvironInitializationError(f'failed to initialize environ due to error: {e}') from e
     ### end of constructor
 
-    def get_curr_state(self) -> Dict[str, Union[int, str, list[str]]]:
+    def get_curr_state(self) -> Dict[str, Union[int, str, List[str]]]:
         """
             Retrieves the current state of the chessboard, including the turn index, the current turn, and the legal moves.
             This method constructs a dictionary that represents the current state of the chessboard. The dictionary 
@@ -233,7 +234,7 @@ class Environ:
         self.turn_index = 0
     ### end of reset_environ
     
-    def get_legal_moves(self) -> list[str]:   
+    def get_legal_moves(self) -> List[str]:   
         """
             Generates a list of all legal moves in Standard Algebraic Notation (SAN) at the current turn.
             This method evaluates the current state of the chessboard and generates a list of all possible legal moves. 
