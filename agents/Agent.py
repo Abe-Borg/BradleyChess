@@ -4,8 +4,11 @@ import numpy as np
 import helper_methods
 import logging
 from typing import Union
+from typing import Dict
+from typing import List
 import custom_exceptions
-from utils.logging_config import setup_logger 
+from utils.logging_config import setup_logger
+from typing import Optional
 
 # agent_logger = logging.getLogger(__name__)
 # agent_logger.setLevel(logging.ERROR)
@@ -34,7 +37,7 @@ class Agent:
             - is_trained (bool): A boolean indicating whether the agent has been trained.
             - q_table (pd.DataFrame): A Pandas DataFrame containing the q-values for the agent.
     """
-    def __init__(self, color: str, learn_rate = 0.6, discount_factor = 0.35, q_table: pd.DataFrame = None):
+    def __init__(self, color: str, learn_rate: float = 0.6, discount_factor: float = 0.35, q_table: Optional[pd.DataFrame] = None):
         """
             Initializes an Agent object with a color, a learning rate, a discount factor
             This method initializes an Agent object by setting the color, the learning rate, and the 
@@ -44,17 +47,17 @@ class Agent:
             Modifies the learn_rate, discount_factor, color, is_trained, and q_table attributes.
         """
         try:
+            self.color = color
             self.learn_rate = learn_rate
             self.discount_factor = discount_factor
-            self.color = color
             self.is_trained: bool = False
-            self.q_table: pd.DataFrame = q_table # q table will be assigned at program execution.
+            self.q_table = q_table if q_table is not None else pd.DataFrame()
         except Exception as e:
             agent_logger.error(f'at __init__: failed to initialize agent. Error: {e}\n', exc_info=True)
             raise custom_exceptions.AgentInitializationError(f'failed to initialize agent due to error: {e}') from e
     ### end of __init__ ###
 
-    def choose_action(self, chess_data, environ_state: dict[str, str, list[str]], curr_game: str = 'Game 1') -> str:
+    def choose_action(self, chess_data, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
         """
             Chooses the next chess move for the agent based on the current state.
             This method chooses the next chess move for the agent based on the current state of the environment. If 
@@ -73,6 +76,9 @@ class Agent:
                 Modifies the q-table if there are legal moves that are not in the q-table.
                 Writes into the errors file if there are no legal moves.
         """
+        if chess_data is None:
+            chess_data = {}
+
         if environ_state['legal_moves'] == []:
             agent_logger.info(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             return ''
