@@ -7,12 +7,10 @@ import logging
 from utils import custom_exceptions
 from utils.logging_config import setup_logger 
 
-# # use DEBUG for detailed internal state information and INFO for high-level events.
 agent_vs_agent_logger = setup_logger(__name__, game_settings.agent_vs_agent_logger_filepath)
 
 def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_game = 0) -> None:
     try:
-        # play all moves in a single game
         print(f'Playing game {current_game}\n')
         while helper_methods.is_game_over(environ) == False:
             if print_to_screen:
@@ -36,7 +34,6 @@ def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_g
         agent_vs_agent_logger.error(error_message)
         raise custom_exceptions.GamePlayError(error_message) from e
 
-    # game is over, reset environ
     agent_vs_agent_logger.info('Game is over\n')
     agent_vs_agent_logger.info(f'Final board is:\n{environ.board}\n')
     agent_vs_agent_logger.info(f'game result is: {environ.get_game_result()}\n')
@@ -53,11 +50,9 @@ if __name__ == '__main__':
         bradley = helper_methods.bootstrap_agent(bradley, game_settings.bradley_agent_q_table_path)
         imman = helper_methods.bootstrap_agent(imman, game_settings.imman_agent_q_table_path)
 
-        # ask user to input number of games to play
         number_of_games = int(input('How many games do you want the agents to play? '))
         print_to_screen = (input('Do you want to print the games to the screen? (y/n) ')).lower()[0]
 
-        # while there are games still to play, call agent_vs_agent
         for current_game in range(int(number_of_games)):
             if print_to_screen == 'y':
                 print(f'Game {current_game + 1}')

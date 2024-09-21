@@ -10,7 +10,6 @@ from utils import custom_exceptions
 from utils.logging_config import setup_logger
 from typing import Optional
 
-# # use DEBUG for detailed internal state information and INFO for high-level events.
 agent_logger = setup_logger(__name__, game_settings.agent_errors_filepath)
 
 class Agent:
@@ -77,7 +76,7 @@ class Agent:
             return ''
         
         try:
-            self.update_q_table(environ_state['legal_moves']) # this func also checks if there are any new unique move strings
+            self.update_q_table(environ_state['legal_moves'])
         except Exception as e:
             error_message = f'Failed to update Q-table. curr_game: {curr_game}, curr_turn: {environ_state["curr_turn"]} due to error: {str(e)}'
             agent_logger.error(error_message)
@@ -198,11 +197,9 @@ class Agent:
         # Convert to set for efficient lookup
         new_moves_set = set(new_chess_moves)
 
-        # Check if all moves are already in the Q-table
         existing_moves = set(self.q_table.index)
         truly_new_moves = new_moves_set - existing_moves
 
-        # If no new moves, return early
         if not truly_new_moves:
             return
 

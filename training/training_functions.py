@@ -38,9 +38,6 @@ def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
             training_functions_logger.error(f'An error occurred at train_one_game: {e}\n')
             training_functions_logger.error(f'at game: {game_number}\n')
             raise Exception from e
-
-    # training is complete, all games in database have been processed
-    ### I will need to use a pool.Queue to collect all the values to be input to the q table at the end of training.
     
     w_agent.is_trained = True
     b_agent.is_trained = True
@@ -276,7 +273,6 @@ def generate_q_est_df(chess_data, w_agent, b_agent) -> pd.DataFrame:
             training_functions_logger.error(f'at game: {game_number}\n')
             raise Exception from e
 
-    # i will need to use a pool.Queue to collect all the values to be input to the q est table.
     return estimated_q_values
 # end of generate_q_est_df
 
@@ -622,7 +618,6 @@ def analyze_board_state(board, engine) -> dict:
         # Get score from analysis_result and normalize for player perspective
         pov_score = analysis_result[0]['score'].white() if board.turn == chess.WHITE else analysis_result[0]['score'].black()
 
-        # Check if the score is a mate score and get the mate score, otherwise get the centipawn score
         if pov_score.is_mate():
             mate_score = pov_score.mate()
         else:
@@ -632,7 +627,6 @@ def analyze_board_state(board, engine) -> dict:
         raise custom_exceptions.ScoreExtractionError("Error occurred while extracting scores from analysis") from e
 
     try:
-        # Extract the anticipated next move from the analysis
         anticipated_next_move = analysis_result[0]['pv'][0]
     except Exception as e:
         training_functions_logger.error(f'An error occurred while extracting the anticipated next move: {e}\n')
@@ -729,11 +723,10 @@ def start_chess_engine():
     try:
         chess_engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
         return chess_engine
-    except custom_exceptions.EngineStartError as e:             # <<<<< !!!!!! Need a custom exception here later
+    except custom_exceptions.EngineStartError as e:
         training_functions_logger.error(f'An error occurred at start_chess_engine: {e}\n')
         raise Exception from e
 # end of start_chess_engine
-
 
 def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, chess_agent) -> None:
     """

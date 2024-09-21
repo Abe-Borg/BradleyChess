@@ -7,7 +7,6 @@ from typing import Dict
 from typing import Union
 from typing import List
 
-# use DEBUG for detailed internal state information and INFO for high-level events.
 environ_logger = setup_logger(__name__, game_settings.environ_errors_filepath)
 
 
