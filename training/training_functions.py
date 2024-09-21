@@ -760,4 +760,53 @@ def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, c
         training_functions_logger.error(f'curr_q_val: {curr_q_val}\n')
         training_functions_logger.error(f'chess_agent: {chess_agent}\n')
         raise Exception from e
-# enf of assign_points_to_q_table
+# enf of assign_points_to_q_table 
+
+def select_action(agent, curr_state, chess_data, game_number):
+    try:
+        action = agent.choose_action(chess_data, curr_state, game_number)
+        if not action:
+            raise custom_exceptions.FailureToChooseActionError("Action selection failed.")
+        return action
+    except Exception as e:
+        training_functions_logger.error(f"Error selecting action: {e}")
+        raise
+
+
+def apply_move_and_update_state(environ, agent, action, game_number):
+    try:
+        environ.load_chessboard(action, game_number)
+        environ.update_curr_state()
+        curr_state = environ.get_curr_state()
+        return curr_state
+    except Exception as e:
+        training_functions_logger.error(f"Error applying move and updating state: {e}")
+        raise
+
+def calculate_reward(chess_move):
+    try:
+        return get_reward(chess_move)
+    except Exception as e:
+        training_functions_logger.error(f"Error calculating reward: {e}")
+        raise
+
+def update_q_value(agent, curr_q_value, reward, est_q_value):
+    try:
+        next_q_value = find_next_q_value(
+            curr_q_value,
+            agent.learn_rate,
+            reward,
+            agent.discount_factor,
+            est_q_value
+        )
+        return next_q_value
+    except Exception as e:
+        training_functions_logger.error(f"Error updating Q-value: {e}")
+        raise
+
+def estimate_q_value(environ, engine):
+    try:
+        return find_estimated_q_value(environ, engine)
+    except Exception as e:
+        training_functions_logger.error(f"Error estimating Q-value: {e}")
+        raise
