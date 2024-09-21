@@ -1,6 +1,5 @@
 from utils import helper_methods
 import chess
-import logging
 from utils import game_settings
 from environment import Environ
 import pandas as pd

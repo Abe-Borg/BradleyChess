@@ -2,7 +2,6 @@ import pandas as pd
 from utils import game_settings
 import random
 import chess.engine
-import logging
 from agents import Agent
 from utils import custom_exceptions
 from utils.logging_config import setup_logger

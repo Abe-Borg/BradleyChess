@@ -1,6 +1,5 @@
 from utils import game_settings
 import chess
-import logging
 from utils import custom_exceptions
 from utils.logging_config import setup_logger 
 from typing import Dict 

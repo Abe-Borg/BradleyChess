@@ -2,7 +2,6 @@ from utils import game_settings
 import pandas as pd
 import numpy as np
 from utils import helper_methods
-import logging
 from typing import Union
 from typing import Dict
 from typing import List

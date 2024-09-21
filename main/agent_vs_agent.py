@@ -3,7 +3,6 @@ from utils import game_settings
 import time
 from environment import Environ
 from agents import Agent
-import logging
 from utils import custom_exceptions
 from utils.logging_config import setup_logger 
 
