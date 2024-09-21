@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     try:
-        training_functions.train_rl_agents(chess_data, estimated_q_values_tables, bradley, imman)
+        training_functions.train_rl_agents(chess_data, estimated_q_values_table, bradley, imman)
     except Exception as e:
         print(f'training interrupted because of:  {e}')
         quit()
