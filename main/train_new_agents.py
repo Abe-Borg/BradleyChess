@@ -1,12 +1,9 @@
-from utils import helper_methods
-from utils import game_settings
+from utils import helper_methods, game_settings, custom_exceptions
 import pandas as pd
 import time
 from training import training_functions
 from agents import Agent
-import chess
 from utils.logging_config import setup_logger
-from utils import custom_exceptions
 
 train_new_agents_logger = setup_logger(__name__, game_settings.train_new_agents_logger_filepath)
 

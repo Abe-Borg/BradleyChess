@@ -1,9 +1,7 @@
-from utils import helper_methods
-from utils import game_settings
+from utils import helper_methods, game_settings, custom_exceptions
 import time
 from environment import Environ
 from agents import Agent
-from utils import custom_exceptions
 from utils.logging_config import setup_logger
 
 agent_vs_human_logger = setup_logger(__name__, game_settings.agent_vs_human_logger_filepath)

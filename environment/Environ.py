@@ -1,13 +1,8 @@
-from utils import game_settings
 import chess
-from utils import custom_exceptions
+from utils import custom_exceptions, game_settings
 from utils.logging_config import setup_logger 
-from typing import Dict 
-from typing import Union
-from typing import List
-
+from typing import Union, Dict, List
 environ_logger = setup_logger(__name__, game_settings.environ_errors_filepath)
-
 
 class Environ:
     """

@@ -1,11 +1,8 @@
-from utils import helper_methods
-from utils import game_settings
+from utils import helper_methods, game_settings, custom_exceptions
 import time
 from environment import Environ
 from agents import Agent
-from utils import custom_exceptions
 from utils.logging_config import setup_logger 
-
 agent_vs_agent_logger = setup_logger(__name__, game_settings.agent_vs_agent_logger_filepath)
 
 def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_game = 0) -> None:

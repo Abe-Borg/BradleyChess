@@ -1,14 +1,8 @@
-from utils import game_settings
+from utils import game_settings, helper_methods, custom_exceptions
 import pandas as pd
 import numpy as np
-from utils import helper_methods
-from typing import Union
-from typing import Dict
-from typing import List
-from utils import custom_exceptions
+from typing import Union, Dict, List, Optional
 from utils.logging_config import setup_logger
-from typing import Optional
-
 agent_logger = setup_logger(__name__, game_settings.agent_errors_filepath)
 
 class Agent:

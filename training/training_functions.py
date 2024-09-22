@@ -1,15 +1,12 @@
 from typing import Tuple
 from agents import Agent
-from utils import helper_methods
 import chess
-from utils import game_settings
+from utils import game_settings, custom_exceptions
 from environment import Environ
 import pandas as pd
 import copy
-from utils import custom_exceptions
 import re
 from utils.logging_config import setup_logger
-
 training_functions_logger = setup_logger(__name__, game_settings.training_functions_logger_filepath)
 
 def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent) -> Tuple[Agent.Agent, Agent.Agent]:
