@@ -491,14 +491,13 @@ if __name__ == '__main__':
 
 <training/training_functions.py>
 
-import helper_methods
+from utils import helper_methods
 import chess
-import logging
-import game_settings
-import Environ
+from utils import game_settings
+from environment import Environ
 import pandas as pd
 import copy
-import custom_exceptions
+from utils import custom_exceptions
 import re
 from utils.logging_config import setup_logger
 
@@ -516,9 +515,6 @@ def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
             training_functions_logger.error(f'An error occurred at train_one_game: {e}\n')
             training_functions_logger.error(f'at game: {game_number}\n')
             raise Exception from e
-
-    # training is complete, all games in database have been processed
-    ### I will need to use a pool.Queue to collect all the values to be input to the q table at the end of training.
     
     w_agent.is_trained = True
     b_agent.is_trained = True
@@ -564,9 +560,9 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
         ### WHITE AGENT PLAYS THE SELECTED MOVE ###
         # take action a, observe r, s', and load chessboard
         try:
-            rl_agent_plays_move_during_training(w_chess_move, game_number, environ)
+            apply_move_and_update_state(w_chess_move, game_number, environ)
         except Exception as e:
-            training_functions_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
+            training_functions_logger.error(f'An error occurred at apply_move_and_update_state: {e}\n')
             training_functions_logger.error(f'at game_number: {game_number}\n')
             training_functions_logger.error(f'at state: {curr_state}\n')
             raise Exception from e
@@ -579,7 +575,7 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
             training_functions_logger.error(f'at state: {curr_state}\n')
             raise Exception from e
 
-        # get latest curr_state since rl_agent_plays_move_during_training updated the chessboard
+        # get latest curr_state since apply_move_and_update_state updated the chessboard
         try:
             curr_state = environ.get_curr_state()
         except Exception as e:
@@ -627,9 +623,9 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
         ##### BLACK AGENT PLAYS SELECTED MOVE #####
         # take action a, observe r, s', and load chessboard
         try:
-            rl_agent_plays_move_during_training(b_chess_move, game_number, environ)
+            apply_move_and_update_state(b_chess_move, game_number, environ)
         except Exception as e:
-            training_functions_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
+            training_functions_logger.error(f'An error occurred at apply_move_and_update_state: {e}\n')
             training_functions_logger.error(f'at game_number: {game_number}\n')
             training_functions_logger.error(f'at state: {curr_state}\n')
             raise Exception from e
@@ -642,7 +638,7 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
             training_functions_logger.error(f'at state: {curr_state}\n')
             raise Exception from e
 
-        # get latest curr_state since rl_agent_plays_move_during_training updated the chessboard
+        # get latest curr_state since apply_move_and_update_state updated the chessboard
         try:
             curr_state = environ.get_curr_state()
         except Exception as e:
@@ -723,7 +719,6 @@ def generate_q_est_df(chess_data, w_agent, b_agent) -> pd.DataFrame:
             training_functions_logger.error(f'at game: {game_number}\n')
             raise Exception from e
 
-    # i will need to use a pool.Queue to collect all the values to be input to the q est table.
     return estimated_q_values
 # end of generate_q_est_df
 
@@ -763,14 +758,14 @@ def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent) -> Non
         ### WHITE AGENT PLAYS THE SELECTED MOVE ###
         # take action a, observe r, s', and load chessboard
         try:
-            rl_agent_plays_move_during_training(w_chess_move, game_number, environ)
+            apply_move_and_update_state(w_chess_move, game_number, environ)
         except Exception as e:
-            training_functions_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
+            training_functions_logger.error(f'An error occurred at apply_move_and_update_state: {e}\n')
             training_functions_logger.error(f'at game_number: {game_number}\n')
             training_functions_logger.error(f'at state: {curr_state}\n')
             raise Exception from e
 
-        # get latest curr_state since rl_agent_plays_move_during_training updated the chessboard
+        # get latest curr_state since apply_move_and_update_state updated the chessboard
         try:
             curr_state = environ.get_curr_state()
         except Exception as e:
@@ -822,14 +817,14 @@ def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent) -> Non
         ##### BLACK AGENT PLAYS SELECTED MOVE #####
         # take action a, observe r, s', and load chessboard
         try:
-            rl_agent_plays_move_during_training(b_chess_move, game_number, environ)
+            apply_move_and_update_state(b_chess_move, game_number, environ)
         except Exception as e:
-            training_functions_logger.error(f'An error occurred at rl_agent_plays_move_during_training: {e}\n')
+            training_functions_logger.error(f'An error occurred at apply_move_and_update_state: {e}\n')
             training_functions_logger.error(f'at: {game_number}\n')
             training_functions_logger.error(f'at state: {curr_state}\n')
             raise Exception from e
 
-        # get latest curr_state since rl_agent_plays_move_during_training updated the chessboard
+        # get latest curr_state since apply_move_and_update_state updated the chessboard
         try:
             curr_state = environ.get_curr_state()
         except Exception as e:
@@ -879,7 +874,7 @@ def find_estimated_q_value(environ, engine) -> int:
     try:
         anticipated_next_move = analyze_board_state(environ.board, engine)
     except custom_exceptions.BoardAnalysisError as e:
-        training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
+        training_functions_logger.error(f'at find_estimated_q_value. An error occurred: {e}\n')
         training_functions_logger.error(f'failed to analyze_board_state\n')
         raise Exception from e
     
@@ -887,7 +882,7 @@ def find_estimated_q_value(environ, engine) -> int:
     try:
         environ.load_chessboard_for_q_est(anticipated_next_move)
     except custom_exceptions.ChessboardLoadError as e:
-        training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
+        training_functions_logger.error(f'at find_estimated_q_value. An error occurred: {e}\n')
         training_functions_logger.error(f'failed to load_chessboard_for_q_est\n')
         raise Exception from e
     
@@ -896,7 +891,7 @@ def find_estimated_q_value(environ, engine) -> int:
         try:
             environ.pop_chessboard()
         except custom_exceptions.ChessboardPopError as e:
-            training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
+            training_functions_logger.error(f'at find_estimated_q_value. An error occurred: {e}\n')
             training_functions_logger.error(f'failed at environ.pop_chessboard\n')
             raise Exception from e
 
@@ -904,7 +899,7 @@ def find_estimated_q_value(environ, engine) -> int:
     try:
         est_qval_analysis = analyze_board_state(environ.board, engine)
     except custom_exceptions.QValueEstimationError as e:
-        training_functions_logger.error(f'at Bradley.find_estimated_q_value. An error occurred: {e}\n')
+        training_functions_logger.error(f'at find_estimated_q_value. An error occurred: {e}\n')
         training_functions_logger.error(f'failed at analyze_board_state\n')
         raise Exception from e
 
@@ -919,7 +914,7 @@ def find_estimated_q_value(environ, engine) -> int:
     try:
         environ.pop_chessboard()
     except Exception as e:
-        training_functions_logger.error(f'@ Bradley.find_estimated_q_value. An error occurred: {e}\n')
+        training_functions_logger.error(f'@ find_estimated_q_value. An error occurred: {e}\n')
         training_functions_logger.error("failed to pop_chessboard after est q val analysis values found\n")
         raise Exception from e
 
@@ -931,7 +926,7 @@ def find_next_q_value(curr_qval: int, learn_rate: float, reward: int, discount_f
         next_qval = int(curr_qval + learn_rate * (reward + ((discount_factor * est_qval) - curr_qval)))
         return next_qval
     except OverflowError:
-        training_functions_logger.error(f'@ Bradley.find_next_q_value. An error occurred: OverflowError\n')
+        training_functions_logger.error(f'@ find_next_q_value. An error occurred: OverflowError\n')
         training_functions_logger.error(f'curr_qval: {curr_qval}\n')
         training_functions_logger.error(f'learn_rate: {learn_rate}\n')
         training_functions_logger.error(f'reward: {reward}\n')
@@ -942,8 +937,8 @@ def find_next_q_value(curr_qval: int, learn_rate: float, reward: int, discount_f
 
 def analyze_board_state(board, engine) -> dict:
     if not board.is_valid():
-        training_functions_logger.error(f'at Bradley.analyze_board_state. Board is in invalid state\n')
-        raise custom_exceptions.InvalidBoardStateError(f'at Bradley.analyze_board_state. Board is in invalid state\n')
+        training_functions_logger.error(f'at analyze_board_state. Board is in invalid state\n')
+        raise custom_exceptions.InvalidBoardStateError(f'at analyze_board_state. Board is in invalid state\n')
 
     try: 
         analysis_result = engine.analyse(board, game_settings.search_limit, multipv = game_settings.num_moves_to_return)
@@ -960,7 +955,6 @@ def analyze_board_state(board, engine) -> dict:
         # Get score from analysis_result and normalize for player perspective
         pov_score = analysis_result[0]['score'].white() if board.turn == chess.WHITE else analysis_result[0]['score'].black()
 
-        # Check if the score is a mate score and get the mate score, otherwise get the centipawn score
         if pov_score.is_mate():
             mate_score = pov_score.mate()
         else:
@@ -970,7 +964,6 @@ def analyze_board_state(board, engine) -> dict:
         raise custom_exceptions.ScoreExtractionError("Error occurred while extracting scores from analysis") from e
 
     try:
-        # Extract the anticipated next move from the analysis
         anticipated_next_move = analysis_result[0]['pv'][0]
     except Exception as e:
         training_functions_logger.error(f'An error occurred while extracting the anticipated next move: {e}\n')
@@ -983,21 +976,21 @@ def analyze_board_state(board, engine) -> dict:
     }
 ### end of analyze_board_state
 
-def rl_agent_plays_move_during_training(chess_move: str, game_number, environ: Environ.Environ) -> None:
+def apply_move_and_update_state(chess_move: str, game_number, environ: Environ.Environ) -> None:
     try:
         environ.load_chessboard(chess_move, game_number)
     except custom_exceptions.ChessboardLoadError as e:
-        training_functions_logger.error(f'at Bradley.rl_agent_plays_move_during_training. An error occurred at {game_number}: {e}\n')
+        training_functions_logger.error(f'at apply_move_and_update_state. An error occurred at {game_number}: {e}\n')
         training_functions_logger.error(f"failed to load_chessboard with move {chess_move}\n")
         raise Exception from e
 
     try:
         environ.update_curr_state()
     except custom_exceptions.StateUpdateError as e:
-        training_functions_logger.error(f'at Bradley.rl_agent_plays_move_during_training. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
+        training_functions_logger.error(f'at apply_move_and_update_state. update_curr_state() failed to increment turn_index, Caught exception: {e}\n')
         training_functions_logger.error(f'Current state is: {environ.get_curr_state()}\n')
         raise Exception from e
-# end of rl_agent_plays_move_during_training
+# end of apply_move_and_update_state
 
 def get_reward(chess_move: str) -> int:
     if not chess_move or not isinstance(chess_move, str):
@@ -1022,11 +1015,10 @@ def start_chess_engine():
     try:
         chess_engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
         return chess_engine
-    except custom_exceptions.EngineStartError as e:             # <<<<< !!!!!! Need a custom exception here later
+    except custom_exceptions.EngineStartError as e:
         training_functions_logger.error(f'An error occurred at start_chess_engine: {e}\n')
         raise Exception from e
 # end of start_chess_engine
-
 
 def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, chess_agent) -> None:
     try:
