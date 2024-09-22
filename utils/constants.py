@@ -22,3 +22,6 @@ chance_for_random_move = 0.05 # 10% chance that RL agent selects random chess mo
 # we only want to look ahead one move, that's the anticipated q value at next state, and next action
 chess_engine_num_moves_to_return = 1
 chess_engine_depth_limit = 1
+
+default_learning_rate = 0.6
+default_discount_factor = 0.35

@@ -1,4 +1,4 @@
-from utils import game_settings, helper_methods, custom_exceptions
+from utils import game_settings, helper_methods, custom_exceptions, constants
 import pandas as pd
 import numpy as np
 from typing import Union, Dict, List, Optional
@@ -22,7 +22,7 @@ class Agent:
             - is_trained (bool): A boolean indicating whether the agent has been trained.
             - q_table (pd.DataFrame): A Pandas DataFrame containing the q-values for the agent.
     """
-    def __init__(self, color: str, learn_rate: float = 0.6, discount_factor: float = 0.35, q_table: Optional[pd.DataFrame] = None):
+    def __init__(self, color: str, learn_rate: float = constants.default_learning_rate, discount_factor: float = constants.default_discount_factor, q_table: Optional[pd.DataFrame] = None):
         self.color = color
         self.learn_rate = learn_rate
         self.discount_factor = discount_factor
@@ -165,24 +165,18 @@ class Agent:
         if isinstance(new_chess_moves, str):
             new_chess_moves = [new_chess_moves]
         
-        new_moves_set = set(new_chess_moves)
-        existing_moves = set(self.q_table.index)
-        truly_new_moves = new_moves_set - existing_moves
-
+        truly_new_moves = set(new_chess_moves) - set(self.q_table.index)
         if not truly_new_moves:
             return
 
-        try:
-            q_table_new_values: pd.DataFrame = pd.DataFrame(
-                0, 
-                index = list(truly_new_moves), 
-                columns = self.q_table.columns, 
-                dtype = np.int64
-            )
+        
+        q_table_new_values: pd.DataFrame = pd.DataFrame(
+            0, 
+            index = truly_new_moves,
+            columns = self.q_table.columns, 
+            dtype = np.int64
+        )
 
-            self.q_table = pd.concat([self.q_table, q_table_new_values])
-        except Exception as e:
-            error_message = f'@ update_q_table(). Failed to update q_table. new_chess_moves: {new_chess_moves}, dur to error: {str(e)}'
-            agent_logger.error(error_message)
-            raise custom_exceptions.QTableUpdateError(error_message) from e
+        self.q_table = pd.concat([self.q_table, q_table_new_values])
+        
     ### update_q_table ###
