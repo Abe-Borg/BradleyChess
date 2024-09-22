@@ -67,17 +67,12 @@ class Environ:
                 into the errors file before the exception is re-raised. 
         """
         if not (0 <= self.turn_index < len(self.turn_list)):
-            environ_logger.error(f'ERROR: Turn index out of range: {self.turn_index}\n')
-            raise custom_exceptions.TurnIndexError(f'Turn index out of range: {self.turn_index}')
+            message = f'Turn index out of range: {self.turn_index}'
+            environ_logger.error(message)
+            raise custom_exceptions.TurnIndexError(message)
     
-        try:
-            curr_turn = self.get_curr_turn()
-            legal_moves = self.get_legal_moves()
-        except Exception as e:
-            error_message = f'An error occurred at get_curr_state or get_legal_moves due to error: {str(e)}'
-            environ_logger.error()
-            raise custom_exceptions.StateRetrievalError(error_message) from e
-        
+        curr_turn = self.get_curr_turn()
+        legal_moves = self.get_legal_moves()     
         return {'turn_index': self.turn_index, 'curr_turn': curr_turn, 'legal_moves': legal_moves}
     ### end of get_curr_state
     
@@ -96,12 +91,14 @@ class Environ:
                 Modifies the turn index by incrementing it by one.
         """
         if self.turn_index >= game_settings.max_turn_index:
-            environ_logger.error(f'ERROR: max_turn_index reached: {self.turn_index} >= {game_settings.max_turn_index}\n')
-            raise IndexError(f"Maximum turn index ({game_settings.max_turn_index}) reached!")
+            message = f'ERROR: max_turn_index reached: {self.turn_index} >= {game_settings.max_turn_index}\n'
+            environ_logger.error(message)
+            raise IndexError(message)
     
         if self.turn_index >= len(self.turn_list):
-            environ_logger.error(f'ERROR: turn index out of bounds: {self.turn_index} >= {len(self.turn_list)}\n')
-            raise IndexError(f"Turn index out of bounds: {self.turn_index}")
+            message = f'ERROR: turn index out of bounds: {self.turn_index} >= {len(self.turn_list)}\n'
+            environ_logger.error(message)
+            raise IndexError(message)
     
         self.turn_index += 1
     ### end of update_curr_state

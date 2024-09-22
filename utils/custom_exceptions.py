@@ -3,12 +3,12 @@
 class ChessError(Exception):
     """Base class for exceptions in the chess application."""
     def __init__(self, message="An error occurred in the chess application"):
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
 
 class ChessboardError(ChessError):
     """Base class for exceptions related to the chessboard."""
-    pass
+    def __init__(self, message="An error occurred with the chessboard"):
+        super().__init__(message)
 
 class ChessboardLoadError(ChessboardError):
     """Exception raised when there's an error loading a move onto the chessboard."""
@@ -243,6 +243,10 @@ class QValueEstimationError(TrainingFunctionError):
 
 class GameSimulationError(TrainingFunctionError):
     """Exception raised when there's an error simulating games during training."""
+    pass
+
+class EmptyChessMoveError(TrainingFunctionError):
+    """Exception raised when an empty chess move is attempted."""
     pass
 
 class GamePlayError(ChessError):

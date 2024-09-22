@@ -1,14 +1,13 @@
-# utils/logging_config.py
 import logging
-from pathlib import Path
 
 def setup_logger(name: str, log_file: str, level=logging.ERROR) -> logging.Logger:
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler = logging.FileHandler(log_file)
-    handler.setFormatter(formatter)
-
     logger = logging.getLogger(name)
-    logger.setLevel(level)
     if not logger.handlers:
-        logger.addHandler(handler)
+        logger.setLevel(level)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    
     return logger

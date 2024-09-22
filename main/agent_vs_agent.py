@@ -9,29 +9,21 @@ from utils.logging_config import setup_logger
 agent_vs_agent_logger = setup_logger(__name__, game_settings.agent_vs_agent_logger_filepath)
 
 def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_game = 0) -> None:
-    try:
-        print(f'Playing game {current_game}\n')
+    agent_vs_agent_logger.info(f'Playing game {current_game}\n')
+    try:    
         while helper_methods.is_game_over(environ) == False:
-            if print_to_screen:
-                print(f'\nCurrent turn: {environ.get_curr_turn()}')
-                chess_move = helper_methods.agent_selects_and_plays_chess_move(w_agent, environ)
-                time.sleep(3)
-                print(f'White agent played {chess_move}')
-            else:
-                agent_vs_agent_logger.info(f'Current turn is: {environ.get_current_turn()}. \nWhite agent played {chess_move}\n')
-            
+            chess_move = helper_methods.agent_selects_and_plays_chess_move(w_agent, environ)
+            agent_vs_agent_logger.info(f'\nCurrent turn: {environ.get_curr_turn()}')
+            agent_vs_agent_logger.info(f'White agent played {chess_move}')
+            agent_vs_agent_logger.info(f'Current turn is: {environ.get_current_turn()}. \nWhite agent played {chess_move}\n')
+     
             # sometimes game ends after white's turn
             if helper_methods.is_game_over(environ) == False:
-                if print_to_screen:
-                    chess_move = helper_methods.agent_selects_and_plays_chess_move(b_agent, environ)
-                    time.sleep(3)
-                    print(f'Black agent played {chess_move} curr board is:\n{environ.board}\n')
-                else:
-                    agent_vs_agent_logger.info(f'Black agent played {chess_move} curr board is:\n{environ.board}\n')
-    except Exception as e:
-        error_message = f'An error occurred at agent_vs_agent: {e}'
-        agent_vs_agent_logger.error(error_message)
-        raise custom_exceptions.GamePlayError(error_message) from e
+                chess_move = helper_methods.agent_selects_and_plays_chess_move(b_agent, environ)
+                agent_vs_agent_logger.info(f'Black agent played {chess_move} curr board is:\n{environ.board}\n')
+    except custom_exceptions.GamePlayError as e:
+        agent_vs_agent_logger.error(f'An error occurred at agent_vs_agent: {e}')
+        raise
 
     agent_vs_agent_logger.info('Game is over\n')
     agent_vs_agent_logger.info(f'Final board is:\n{environ.board}\n')

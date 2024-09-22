@@ -29,24 +29,12 @@ class Agent:
             - q_table (pd.DataFrame): A Pandas DataFrame containing the q-values for the agent.
     """
     def __init__(self, color: str, learn_rate: float = 0.6, discount_factor: float = 0.35, q_table: Optional[pd.DataFrame] = None):
-        """
-            Initializes an Agent object with a color, a learning rate, a discount factor
-            This method initializes an Agent object by setting the color, the learning rate, and the 
-            discount factor.
-            
-            Side Effects: 
-            Modifies the learn_rate, discount_factor, color, is_trained, and q_table attributes.
-        """
-        try:
-            self.color = color
-            self.learn_rate = learn_rate
-            self.discount_factor = discount_factor
-            self.is_trained: bool = False
-            self.q_table = q_table if q_table is not None else pd.DataFrame()
-        except Exception as e:
-            agent_logger.error(f'at __init__: failed to initialize agent. Error: {e}\n', exc_info=True)
-            raise custom_exceptions.AgentInitializationError(f'failed to initialize agent due to error: {e}') from e
-    ### end of __init__ ###
+        self.color = color
+        self.learn_rate = learn_rate
+        self.discount_factor = discount_factor
+        self.is_trained: bool = False
+        self.q_table = q_table if q_table is not None else pd.DataFrame()
+        ### end of __init__ ###
 
     def choose_action(self, chess_data, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
         """
@@ -67,29 +55,20 @@ class Agent:
                 Modifies the q-table if there are legal moves that are not in the q-table.
                 Writes into the errors file if there are no legal moves.
         """
-        if chess_data is None:
+        if not chess_data:
             chess_data = {}
 
-        if environ_state['legal_moves'] == []:
+        legal_moves = environ_state['legal_moves']
+        if not legal_moves:
             agent_logger.info(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             return ''
+      
+        self.update_q_table(legal_moves)
         
-        try:
-            self.update_q_table(environ_state['legal_moves'])
-        except Exception as e:
-            error_message = f'Failed to update Q-table. curr_game: {curr_game}, curr_turn: {environ_state["curr_turn"]} due to error: {str(e)}'
-            agent_logger.error(error_message)
-            raise custom_exceptions.QTableUpdateError(error_message) from e
-
-        try:
-            if self.is_trained:
-                return self.policy_game_mode(environ_state['legal_moves'], environ_state['curr_turn'])
-            else:
-                return self.policy_training_mode(chess_data, curr_game, environ_state["curr_turn"])
-        except Exception as e:
-            error_message = f'Failed to choose action. curr_game: {curr_game}, curr_turn: {environ_state["curr_turn"]} due to error: {str(e)}'
-            agent_logger.error(error_message)
-            raise custom_exceptions.FailureToChooseActionError(error_message) from e
+        if self.is_trained:
+            return self.policy_game_mode(legal_moves, environ_state['curr_turn'])
+        else:
+            return self.policy_training_mode(chess_data, curr_game, environ_state["curr_turn"])
     ### end of choose_action ###
     
     def policy_training_mode(self, chess_data, curr_game: str, curr_turn: str) -> str:
@@ -113,7 +92,7 @@ class Agent:
         try:
             chess_move = chess_data.at[curr_game, curr_turn]
             return chess_move
-        except Exception as e:
+        except KeyError as e:
             error_message = f'Failed to choose action at policy_training_mode. curr_game: {curr_game}, curr_turn: {curr_turn} due to error: {str(e)}'
             agent_logger.error(error_message)
             raise custom_exceptions.FailureToChooseActionError(error_message) from e
@@ -139,12 +118,11 @@ class Agent:
         """
         dice_roll = helper_methods.get_number_with_probability(game_settings.chance_for_random_move)
         
-        try:
-            legal_moves_in_q_table = self.q_table[curr_turn].loc[self.q_table[curr_turn].index.intersection(legal_moves)]
-        except Exception as e:
-            error_message = f'at policy_game_mode: legal moves not found in q_table or legal_moves is empty. curr_turn: {curr_turn} due to error: {str(e)}'
+        legal_moves_in_q_table = self.q_table[curr_turn].loc[self.q_table[curr_turn].index.intersection(legal_moves)]
+        if legal_moves_in_q_table.empty:
+            error_message = f'at policy_game_mode: legal moves not found in q_table or legal_moves is empty.'
             agent_logger.error(error_message)
-            raise custom_exceptions.FailureToChooseActionError(error_message) from e
+            raise custom_exceptions.FailureToChooseActionError(error_message)
 
         if dice_roll == 1:
             chess_move = legal_moves_in_q_table.sample().index[0]
@@ -171,7 +149,7 @@ class Agent:
         """
         try:    
             self.q_table.at[chess_move, curr_turn] += pts
-        except Exception as e:
+        except KeyError as e:
             error_message = f'@ change_q_table_pts(). Failed to change q_table points. chess_move: {chess_move}, curr_turn: {curr_turn}, pts: {pts} due to error: {str(e)}'
             agent_logger.error(error_message)
             raise custom_exceptions.QTableUpdateError(error_message) from e
@@ -193,9 +171,7 @@ class Agent:
         if isinstance(new_chess_moves, str):
             new_chess_moves = [new_chess_moves]
         
-        # Convert to set for efficient lookup
         new_moves_set = set(new_chess_moves)
-
         existing_moves = set(self.q_table.index)
         truly_new_moves = new_moves_set - existing_moves
 

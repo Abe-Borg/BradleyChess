@@ -29,29 +29,11 @@ def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
             Modifies the chessboard and the current state of the environment by loading the chess move and updating 
             the current state.
     """
-    try:
-        curr_state = environ.get_curr_state()
-    except Exception as e:
-        error_message = f'error at agent_selects_and_plays_chess_move: {str(e)}, unable to retrieve current state\n'
-        helper_methods_logger.error(error_message)
-        raise custom_exceptions.StateRetrievalError(error_message) from e
-    
-    chess_move: str = chess_agent.choose_action(curr_state) # we're not training, so we don't need to pass current_game
-
-    try:
-        environ.load_chessboard(chess_move)
-    except Exception as e:
-        error_message = f'error at agent_selects_and_plays_chess_move: {str(e)}, failed to load chessboard with move: {chess_move}\n'
-        helper_methods_logger.error(error_message)
-        raise custom_exceptions.ChessboardLoadError(error_message) from e
-
-    try:
-        environ.update_curr_state()
-        return chess_move
-    except Exception as e:
-        error_message = f'error at agent_selects_and_plays_chess_move: {str(e)}, failed to update current state\n'
-        helper_methods_logger.error(error_message)
-        raise custom_exceptions.StateUpdateError(error_message) from e
+    curr_state = environ.get_curr_state() 
+    chess_move: str = chess_agent.choose_action(curr_state)
+    environ.load_chessboard(chess_move)
+    environ.update_curr_state()
+    return chess_move
 ### end of agent_selects_and_plays_chess_move
 
 def receive_opponent_move(chess_move: str, environ) -> bool:                                                                                 
@@ -74,20 +56,10 @@ def receive_opponent_move(chess_move: str, environ) -> bool:
             Modifies the chessboard and the current state of the environment by loading the chess move and updating 
             the current state.
     """
-    try:
-        environ.load_chessboard(chess_move)
-    except Exception as e:
-        error_message = f'error at receive_opp_move: {str(e)}, failed to load chessboard with move: {chess_move}\n'
-        helper_methods_logger.error(error_message)
-        raise custom_exceptions.ChessboardLoadError(error_message) from e
+    environ.load_chessboard(chess_move)
+    environ.update_curr_state()
+    return True
 
-    try:
-        environ.update_curr_state()
-        return True
-    except Exception as e:
-        error_message = f'error at receive_opp_move: {str(e)}, failed to update current state\n'
-        helper_methods_logger.error(error_message)
-        raise custom_exceptions.StateUpdateError(error_message) from e
 ### end of receive_opp_move
 
 def pikl_q_table(chess_agent, q_table_path: str) -> None:
