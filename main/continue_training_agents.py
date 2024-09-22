@@ -1,4 +1,4 @@
-from utils import helper_methods, game_settings, custom_exceptions
+from utils import helper_methods, game_settings, custom_exceptions, constants
 import time
 from training import training_functions
 from agents import Agent
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     
     helper_methods.bootstrap_agent(bradley, game_settings.bradley_agent_q_table_path)
     helper_methods.bootstrap_agent(imman, game_settings.imman_agent_q_table_path)
-    num_games_to_play = game_settings.agent_vs_agent_num_games
+    num_games_to_play = constants.agent_vs_agent_num_games
 
     try:
         training_functions.continue_training_rl_agents(num_games_to_play, bradley, imman, environ)

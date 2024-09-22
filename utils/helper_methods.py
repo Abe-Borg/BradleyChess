@@ -1,10 +1,8 @@
 import pandas as pd
-from utils import game_settings
+from utils import game_settings, constants, custom_exceptions
 import random
 from agents import Agent
-from utils import custom_exceptions
 from utils.logging_config import setup_logger
-
 helper_methods_logger = setup_logger(__name__, game_settings.helper_methods_errors_filepath)
 
 def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
@@ -106,7 +104,7 @@ def is_game_over(environ) -> bool:
     try:
         return (
             environ.board.is_game_over() or
-            environ.turn_index >= game_settings.max_turn_index or
+            environ.turn_index >= constants.max_turn_index or
             (len(environ.get_legal_moves()) == 0)
         )
     except Exception as e:

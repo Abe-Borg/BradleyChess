@@ -2,6 +2,7 @@ import chess.engine
 import pandas as pd
 from pathlib import Path
 import chess
+from utils import constants
 
 base_directory = Path(__file__).parent
 
@@ -10,32 +11,8 @@ pd.set_option('display.max_columns', None)
 PRINT_TRAINING_RESULTS = False
 PRINT_STEP_BY_STEP = False
 
-agent_vs_agent_num_games = 100 # number of games that agents will play against each other
-
-# the following numbers are based on centipawn scores
-CHESS_MOVE_VALUES: dict[str, int] = {
-        'new_move': 100, # a move that has never been made before
-        'capture': 150,
-        'piece_development': 200,
-        'check': 300,
-        'promotion': 500,
-        'promotion_queen': 900,
-        'mate_score': 1_000
-    }
-
-training_sample_size = 50_000
-max_num_turns_per_player = 200
-max_turn_index = max_num_turns_per_player * 2 - 1
-
-initial_q_val = 1 # this is relevant when training an agent. SARSA algorithm requires an initial value
-chance_for_random_move = 0.05 # 10% chance that RL agent selects random chess move
-        
-# The following values are for the chess engine analysis of moves.
-# we only want to look ahead one move, that's the anticipated q value at next state, and next action
-num_moves_to_return = 1
-depth_limit = 1
 time_limit = None
-search_limit = chess.engine.Limit(depth = depth_limit, time = time_limit)
+search_limit = chess.engine.Limit(depth = constants.chess_engine_depth_limit, time = time_limit)
 
 stockfish_filepath = base_directory / ".." / "stockfish_15_win_x64_avx2" / "stockfish_15_x64_avx2.exe"
 absolute_stockfish_filepath = stockfish_filepath.resolve()

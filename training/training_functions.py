@@ -1,7 +1,7 @@
 from typing import Tuple
 from agents import Agent
 import chess
-from utils import game_settings, custom_exceptions
+from utils import game_settings, custom_exceptions, constants
 from environment import Environ
 import pandas as pd
 import copy
@@ -387,7 +387,7 @@ def find_estimated_q_value(environ, engine) -> int:
     if est_qval_analysis['mate_score'] is None:
         est_qval = est_qval_analysis['centipawn_score']
     else: # there is an impending checkmate
-        est_qval = game_settings.CHESS_MOVE_VALUES['mate_score']
+        est_qval = constants.CHESS_MOVE_VALUES['mate_score']
 
     # IMPORTANT STEP, pop the chessboard of last move, we are estimating board states, not
     # playing a move.
@@ -485,7 +485,7 @@ def analyze_board_state(board, engine) -> dict:
         raise custom_exceptions.InvalidBoardStateError(f'at analyze_board_state. Board is in invalid state\n')
 
     try: 
-        analysis_result = engine.analyse(board, game_settings.search_limit, multipv = game_settings.num_moves_to_return)
+        analysis_result = engine.analyse(board, game_settings.search_limit, multipv = constants.chess_engine_num_moves_to_return)
     except Exception as e:
         training_functions_logger.error(f'@ Bradley_analyze_board_state. An error occurred during analysis: {e}\n')
         training_functions_logger.error(f"Chessboard is:\n{board}\n")
@@ -588,15 +588,15 @@ def get_reward(chess_move: str) -> int:
     total_reward = 0
     # Check for piece development (N, R, B, Q)
     if re.search(r'[NRBQ]', chess_move):
-        total_reward += game_settings.CHESS_MOVE_VALUES['piece_development']
+        total_reward += constants.CHESS_MOVE_VALUES['piece_development']
     # Check for capture
     if 'x' in chess_move:
-        total_reward += game_settings.CHESS_MOVE_VALUES['capture']
+        total_reward += constants.CHESS_MOVE_VALUES['capture']
     # Check for promotion (with additional reward for queen promotion)
     if '=' in chess_move:
-        total_reward += game_settings.CHESS_MOVE_VALUES['promotion']
+        total_reward += constants.CHESS_MOVE_VALUES['promotion']
         if '=Q' in chess_move:
-            total_reward += game_settings.CHESS_MOVE_VALUES['promotion_queen']
+            total_reward += constants.CHESS_MOVE_VALUES['promotion_queen']
     return total_reward
 ## end of get_reward
 

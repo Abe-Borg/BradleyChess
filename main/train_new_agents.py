@@ -1,4 +1,4 @@
-from utils import helper_methods, game_settings, custom_exceptions
+from utils import helper_methods, game_settings, custom_exceptions, constants
 import pandas as pd
 import time
 from training import training_functions
@@ -31,4 +31,4 @@ if __name__ == '__main__':
     
     total_time = end_time - start_time
     print('training is complete')
-    print(f'it took: {total_time} for {game_settings.training_sample_size} games\n')
+    print(f'it took: {total_time} for {constants.training_sample_size} games\n')

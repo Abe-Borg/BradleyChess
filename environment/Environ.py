@@ -1,5 +1,5 @@
 import chess
-from utils import custom_exceptions, game_settings
+from utils import custom_exceptions, game_settings, constants
 from utils.logging_config import setup_logger 
 from typing import Union, Dict, List
 environ_logger = setup_logger(__name__, game_settings.environ_errors_filepath)
@@ -36,7 +36,7 @@ class Environ:
             self.board: chess.Board = chess.Board()
             
             # turn_list and turn_index work together to track the current turn (a string like this, 'W1')
-            max_turns = game_settings.max_num_turns_per_player * 2 # 2 players
+            max_turns = constants.max_num_turns_per_player * 2 # 2 players
             self.turn_list: List[str] = [f'{"W" if i % 2 == 0 else "B"}{i // 2 + 1}' for i in range(max_turns)]
             self.turn_index: int = 0
         except Exception as e:
@@ -85,8 +85,8 @@ class Environ:
             Side Effects:
                 Modifies the turn index by incrementing it by one.
         """
-        if self.turn_index >= game_settings.max_turn_index:
-            message = f'ERROR: max_turn_index reached: {self.turn_index} >= {game_settings.max_turn_index}\n'
+        if self.turn_index >= constants.max_turn_index:
+            message = f'ERROR: max_turn_index reached: {self.turn_index} >= {constants.max_turn_index}\n'
             environ_logger.error(message)
             raise IndexError(message)
     
