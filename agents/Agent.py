@@ -110,7 +110,7 @@ class Agent:
             Side Effects:
                 None.
         """
-        dice_roll = helper_methods.get_number_with_probability(game_settings.chance_for_random_move)
+        dice_roll = helper_methods.get_number_with_probability(constants.chance_for_random_move)
         
         legal_moves_in_q_table = self.q_table[curr_turn].loc[self.q_table[curr_turn].index.intersection(legal_moves)]
         if legal_moves_in_q_table.empty:

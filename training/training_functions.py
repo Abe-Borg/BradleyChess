@@ -7,6 +7,8 @@ import pandas as pd
 import copy
 import re
 from utils.logging_config import setup_logger
+from multiprocessing import Pool, cpu_count
+
 training_functions_logger = setup_logger(__name__, game_settings.training_functions_logger_filepath)
 
 def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent) -> Tuple[Agent.Agent, Agent.Agent]:
@@ -25,25 +27,28 @@ def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent) -> Tuple[Agen
             Writes any errors that occur to the errors file.
             Resets the environment at the end of each game.
     """
-    ### FOR EACH GAME IN THE TRAINING SET ###
-    for game_number in chess_data.index:
-        w_curr_q_value: int = game_settings.initial_q_val
-        b_curr_q_value: int = game_settings.initial_q_val
+    num_processes = cpu_count()
+    game_indices = list(chess_data.index)
+    chunks = chunkify(game_indices, num_processes)
 
-        try: 
-            train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value)
-        except Exception as e:
-            training_functions_logger.error(f'An error occurred at train_one_game: {e}\nat game: {game_number}')
-            raise
-    
+    with Pool(processes=num_processes) as pool:
+        results = pool.starmap(worker_train_games, [(chunk, chess_data, est_q_val_table) for chunk in chunks])
+
+    # Merge Q-tables from all processes
+    w_agent_q_tables = [result[0] for result in results]
+    b_agent_q_tables = [result[1] for result in results]
+
+    w_agent.q_table = merge_q_tables(w_agent_q_tables)
+    b_agent.q_table = merge_q_tables(b_agent_q_tables)
+
     w_agent.is_trained = True
     b_agent.is_trained = True
+
     return w_agent, b_agent
 ### end of train_rl_agents
 
-def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value) -> None:
+def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ, engine) -> None:
     num_moves: int = chess_data.at[game_number, 'PlyCount']
-    environ = Environ.Environ()
     curr_state = environ.get_curr_state()
 
     while curr_state['turn_index'] < (num_moves):
@@ -646,3 +651,33 @@ def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, c
 
 
 
+def chunkify(lst, n):
+    # utility function to split the game indices into chunks.
+    return [lst[i::n] for i in range(n)]
+
+
+def worker_train_games(game_indices_chunk, chess_data, est_q_val_table):
+    # Each process will run this function to train on its chunk of games.
+    w_curr_q_value: int = constants.initial_q_val
+    b_curr_q_value: int = constants.initial_q_val
+    w_agent = Agent.Agent('W')
+    b_agent = Agent.Agent('B')
+    environ = Environ.Environ()
+    engine = start_chess_engine()
+
+    for game_number in game_indices_chunk:
+        try:
+            train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ, engine)
+        except Exception as e:
+            training_functions_logger.error(f'An error occurred at train_one_game: {e}\nat game: {game_number}')
+            continue
+
+    engine.quit()
+    return w_agent.q_table, b_agent.q_table
+
+
+def merge_q_tables(q_tables_list):
+    # This function will combine Q-tables from all processes.
+    merged_q_table = pd.concat(q_tables_list)
+    merged_q_table = merged_q_table.groupby(merged_q_table.index).sum()
+    return merged_q_table

@@ -9,9 +9,7 @@ train_new_agents_logger = setup_logger(__name__, game_settings.train_new_agents_
 
 if __name__ == '__main__':
     start_time = time.time()
-    bradley = Agent.Agent('W')
-    imman = Agent.Agent('B')
-
+    
     # !!!!!!!!!!!!!!!!! change this each time for new section of the database  !!!!!!!!!!!!!!!!!
     # estimated q table number must match chess_data number
     estimated_q_values_table = pd.read_pickle(game_settings.est_q_vals_filepath_part_1, compression = 'zip')
@@ -19,16 +17,16 @@ if __name__ == '__main__':
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     try:
-        training_functions.train_rl_agents(chess_data, estimated_q_values_table, bradley, imman)
+        Bradley, Imman = training_functions.train_rl_agents(chess_data, estimated_q_values_table)    
     except custom_exceptions.TrainingError as e:
         print(f'training interrupted because of:  {e}')
         train_new_agents_logger.error(f'An error occurred: {e}')
         exit(1)
         
-    end_time = time.time()
-    helper_methods.pikl_q_table(bradley, 'W', game_settings.bradley_agent_q_table_path)
-    helper_methods.pikl_q_table(bradley, 'B', game_settings.imman_agent_q_table_path)
+    helper_methods.pikl_q_table(Bradley, 'W', game_settings.bradley_agent_q_table_path)
+    helper_methods.pikl_q_table(Imman, 'B', game_settings.imman_agent_q_table_path)
     
+    end_time = time.time()
     total_time = end_time - start_time
     print('training is complete')
     print(f'it took: {total_time} for {constants.training_sample_size} games\n')
