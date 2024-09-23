@@ -69,10 +69,9 @@ if __name__ == '__main__':
     except Exception as e:
         print(f'agent vs human interrupted because of:  {e}')
         agent_vs_human_logger.error(f'An error occurred: {e}\n')
-        quit()
+        exit(1)
 
     end_time = time.time()
     total_time = end_time - start_time
     print('agent vs human game is complete')
     print(f'it took: {total_time}')
-    quit()

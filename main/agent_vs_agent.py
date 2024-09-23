@@ -37,7 +37,6 @@ if __name__ == '__main__':
     try:
         bradley = helper_methods.bootstrap_agent(bradley, game_settings.bradley_agent_q_table_path)
         imman = helper_methods.bootstrap_agent(imman, game_settings.imman_agent_q_table_path)
-
         number_of_games = int(input('How many games do you want the agents to play? '))
         print_to_screen = (input('Do you want to print the games to the screen? (y/n) ')).lower()[0]
 
@@ -46,16 +45,14 @@ if __name__ == '__main__':
                 print(f'Game {current_game + 1}')
 
             agent_vs_agent(environ, bradley, imman, print_to_screen, current_game)
-
     except Exception as e:
         print(f'agent vs agent interrupted because of:  {e}')
         agent_vs_agent_logger.error(f'An error occurred: {e}\n')        
-        quit()
+        exit(1)
     
     end_time = time.time()
     total_time = end_time - start_time
 
     print('single agent vs agent game is complete')
     print(f'it took: {total_time}')
-    quit()
 
