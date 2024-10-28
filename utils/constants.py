@@ -1,4 +1,4 @@
-agent_vs_agent_num_games = 100 # number of games that agents will play against each other
+agent_vs_agent_num_games = 100
 
 # the following numbers are based on centipawn scores
 CHESS_MOVE_VALUES: dict[str, int] = {
@@ -16,7 +16,7 @@ max_num_turns_per_player = 200
 max_turn_index = max_num_turns_per_player * 2 - 1
 
 initial_q_val = 1 # this is relevant when training an agent. SARSA algorithm requires an initial value
-chance_for_random_move = 0.05 # 10% chance that RL agent selects random chess move
+chance_for_random_move = 0.05 
         
 # The following values are for the chess engine analysis of moves.
 # we only want to look ahead one move, that's the anticipated q value at next state, and next action
