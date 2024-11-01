@@ -7,22 +7,27 @@ agent_logger = setup_logger(__name__, game_settings.agent_errors_filepath)
 
 class Agent:
     """
-        The `Agent` class is responsible for deciding what chess move to play 
-        based on the current state. The state is passed to the agent by 
-        the `Environ` class.
+        The `Agent` class decides which chess move to play based on the current state.
 
         Args:
-            - color (str): A string indicating the color of the agent, either 'W' or 'B'.
-            - learn_rate (float): A float between 0 and 1 that represents the learning rate.
-            - discount_factor (float): A float between 0 and 1 that represents the discount factor.
+            color (str): The color of the agent, either 'W' or 'B'.
+            learn_rate (float): The learning rate between 0 and 1.
+            discount_factor (float): The discount factor between 0 and 1.
+            q_table (Optional[pd.DataFrame]): An existing Q-table DataFrame.
+
         Attributes:
-            - color (str): A string indicating the color of the agent, either 'W' or 'B'.
-            - learn_rate (float): A float between 0 and 1 that represents the learning rate.
-            - discount_factor (float): A float between 0 and 1 that represents the discount factor.
-            - is_trained (bool): A boolean indicating whether the agent has been trained.
-            - q_table (pd.DataFrame): A Pandas DataFrame containing the q-values for the agent.
+            is_trained (bool): Indicates whether the agent has been trained.
+            q_table (pd.DataFrame): The Q-values for the agent's decisions.
     """
     def __init__(self, color: str, learn_rate: float = constants.default_learning_rate, discount_factor: float = constants.default_discount_factor, q_table: Optional[pd.DataFrame] = None):
+        """
+            Initializes the Agent with the specified parameters.
+            Args:
+                color (str): The color of the agent, either 'W' for white or 'B' for black.
+                learn_rate (float, optional): The learning rate between 0 and 1.
+                discount_factor (float, optional): The discount factor between 0 and 1.
+                q_table (Optional[pd.DataFrame], optional): An existing Q-table DataFrame. 
+        """
         self.color = color
         self.learn_rate = learn_rate
         self.discount_factor = discount_factor
@@ -32,20 +37,13 @@ class Agent:
 
     def choose_action(self, chess_data, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
         """
-            This method chooses the next chess move for the agent based on the current state of the environment. If 
-            there are no legal moves, it logs an error and returns an empty string. If there are legal moves that are 
-            not in the q-table, it updates the q-table with these moves. Depending on whether the agent is trained, it 
-            uses either the game mode policy or the training mode policy to choose the next move.
-            
+            Chooses the next chess move based on the current environment state.
             Args:
-                environ_state (dict[str, str, list[str]]): A dictionary representing the current state of the environment.
-                curr_game (str, optional): A string representing the current game being played. Defaults to 'Game 1'.
+                chess_data (pd.DataFrame): DataFrame containing chess moves for each game.
+                environ_state (Dict[str, Any]): The current state of the environment.
+                curr_game (str, optional): The identifier for the current game. Defaults to 'Game 1'.
             Returns:
-                str: A string representing the chess move chosen by the agent. If there are no legal moves, returns an 
-                empty string.
-            Side Effects:
-                Modifies the q-table if there are legal moves that are not in the q-table.
-                Writes into the errors file if there are no legal moves.
+                str: The chosen chess move. Returns an empty string if no legal moves are available.
         """
         if not chess_data:
             chess_data = {}
@@ -118,7 +116,6 @@ class Agent:
         """
             This method adds points to a cell in the q-table. The cell is determined by the chess move and the current 
             turn. The points are added to the existing q-value of the cell.
-
             Args:
                 chess_move (str): A string representing the chess move, e.g. 'e4'. This determines the row of the cell 
                 in the q-table.
