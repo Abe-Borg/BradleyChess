@@ -11,21 +11,15 @@ from multiprocessing import Pool, cpu_count
 
 training_functions_logger = setup_logger(__name__, game_settings.training_functions_logger_filepath)
 
-def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent) -> Tuple[Agent.Agent, Agent.Agent]:
+def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
     """
-        Trains the RL agents using the SARSA algorithm and sets their `is_trained` flag to True.
-        This method trains two RL agents by having them play games from a database exactly as shown, and learning from that. 
-        The agents learn from these games using the SARSA (State-Action-Reward-State-Action) algorithm.
-        
+        Trains the RL agents using the SARSA algorithm         
         Args:
-            est_q_val_table (pd.DataFrame): A DataFrame containing the estimated q values for each game in the training set.
-        Raises:
-            Exception: A TrainingError is raised if an error occurs while getting the current state, choosing an action, playing a move, or getting the latest current state. The exception is written to the errors file.
-        Side Effects:
-            Modifies the q tables of the RL agents and sets their `is_trained` flag to True.
-            Writes the start and end of each game, any errors that occur, and the final state of the chessboard to the initial training results file.
-            Writes any errors that occur to the errors file.
-            Resets the environment at the end of each game.
+            chess_data (pd.DataFrame): A DataFrame containing the chess database.
+            est_q_val_table (pd.DataFrame): A DataFrame containing the estimated 
+            q values for each game in the training set.
+            w_agent: The white agent.
+            b_agent: The black agent.
     """
     num_processes = cpu_count()
     game_indices = list(chess_data.index)
@@ -74,7 +68,7 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
         if environ.board.is_game_over() or curr_state['turn_index'] >= (num_moves) or not curr_state['legal_moves']:
             break
         else:
-            # the var curr_turn_for_q_values is here because we previously moved to next turn (after move was played)
+            # curr_turn_for_q_est is here because we previously moved to next turn (after move was played)
             # but we want to assign the q est based on turn just before the curr turn was incremented.
             w_est_q_value: int = est_q_val_table.at[game_number, curr_turn_for_q_est]
 
@@ -118,35 +112,20 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
 def generate_q_est_df(chess_data, w_agent, b_agent) -> pd.DataFrame:
     """
         Generates a dataframe containing the estimated q-values for each chess move in the chess database.
-
         This method iterates over each game in the chess database and plays through the game using the reinforcement 
-        learning agents. For each move, it calculates the estimated q-value and writes it to a file.
-
-        The method first tries to get the current state of the game. If an error occurs, it logs the error and the 
-        current board state in the errors file and moves on to the next game.
-
-        The method then enters a loop where it alternates between the white and black agents choosing and playing 
-        moves. If an error occurs while choosing or playing a move, the method logs the error and the current state 
-        in the errors file and breaks out of the loop to move on to the next game.
-
-        After each move, the method tries to get the latest state of the game. If an error occurs, it logs the error 
-        and the current board state in the errors file and breaks out of the loop to move on to the next game.
-
-        If the game is not over and there are still legal moves, the method tries to find the estimated q-value for 
-        the current move and writes it to the file. If an error occurs while finding the estimated q-value, the 
-        method logs the error and the current state in the errors file and breaks out of the loop to move on to the 
-        next game.
-
+        learning agents. For each move, it calculates the estimated q-value.
+        After each move, the method tries to get the latest state of the game.         
         The loop continues until the game is over, there are no more legal moves, or the maximum number of moves for 
         the current training game has been reached.
-
-        After each game, the method resets the environment to prepare for the next game.
-
         Args:
             chess_data (pd.DataFrame): A DataFrame containing the chess database.
+            w_agent: The white agent.
+            b_agent: The black agent.
         Returns:
             estimated_q_values (pd.DataFrame): A DataFrame containing the estimated q-values for each chess move.
     """
+    # Create a copy of the chess data to store the estimated q-values
+    # the cells will be reassigned to be ints instead of strings.
     estimated_q_values = chess_data.copy(deep = True)
     estimated_q_values = estimated_q_values.astype('int64')
     estimated_q_values.iloc[:, 1:] = 0
@@ -163,6 +142,23 @@ def generate_q_est_df(chess_data, w_agent, b_agent) -> pd.DataFrame:
 # end of generate_q_est_df
 
 def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent) -> None:
+    """
+        Generates the estimated q-values for each chess move in a single game.
+        This method plays through a single game in the chess database using the reinforcement learning agents.
+        For each move, it calculates the estimated q-value based on the current state of the board.
+        The method then updates the estimated q-values DataFrame with the calculated q-values.
+        The loop continues until the game is over, there are no more legal moves, or the maximum number of moves
+        for the current training game has been reached.
+        Args:
+            chess_data (pd.DataFrame): A DataFrame containing the chess database.
+            game_number (int): The index of the game in the chess database.
+            w_agent: The white agent.
+            b_agent: The black agent.
+        Raises:
+            Exception: An exception is raised if an error occurs during the training process.
+        Side Effects:
+            Modifies the estimated q-values DataFrame with the calculated q-values.
+    """
     num_moves: int = chess_data.at[game_number, 'PlyCount']
     environ = Environ.Environ()
     engine = start_chess_engine()
@@ -178,7 +174,6 @@ def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent) -> Non
     while curr_state['turn_index'] < (num_moves):
         ##################### WHITE'S TURN ####################
         # choose action a from state s, using policy
-
         try:
             w_chess_move = w_agent.choose_action(chess_data, curr_state, game_number)
         except Exception as e:
@@ -191,8 +186,6 @@ def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent) -> Non
             training_functions_logger.error(f'w_chess_move is empty at state: {curr_state}\n')
             raise Exception("w_chess_move is empty")
 
-        # assign curr turn to new var for now. once agent plays move, turn will be updated, but we need 
-        # to track the turn before so that the est q value can be assigned to the correct column.
         curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
 
         ### WHITE AGENT PLAYS THE SELECTED MOVE ###
@@ -250,8 +243,6 @@ def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent) -> Non
             training_functions_logger.error(f'at: {game_number}\n')
             raise Exception("b_chess_move is empty")
 
-        # assign curr turn to new var for now. once agent plays move, turn will be updated, but we need 
-        # to track the turn before so that the est q value can be assigned to the correct column.
         curr_turn_for_q_est = copy.copy(curr_state['curr_turn'])
         
         ##### BLACK AGENT PLAYS SELECTED MOVE #####
@@ -306,20 +297,7 @@ def generate_q_est_df_one_game(chess_data, game_number, w_agent, b_agent) -> Non
     engine.quit()
 # end of generate_q_est_df_one_game
 
-
-# def continue_training_rl_agents(num_games_to_play: int, w_agent, b_agent, environ) -> None:
-#     """ continues to train the agent, this time the agents make their own decisions instead 
-#         of playing through the database.
-
-#         precondition: the agents have already been trained using the SARSA algorithm on the database.
-#                       and the respective q tables have been populated. Each agent passed to this 
-#                       function should have their `is_trained` flag set to True. And the q tables
-#                       have been assigned to the agents.
-#         Args:
-#             num_games_to_play (int): The number of games to play.
-#             w_agent (RLAgent): The white agent.
-#             b_agent (RLAgent): The black agent.
-#     """ 
+# def continue_training_rl_agents
 #     ### placeholder, will implement this function later.
 # ### end of continue_training_rl_agents
 
@@ -343,7 +321,6 @@ def find_estimated_q_value(environ, engine) -> int:
 
         Returns:
             int: The estimated q-value for the agent's next action.
-
         Raises:
             BoardAnalysisError: An exception is raised if an error occurs while analyzing the board state for the estimated q-value
             ChessboardManipulationError: if an error occurs loading the chessboard, popping the chessboard.
@@ -363,7 +340,6 @@ def find_estimated_q_value(environ, engine) -> int:
         training_functions_logger.error(f'failed to analyze_board_state\n')
         raise Exception from e
     
-    # load up the chess board with opponent's anticipated chess move 
     try:
         environ.load_chessboard_for_q_est(anticipated_next_move)
     except custom_exceptions.ChessboardLoadError as e:
@@ -371,7 +347,6 @@ def find_estimated_q_value(environ, engine) -> int:
         training_functions_logger.error(f'failed to load_chessboard_for_q_est\n')
         raise Exception from e
     
-    # check if the game would be over with the anticipated next move, like unstopable checkmate.
     if environ.board.is_game_over() or not environ.get_legal_moves():
         try:
             environ.pop_chessboard()
@@ -388,7 +363,6 @@ def find_estimated_q_value(environ, engine) -> int:
         training_functions_logger.error(f'failed at analyze_board_state\n')
         raise Exception from e
 
-    # get pts for est_qval 
     if est_qval_analysis['mate_score'] is None:
         est_qval = est_qval_analysis['centipawn_score']
     else: # there is an impending checkmate
@@ -408,16 +382,11 @@ def find_estimated_q_value(environ, engine) -> int:
 
 def find_next_q_value(curr_qval: int, learn_rate: float, reward: int, discount_factor: float, est_qval: int) -> int:
     """
-        Calculates the next q-value using the SARSA (State-Action-Reward-State-Action) algorithm.
-
-        This method calculates the next q-value based on the current q-value, the learning rate, the reward, the 
-        discount factor, and the estimated q-value for the next state-action pair. The formula used is:
-
+        calculates the next q-value based on the current q-value, the learning rate, the reward, the 
+        discount factor, and the estimated q-value for the next state-action pair. 
             next_qval = curr_qval + learn_rate * (reward + (discount_factor * est_qval) - curr_qval)
-
         This formula is derived from the SARSA algorithm, which is a model-free reinforcement learning method used 
         to estimate the q-values for state-action pairs in an environment.
-
         Args:
             curr_qval (int): The current q-value for the state-action pair.
             learn_rate (float): The learning rate, a value between 0 and 1. This parameter controls how much the 
@@ -426,15 +395,10 @@ def find_next_q_value(curr_qval: int, learn_rate: float, reward: int, discount_f
             discount_factor (float): The discount factor, a value between 0 and 1. This parameter determines the 
             importance of future rewards.
             est_qval (int): The estimated q-value for the next state-action pair.
-
         Returns:
             int: The next q-value, calculated using the SARSA algorithm.
-
         Raises:
             QValueCalculationError: If an error or overflow occurs during the calculation of the next q-value.
-
-        Side Effects:
-            None.
     """
     try:
         next_qval = int(curr_qval + learn_rate * (reward + ((discount_factor * est_qval) - curr_qval)))
@@ -452,30 +416,16 @@ def find_next_q_value(curr_qval: int, learn_rate: float, reward: int, discount_f
 def analyze_board_state(board, engine) -> dict:
     """
         Analyzes the current state of the chessboard using the Stockfish engine and returns the analysis results.
-
         This method uses the Stockfish engine to analyze the current state of the chessboard. The analysis results 
-        include the mate score, the centipawn score, and the anticipated next move. The method first checks if the 
-        board is in a valid state. If it's not, it writes an error message to the errors file and raises a ValueError.
-
-        The method then tries to analyze the board using the Stockfish engine. If an error occurs during the analysis, 
-        it writes an error message to the errors file and raises an Exception.
-
-        The method then tries to extract the mate score and the centipawn score from the analysis results. If an error 
-        occurs while extracting the scores, it writes an error message to the errors file and raises an Exception.
-
-        Finally, the method tries to extract the anticipated next move from the analysis results. If an error occurs 
-        while extracting the anticipated next move, it writes an error message to the errors file and raises an Exception.
-
+        include the mate score, the centipawn score, and the anticipated next move.
         Args:
             board (chess.Board): The current state of the chessboard to analyze.
             engine (Stockfish): The Stockfish engine used to analyze the board.
-
         Returns:
             dict: A dictionary containing the analysis results:
             - 'mate_score': Number of moves to mate (None if not a mate position)
             - 'centipawn_score': Centipawn score (None if mate position)
             - 'anticipated_next_move': The best move suggested by the engine
-
         Raises:
             InvalidBoardStateError: If the board is in an invalid state.
             EngineAnalysisError: If an error occurs during the Stockfish analysis.
@@ -503,7 +453,6 @@ def analyze_board_state(board, engine) -> dict:
     try:
         # Get score from analysis_result and normalize for player perspective
         pov_score = analysis_result[0]['score'].white() if board.turn == chess.WHITE else analysis_result[0]['score'].black()
-
         if pov_score.is_mate():
             mate_score = pov_score.mate()
         else:
@@ -525,20 +474,17 @@ def analyze_board_state(board, engine) -> dict:
     }
 ### end of analyze_board_state
 
-def apply_move_and_update_state(chess_move: str, game_number, environ: Environ.Environ) -> None:
+def apply_move_and_update_state(chess_move: str, game_number: str, environ) -> None:
     """
         Loads the chessboard with the given move and updates the current state of the environment.
-        This method is used during training. It first attempts to load the chessboard with the given move. If an 
-        error occurs while loading the chessboard, it writes an error message to the errors file and raises an 
-        exception. It then attempts to update the current state of the environment. If an error occurs while 
-        updating the current state, it writes an error message to the errors file and raises an exception.
-
+        This method is used during training. 
         Args: 
             chess_move (str): A string representing the chess move in standard algebraic notation.
-            game_number: The current game being played during training.
+            game_number (str): The current game being played during training.
+            environ (Environ): The environment object representing the current state of the game.
         Raises:
             Exception: An exception is raised if an error occurs while loading the chessboard or updating the 
-            current state. The original exception is included in the raised exception.
+            current state.
         Side Effects:
             Modifies the chessboard and the current state of the environment by loading the chess move and updating 
             the current state.
@@ -561,31 +507,14 @@ def apply_move_and_update_state(chess_move: str, game_number, environ: Environ.E
 
 def get_reward(chess_move: str) -> int:
     """
-        Calculates the reward for a given chess move based on the type of move.
-
-        This method calculates the reward for a given chess move by checking for specific patterns in the move string 
-        that correspond to different types of moves. The reward is calculated as follows:
-
-        1. If the move involves the development of a piece (N, R, B, Q), the reward is increased by the value 
-        associated with 'piece_development' in the game settings.
-        2. If the move involves a capture (indicated by 'x' in the move string), the reward is increased by the value 
-        associated with 'capture' in the game settings.
-        3. If the move involves a promotion (indicated by '=' in the move string), the reward is increased by the value 
-        associated with 'promotion' in the game settings. If the promotion is to a queen (indicated by '=Q' in the 
-        move string), the reward is further increased by the value associated with 'promotion_queen' in the game 
-        settings.
-
+        calculates the reward for a given chess move by checking for specific patterns in the move string 
+        that correspond to different types of moves. 
         Args:
             chess_move (str): A string representing the selected chess move in standard algebraic notation.
-
         Returns:
             int: The total reward for the given chess move, calculated based on the type of move.
-
         Raises:
             ValueError: If the chess_move string is empty or invalid.
-
-        Side Effects:
-            None.
     """
     if not chess_move or not isinstance(chess_move, str):
         raise custom_exceptions.RewardCalculationError("Invalid chess move input")
@@ -617,22 +546,14 @@ def start_chess_engine():
 def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, chess_agent) -> None:
     """
         Assigns points to the q table for the given chess move, current turn, current q value, and RL agent color.
-        This method assigns points to the q table for the RL agent of the given color. It calls the 
-        `change_q_table_pts` method on the RL agent, passing in the chess move, the current turn, and the current q 
-        value. If a KeyError is raised because the chess move is not represented in the q table, the method writes 
-        an error message to the errors file, updates the q table to include the chess move, and tries to assign 
-        points to the q table again.
-
         Args:
             chess_move (str): The chess move to assign points to in the q table.
             curr_turn (str): The current turn of the game.
             curr_qval (int): The current q value for the given chess move.
-            rl_agent_color (str): The color of the RL agent making the move.
-
+            chess_agent: The RL agent to assign points to in the q table.
         Raises:
             QTableUpdateError: is raised if the chess move is not represented in the q table. The exception is 
             written to the errors file.
-
         Side Effects:
             Modifies the q table of the RL agent by assigning points to the given chess move.
             Writes to the errors file if a exception is raised.
@@ -649,12 +570,9 @@ def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, c
         raise Exception from e
 # enf of assign_points_to_q_table 
 
-
-
 def chunkify(lst, n):
     # utility function to split the game indices into chunks.
     return [lst[i::n] for i in range(n)]
-
 
 def worker_train_games(game_indices_chunk, chess_data, est_q_val_table):
     # Each process will run this function to train on its chunk of games.
