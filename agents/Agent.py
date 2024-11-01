@@ -32,19 +32,17 @@ class Agent:
 
     def choose_action(self, chess_data, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
         """
-            Chooses the next chess move for the agent based on the current state.
             This method chooses the next chess move for the agent based on the current state of the environment. If 
             there are no legal moves, it logs an error and returns an empty string. If there are legal moves that are 
             not in the q-table, it updates the q-table with these moves. Depending on whether the agent is trained, it 
             uses either the game mode policy or the training mode policy to choose the next move.
-
+            
             Args:
                 environ_state (dict[str, str, list[str]]): A dictionary representing the current state of the environment.
                 curr_game (str, optional): A string representing the current game being played. Defaults to 'Game 1'.
             Returns:
                 str: A string representing the chess move chosen by the agent. If there are no legal moves, returns an 
                 empty string.
-
             Side Effects:
                 Modifies the q-table if there are legal moves that are not in the q-table.
                 Writes into the errors file if there are no legal moves.
@@ -67,7 +65,6 @@ class Agent:
     
     def policy_training_mode(self, chess_data, curr_game: str, curr_turn: str) -> str:
         """
-            Determines how the agent chooses a move at each turn during training.
             This method determines how the agent chooses a move at each turn during training. It retrieves the move 
             corresponding to the current game and turn from the chess data.
 
@@ -75,13 +72,9 @@ class Agent:
                 chess_data (pd.DataFrame): A Pandas DataFrame containing the chess moves for each game and turn.
                 curr_game (str): A string representing the current game being played.
                 curr_turn (str): A string representing the current turn, e.g. 'W1'.
-
             Returns:
                 str: A string representing the chess move chosen by the agent. The move is retrieved from the chess 
                 data based on the current game and turn.
-
-            Side Effects:
-                None.
         """
         try:
             chess_move = chess_data.at[curr_game, curr_turn]
@@ -94,12 +87,10 @@ class Agent:
 
     def policy_game_mode(self, legal_moves: List[str], curr_turn: str) -> str:
         """
-            Determines how the agent chooses a move during a game between a human player and the agent.
             This method determines how the agent chooses a move during a game between a human player and the agent. 
             The agent searches its q-table to find the moves with the highest q-values at each turn. Sometimes, based 
             on a probability defined in the game settings, the agent will pick a random move from the q-table instead 
             of the move with the highest q-value.
-
             Args:
                 legal_moves (list[str]): A list of strings representing the legal moves for the current turn.
                 curr_turn (str): A string representing the current turn, e.g. 'W1'.
@@ -107,8 +98,6 @@ class Agent:
                 str: A string representing the chess move chosen by the agent. The move is either the one with the 
                 highest q-value or a random move from the q-table, depending on a probability defined in the game 
                 settings.
-            Side Effects:
-                None.
         """
         dice_roll = helper_methods.get_number_with_probability(constants.chance_for_random_move)
         
@@ -127,7 +116,6 @@ class Agent:
 
     def change_q_table_pts(self, chess_move: str, curr_turn: str, pts: int) -> None:
         """
-            Adds points to a cell in the q-table.
             This method adds points to a cell in the q-table. The cell is determined by the chess move and the current 
             turn. The points are added to the existing q-value of the cell.
 
@@ -137,7 +125,6 @@ class Agent:
                 curr_turn (str): A string representing the current turn, e.g. 'W10'. This determines the column of the 
                 cell in the q-table.
                 pts (int): An integer representing the number of points to add to the q-table cell.
-
             Side Effects:
                 Modifies the q-table by adding points to the cell determined by the chess move and the current turn.
         """
@@ -151,8 +138,6 @@ class Agent:
 
     def update_q_table(self, new_chess_moves: Union[str, List[str]]) -> None:
         """
-            Updates the Q-table with new chess moves, if they are not already present.
-
             This method checks if the provided chess moves are already in the Q-table.
             If all moves are present, it returns without making changes.
             If any moves are new, it adds them to the Q-table with initial Q-values of 0.
@@ -168,7 +153,6 @@ class Agent:
         truly_new_moves = set(new_chess_moves) - set(self.q_table.index)
         if not truly_new_moves:
             return
-
         
         q_table_new_values: pd.DataFrame = pd.DataFrame(
             0, 
@@ -178,5 +162,4 @@ class Agent:
         )
 
         self.q_table = pd.concat([self.q_table, q_table_new_values])
-        
     ### update_q_table ###
