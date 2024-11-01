@@ -2,16 +2,13 @@ from utils import helper_methods, game_settings, custom_exceptions
 import time
 from environment import Environ
 from agents import Agent
-from utils.logging_config import setup_logger
 
-agent_vs_human_logger = setup_logger(__name__, game_settings.agent_vs_human_logger_filepath)
-
-def play_game_vs_human(environ: Environ.Environ, chess_agent: Agent.Agent) -> None:
+def play_game_vs_human(environ, agent) -> None:
     player_turn = 'W'
     try:
         while not helper_methods.is_game_over(environ):
             print(f'\nCurrent turn is :  {environ.get_curr_turn()}\n')
-            chess_move = handle_move(player_turn, chess_agent, environ)
+            chess_move = handle_move(player_turn, agent, environ)
             print(f'{player_turn} played {chess_move}\n')
             player_turn = 'B' if player_turn == 'W' else 'W'
 
@@ -19,18 +16,15 @@ def play_game_vs_human(environ: Environ.Environ, chess_agent: Agent.Agent) -> No
         print(f'The game ended because of: {helper_methods.get_game_termination_reason(environ)}')
     except custom_exceptions.GamePlayError as e:
         print(f'An error occurred at play_game_vs_human: {e}')
-        error_message = f'An error occurred at play_game_vs_human: {str(e)}'
-        agent_vs_human_logger.error(error_message)
         raise 
-    
     finally:
         environ.reset_environ()
 ### end of play_game
 
-def handle_move(player_color: str, chess_agent: Agent.Agent, environ: Environ.Environ) -> str:
-    if player_color == chess_agent.color:
+def handle_move(player_color: str, agent, environ) -> str:
+    if player_color == agent.color:
         print('=== RL AGENT\'S TURN ===\n')
-        chess_move = helper_methods.agent_selects_and_plays_chess_move(chess_agent, environ)
+        chess_move = helper_methods.agent_selects_and_plays_chess_move(agent, environ)
     else:
         print('=== OPPONENT\'S TURN ===')
         while True:
@@ -41,12 +35,8 @@ def handle_move(player_color: str, chess_agent: Agent.Agent, environ: Environ.En
                 if chess_move == 'exit':
                     print('Exiting game...')
                     quit()
-            except custom_exceptions.ChessboardLoadError as e:
-                agent_vs_human_logger.error(e)
+            except Exception as e:
                 print('Failed to load move. Try again.')
-            except custom_exceptions.StateUpdateError as e:
-                agent_vs_human_logger.error(e)
-                print('Failed to update state. Try again.')
 ### end of handle_move
 
 if __name__ == '__main__':    
@@ -68,7 +58,6 @@ if __name__ == '__main__':
         
     except Exception as e:
         print(f'agent vs human interrupted because of:  {e}')
-        agent_vs_human_logger.error(f'An error occurred: {e}\n')
         exit(1)
 
     end_time = time.time()

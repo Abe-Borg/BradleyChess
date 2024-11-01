@@ -5,7 +5,7 @@ from agents import Agent
 from utils.logging_config import setup_logger 
 agent_vs_agent_logger = setup_logger(__name__, game_settings.agent_vs_agent_logger_filepath)
 
-def agent_vs_agent(environ, w_agent, b_agent, print_to_screen = False, current_game: int = 0) -> None:
+def agent_vs_agent(environ, w_agent, b_agent, current_game: int = 0) -> None:
     agent_vs_agent_logger.info(f'Playing game {current_game}\n')
     try:    
         while helper_methods.is_game_over(environ) == False:
@@ -37,9 +37,9 @@ if __name__ == '__main__':
         bradley = helper_methods.bootstrap_agent(bradley, game_settings.bradley_agent_q_table_path)
         imman = helper_methods.bootstrap_agent(imman, game_settings.imman_agent_q_table_path)
         number_of_games = int(input('How many games do you want the agents to play? '))
-        
+
         for current_game in range(int(number_of_games)):
-            agent_vs_agent(environ, bradley, imman, print_to_screen, current_game)
+            agent_vs_agent(environ, bradley, imman, current_game)
     except Exception as e:
         print(f'agent vs agent interrupted because of:  {e}')
         agent_vs_agent_logger.error(f'An error occurred: {e}\n')        
