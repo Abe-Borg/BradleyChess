@@ -160,3 +160,15 @@ class Agent:
 
         self.q_table = pd.concat([self.q_table, q_table_new_values])
     ### update_q_table ###
+
+    def merge_q_tables(self, other_q_table: pd.DataFrame) -> None:
+        """
+        Merges another Q-table into this agent's Q-table, ensuring no duplicate row indices.
+        Args:
+            other_q_table (pd.DataFrame): The Q-table to merge into this agent's Q-table.
+        Side Effects:
+            - Updates the agent's Q-table by adding values from the other Q-table.
+            - Includes new moves discovered by other agents.
+            - Aggregates Q-values for duplicate moves.
+        """
+        self.q_table = self.q_table.add(other_q_table, fill_value=0)
