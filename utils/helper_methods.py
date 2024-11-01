@@ -13,7 +13,6 @@ def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
         method first gets the current state of the environment. If the list of legal moves is empty, an exception 
         is raised. Depending on the color of the RL agent, the appropriate agent selects a move. The selected move 
         is then loaded onto the chessboard and the current state of the environment is updated.
-
         Args:
         Returns:
             str: A string representing the selected chess move.

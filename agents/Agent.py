@@ -7,7 +7,7 @@ agent_logger = setup_logger(__name__, game_settings.agent_errors_filepath)
 
 class Agent:
     """
-        The `Agent` class decides which chess move to play based on the current state.
+        `Agent` class decides which chess move to play based on the current state.
 
         Args:
             color (str): The color of the agent, either 'W' or 'B'.
@@ -35,15 +35,15 @@ class Agent:
         self.q_table = q_table if q_table is not None else pd.DataFrame()
         ### end of __init__ ###
 
-    def choose_action(self, chess_data, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
+    def choose_action(self, chess_data: pd.Dataframe, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
         """
             Chooses the next chess move based on the current environment state.
             Args:
                 chess_data (pd.DataFrame): DataFrame containing chess moves for each game.
-                environ_state (Dict[str, Any]): The current state of the environment.
+                environ_state (Dict[str, Union[int, str, List[str]]]): The current state of the environment.
                 curr_game (str, optional): The identifier for the current game. Defaults to 'Game 1'.
             Returns:
-                str: The chosen chess move. Returns an empty string if no legal moves are available.
+                str: The chosen chess move.
         """
         if not chess_data:
             chess_data = {}
@@ -61,9 +61,9 @@ class Agent:
             return self.policy_training_mode(chess_data, curr_game, environ_state["curr_turn"])
     ### end of choose_action ###
     
-    def policy_training_mode(self, chess_data, curr_game: str, curr_turn: str) -> str:
+    def policy_training_mode(self, chess_data: pd.Dataframe, curr_game: str, curr_turn: str) -> str:
         """
-            This method determines how the agent chooses a move at each turn during training. It retrieves the move 
+            determines how the agent chooses a move at each turn during training. It retrieves the move 
             corresponding to the current game and turn from the chess data.
 
             Args:
@@ -85,7 +85,7 @@ class Agent:
 
     def policy_game_mode(self, legal_moves: List[str], curr_turn: str) -> str:
         """
-            This method determines how the agent chooses a move during a game between a human player and the agent. 
+            determines how the agent chooses a move during a game between a human player and the agent. 
             The agent searches its q-table to find the moves with the highest q-values at each turn. Sometimes, based 
             on a probability defined in the game settings, the agent will pick a random move from the q-table instead 
             of the move with the highest q-value.
@@ -114,7 +114,7 @@ class Agent:
 
     def change_q_table_pts(self, chess_move: str, curr_turn: str, pts: int) -> None:
         """
-            This method adds points to a cell in the q-table. The cell is determined by the chess move and the current 
+            adds points to a cell in the q-table. The cell is determined by the chess move and the current 
             turn. The points are added to the existing q-value of the cell.
             Args:
                 chess_move (str): A string representing the chess move, e.g. 'e4'. This determines the row of the cell 
@@ -135,7 +135,7 @@ class Agent:
 
     def update_q_table(self, new_chess_moves: Union[str, List[str]]) -> None:
         """
-            This method checks if the provided chess moves are already in the Q-table.
+            checks if the provided chess moves are already in the Q-table.
             If all moves are present, it returns without making changes.
             If any moves are new, it adds them to the Q-table with initial Q-values of 0.
 
