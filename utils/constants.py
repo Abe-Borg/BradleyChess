@@ -15,6 +15,8 @@ training_sample_size = 50_000
 max_num_turns_per_player = 200
 max_turn_index = max_num_turns_per_player * 2 - 1
 
+num_players = 2
+
 initial_q_val = 1 # this is relevant when training an agent. SARSA algorithm requires an initial value
 chance_for_random_move = 0.05 
         
