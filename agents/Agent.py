@@ -26,13 +26,19 @@ class Agent:
                 color (str): The color of the agent, either 'W' for white or 'B' for black.
                 learn_rate (float, optional): The learning rate between 0 and 1.
                 discount_factor (float, optional): The discount factor between 0 and 1.
-                q_table (Optional[pd.DataFrame], optional): An existing Q-table DataFrame. 
+                q_table (Optional[pd.DataFrame], optional): An existing Q-table DataFrame. If provided, a deep copy is made to ensure independence.
+            Side Effects:
+                Initializes the agent's Q-table, ensuring it's a separate instance in memory.
         """
         self.color = color
         self.learn_rate = learn_rate
         self.discount_factor = discount_factor
         self.is_trained: bool = False
-        self.q_table = q_table if q_table is not None else pd.DataFrame()
+
+        if q_table is not None:
+            self.q_table = q_table.copy(deep=True)
+        else:
+            self.q_table = pd.DataFrame()
         ### end of __init__ ###
 
     def choose_action(self, chess_data, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
