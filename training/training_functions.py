@@ -576,8 +576,8 @@ def chunkify(lst, n):
 
 def worker_train_games(game_indices_chunk, chess_data, est_q_val_table):
     # Each process will run this function to train on its chunk of games.
-    w_curr_q_value: int = constants.initial_q_val
-    b_curr_q_value: int = constants.initial_q_val
+    w_curr_q_value: int = copy.copy(constants.initial_q_val)
+    b_curr_q_value: int = copy.copy(constants.initial_q_val)
     w_agent = Agent.Agent('W')
     b_agent = Agent.Agent('B')
     environ = Environ.Environ()
@@ -592,7 +592,6 @@ def worker_train_games(game_indices_chunk, chess_data, est_q_val_table):
 
     engine.quit()
     return w_agent.q_table, b_agent.q_table
-
 
 def merge_q_tables(q_tables_list):
     # This function will combine Q-tables from all processes.

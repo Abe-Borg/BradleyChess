@@ -35,7 +35,7 @@ class Agent:
         self.q_table = q_table if q_table is not None else pd.DataFrame()
         ### end of __init__ ###
 
-    def choose_action(self, chess_data: pd.Dataframe, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
+    def choose_action(self, chess_data: pd.DataFrame, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
         """
             Chooses the next chess move based on the current environment state.
             Args:
@@ -61,7 +61,7 @@ class Agent:
             return self.policy_training_mode(chess_data, curr_game, environ_state["curr_turn"])
     ### end of choose_action ###
     
-    def policy_training_mode(self, chess_data: pd.Dataframe, curr_game: str, curr_turn: str) -> str:
+    def policy_training_mode(self, chess_data: pd.DataFrame, curr_game: str, curr_turn: str) -> str:
         """
             determines how the agent chooses a move at each turn during training. It retrieves the move 
             corresponding to the current game and turn from the chess data.

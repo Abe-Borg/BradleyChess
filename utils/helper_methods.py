@@ -30,8 +30,7 @@ def receive_opponent_move(chess_move: str, environ) -> bool:
             chess_move (str): A string representing the opponent's chess move, such as 'Nf3'.
         Returns:
             bool: A boolean value indicating whether the move was successfully loaded and the current state was 
-            successfully updated. Returns False if an error occurred while loading the chessboard, and does not 
-            attempt to update the current state.
+            successfully updated. 
         Side Effects:
             Modifies the chessboard and the current state of the environment by loading the chess move and updating 
             the current state.
