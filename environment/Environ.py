@@ -28,10 +28,6 @@ class Environ:
         self.board.push_san(chess_move)
     ### end of load_chessboard    
 
-    def pop_chessboard(self) -> None:
-        self.board.pop()
-    ### end of pop_chessboard
-
     def undo_move(self) -> None:
         self.board.pop()
         if self.turn_index > 0:
