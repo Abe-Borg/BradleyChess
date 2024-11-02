@@ -62,4 +62,3 @@ class Environ:
     def get_legal_moves(self) -> List[str]:
         return [self.board.san(move) for move in self.board.legal_moves]
     ### end of get_legal_moves
-    
