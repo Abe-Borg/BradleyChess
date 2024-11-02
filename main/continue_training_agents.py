@@ -1,4 +1,4 @@
-from utils import helper_methods, game_settings, custom_exceptions, constants
+from utils import helper_methods, game_settings, constants
 import time
 from training import training_functions
 from agents import Agent
@@ -20,7 +20,7 @@ if __name__ == '__main__':
         training_functions.continue_training_rl_agents(num_games_to_play, bradley, imman, environ)
         helper_methods.pikl_q_table(bradley, game_settings.bradley_agent_q_table_path)
         helper_methods.pikl_q_table(imman, game_settings.imman_agent_q_table_path)
-    except custom_exceptions.TrainingError as e:
+    except Exception as e:
         print(f'training interrupted because of:  {e}')
         agent_vs_agent_logger.error(f'An error occurred: {e}')
         exit(1)

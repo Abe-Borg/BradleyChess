@@ -40,10 +40,6 @@ class Environ:
                     Each dictionary is expected to have the following keys: 'mate_score', 'centipawn_score', and 
                     'anticipated_next_move'. The 'anticipated_next_move' is a Move.uci string representing the anticipated 
                     next move.
-            Raises:
-                ValueError: Raised when the anticipated next move is invalid or cannot be applied to the current chessboard 
-                state. The error message and the invalid move are written into the errors file before the exception is 
-                re-raised.
             Side Effects:
                 Modifies the chessboard's state by applying the anticipated next move.
         """

@@ -18,7 +18,6 @@ class Agent:
 
         legal_moves = environ_state['legal_moves']
         if not legal_moves:
-            agent_logger.info(f'Agent.choose_action: legal_moves is empty. curr_game: {curr_game}, curr_turn: {environ_state['curr_turn']}\n')
             return ''
       
         self.update_q_table(legal_moves)

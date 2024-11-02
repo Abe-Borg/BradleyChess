@@ -1,4 +1,4 @@
-from utils import helper_methods, game_settings, custom_exceptions, constants
+from utils import helper_methods, game_settings, constants
 import pandas as pd
 import time
 from training import training_functions
@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     try:
         Bradley, Imman = training_functions.train_rl_agents(chess_data, estimated_q_values_table)    
-    except custom_exceptions.TrainingError as e:
+    except Exception as e:
         print(f'training interrupted because of:  {e}')
         train_new_agents_logger.error(f'An error occurred: {e}')
         exit(1)

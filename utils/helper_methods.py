@@ -1,9 +1,7 @@
 import pandas as pd
-from utils import game_settings, constants, custom_exceptions
+from utils import game_settings, constants
 import random
 from agents import Agent
-from utils.logging_config import setup_logger
-helper_methods_logger = setup_logger(__name__, game_settings.helper_methods_errors_filepath)
 
 def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
     """

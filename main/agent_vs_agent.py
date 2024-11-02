@@ -1,4 +1,4 @@
-from utils import helper_methods, game_settings, custom_exceptions
+from utils import helper_methods, game_settings
 import time
 from environment import Environ
 from agents import Agent
@@ -17,7 +17,7 @@ def agent_vs_agent(environ, w_agent, b_agent, current_game: int = 0) -> None:
             if helper_methods.is_game_over(environ) == False:
                 chess_move = helper_methods.agent_selects_and_plays_chess_move(b_agent, environ)
                 agent_vs_agent_logger.info(f'Black agent played {chess_move} curr board is:\n{environ.board}\n')
-    except custom_exceptions.GamePlayError as e:
+    except Exception as e:
         agent_vs_agent_logger.error(f'An error occurred at agent_vs_agent: {e}')
         raise
 
