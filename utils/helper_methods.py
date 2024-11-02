@@ -26,10 +26,6 @@ def receive_opponent_move(chess_move: str, environ) -> bool:
     return True
 ### end of receive_opp_move
 
-def pikl_q_table(chess_agent, q_table_path: str) -> None:
-    chess_agent.q_table.to_pickle(q_table_path, compression = 'zip')
-### end of pikl_q_table
-
 def bootstrap_agent(chess_agent, existing_q_table_path: str) -> Agent.Agent:
     chess_agent.q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
     chess_agent.is_trained = True
@@ -48,11 +44,6 @@ def get_number_with_probability(probability: float) -> int:
     else:
         return 0
 ### end of get_number_with_probability
-
-def reset_q_table(q_table) -> None:
-    q_table.iloc[:, :] = 0
-    return q_table    
-### end of reset_q_table ###
 
 def is_game_over(environ) -> bool:
     return (
