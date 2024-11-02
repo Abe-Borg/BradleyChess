@@ -368,7 +368,7 @@ def find_estimated_q_value(environ, engine) -> int:
     
     if environ.board.is_game_over() or not environ.get_legal_moves():
         try:
-            environ.pop_chessboard()
+            environ.board.pop()
         except custom_exceptions.ChessboardPopError as e:
             training_functions_logger.error(f'at find_estimated_q_value. An error occurred: {e}\n')
             training_functions_logger.error(f'failed at environ.pop_chessboard\n')
@@ -390,7 +390,7 @@ def find_estimated_q_value(environ, engine) -> int:
     # IMPORTANT STEP, pop the chessboard of last move, we are estimating board states, not
     # playing a move.
     try:
-        environ.pop_chessboard()
+        environ.board.pop()
     except Exception as e:
         training_functions_logger.error(f'@ find_estimated_q_value. An error occurred: {e}\n')
         training_functions_logger.error("failed to pop_chessboard after est q val analysis values found\n")
