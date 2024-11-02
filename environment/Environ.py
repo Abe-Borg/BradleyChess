@@ -24,10 +24,6 @@ class Environ:
         return self.turn_list[self.turn_index]
         ### end of get_curr_turn
     
-    def load_chessboard(self, chess_move: str, curr_game = 'Game 1') -> None:
-        self.board.push_san(chess_move)
-    ### end of load_chessboard    
-
     def undo_move(self) -> None:
         self.board.pop()
         if self.turn_index > 0:

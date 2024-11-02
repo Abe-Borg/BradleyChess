@@ -510,7 +510,7 @@ def apply_move_and_update_state(chess_move: str, game_number: str, environ) -> N
             Writes to the errors file if an error occurs.
     """
     try:
-        environ.load_chessboard(chess_move, game_number)
+        environ.board.push_san(chess_move)
     except custom_exceptions.ChessboardLoadError as e:
         training_functions_logger.error(f'at apply_move_and_update_state. An error occurred at {game_number}: {e}\n')
         training_functions_logger.error(f"failed to load_chessboard with move {chess_move}\n")
