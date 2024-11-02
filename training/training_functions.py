@@ -11,6 +11,23 @@ from multiprocessing import Pool, cpu_count
 
 training_functions_logger = setup_logger(__name__, game_settings.training_functions_logger_filepath)
 
+def process_games_in_parallel(game_indices, worker_function, *args):
+    """
+    Processes games in parallel using the specified worker function.
+    Args:
+        game_indices (list): List of game indices to process.
+        worker_function (callable): The function to execute in parallel.
+        *args: Additional arguments to pass to the worker function.
+    Returns:
+        list: Results from each process.
+    """
+    num_processes = min(cpu_count(), len(game_indices))  # Avoid more processes than games
+    chunks = chunkify(game_indices, num_processes)
+
+    with Pool(processes=num_processes) as pool:
+        results = pool.starmap(worker_function, [(chunk, *args) for chunk in chunks])
+    return results
+
 def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
     """
         Trains the RL agents using the SARSA algorithm         
@@ -20,6 +37,8 @@ def train_rl_agents(chess_data, est_q_val_table, w_agent, b_agent):
             q values for each game in the training set.
             w_agent: The white agent.
             b_agent: The black agent.
+        Returns:
+            Tuple[Agent, Agent]: A tuple containing the trained white and black agents.
     """
     num_processes = cpu_count()
     game_indices = list(chess_data.index)
@@ -594,7 +613,14 @@ def worker_train_games(game_indices_chunk, chess_data, est_q_val_table):
     return w_agent.q_table, b_agent.q_table
 
 def merge_q_tables(q_tables_list):
-    # This function will combine Q-tables from all processes.
-    merged_q_table = pd.concat(q_tables_list)
-    merged_q_table = merged_q_table.groupby(merged_q_table.index).sum()
+    """
+        Merges Q-tables from multiple processes, handling unique moves and duplicates.
+        Args:
+            q_tables_list (list): List of Q-tables to merge.
+        Returns:
+            pd.DataFrame: Merged Q-table.
+    """
+    merged_q_table = pd.concat(q_tables_list, axis = 0)
+    merged_q_table = merged_q_table.groupby(merged_q_table.index).sum(min_count = 1)
+    merged_q_table.fillna(0, inplace = True)
     return merged_q_table
