@@ -9,36 +9,16 @@ import re
 from multiprocessing import Pool, cpu_count
 
 def process_games_in_parallel(game_indices, worker_function, *args):
-    """
-    Processes games in parallel using the specified worker function.
-    Args:
-        game_indices (list): List of game indices to process.
-        worker_function (callable): The function to execute in parallel.
-        *args: Additional arguments to pass to the worker function.
-    Returns:
-        list: Results from each process.
-    """
-    num_processes = min(cpu_count(), len(game_indices))  # Avoid more processes than games
+    num_processes = min(cpu_count(), len(game_indices))
     chunks = chunkify(game_indices, num_processes)
 
     with Pool(processes=num_processes) as pool:
         results = pool.starmap(worker_function, [(chunk, *args) for chunk in chunks])
     return results
 
-def train_rl_agents(chess_data, est_q_val_table):
-    """
-        Trains the RL agents using the SARSA algorithm in parallel.
-
-        Args:
-            chess_data (pd.DataFrame): DataFrame containing chess games.
-            est_q_val_table (pd.DataFrame): DataFrame containing estimated Q-values.
-
-        Returns:
-            w_agent (Agent): Trained white agent.
-            b_agent (Agent): Trained black agent.
-    """
+def train_rl_agents(chess_data, est_q_val_table, white_q_table, black_q_table) -> Tuple[Agent, Agent]:
     game_indices = list(chess_data.index)
-    results = process_games_in_parallel(game_indices, worker_train_games, chess_data, est_q_val_table)
+    results = process_games_in_parallel(game_indices, worker_train_games, chess_data, est_q_val_table, white_q_table, black_q_table)
 
     # Collect and merge Q-tables from all processes
     w_agent_q_tables = [result[0] for result in results]
@@ -94,7 +74,6 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
 
         if environ.board.is_game_over():
             break
-
 ### end of train_one_game
 
 def generate_q_est_df(chess_data) -> pd.DataFrame:
