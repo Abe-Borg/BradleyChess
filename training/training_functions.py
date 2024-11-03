@@ -396,8 +396,6 @@ def handle_agent_turn(agent, chess_data, curr_state, game_number, environ, engin
     """
     curr_turn = curr_state['curr_turn']
     chess_move = agent.choose_action(chess_data, curr_state, game_number)
-    if not chess_move:
-        raise custom_exceptions.EmptyChessMoveError(f"{agent.color}_chess_move is empty at state: {curr_state}")
 
     # Assign current Q-value to Q-table
     assign_points_to_q_table(chess_move, curr_turn, curr_q_value, agent)

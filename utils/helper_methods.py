@@ -18,19 +18,16 @@ def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
     environ.load_chessboard(chess_move)
     environ.update_curr_state()
     return chess_move
-### end of agent_selects_and_plays_chess_move
 
 def receive_opponent_move(chess_move: str, environ) -> bool:                                                                                 
     environ.load_chessboard(chess_move)
     environ.update_curr_state()
     return True
-### end of receive_opp_move
 
 def bootstrap_agent(chess_agent, existing_q_table_path: str) -> Agent.Agent:
     chess_agent.q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
     chess_agent.is_trained = True
     return chess_agent
-### end of bootstrap_agent
 
 def get_number_with_probability(probability: float) -> int:
     """Generate a random number with a given probability.
@@ -43,7 +40,6 @@ def get_number_with_probability(probability: float) -> int:
         return 1
     else:
         return 0
-### end of get_number_with_probability
 
 def is_game_over(environ) -> bool:
     return (
@@ -51,12 +47,9 @@ def is_game_over(environ) -> bool:
         environ.turn_index >= constants.max_turn_index or
         (len(environ.get_legal_moves()) == 0)
     )
-### end of is_game_over
 
 def get_game_outcome(environ) -> str:
     return environ.board.outcome().result()
-### end of get_game_outcome
 
 def get_game_termination_reason(environ) -> str:
     return str(environ.board.outcome().termination)
-### end of get_game_termination_reason

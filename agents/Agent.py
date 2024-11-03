@@ -10,7 +10,6 @@ class Agent:
         self.discount_factor = discount_factor
         self.is_trained: bool = False
         self.q_table = q_table if q_table is not None else pd.DataFrame()
-        ### end of __init__ ###
 
     def choose_action(self, chess_data: pd.DataFrame, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
         if not chess_data:
@@ -25,12 +24,10 @@ class Agent:
             return self.policy_game_mode(legal_moves, environ_state['curr_turn'])
         else:
             return self.policy_training_mode(chess_data, curr_game, environ_state["curr_turn"])
-    ### end of choose_action ###
     
     def policy_training_mode(self, chess_data: pd.DataFrame, curr_game: str, curr_turn: str) -> str:
         chess_move = chess_data.at[curr_game, curr_turn]
         return chess_move
-    ### end of policy_training_mode ###
 
     def policy_game_mode(self, legal_moves: List[str], curr_turn: str) -> str:
         dice_roll = helper_methods.get_number_with_probability(constants.chance_for_random_move)        
@@ -41,11 +38,9 @@ class Agent:
         else:
             chess_move = legal_moves_in_q_table.idxmax()
         return chess_move
-    ### end of policy_game_mode ###
 
     def change_q_table_pts(self, chess_move: str, curr_turn: str, pts: int) -> None:
         self.q_table.at[chess_move, curr_turn] += pts
-    ### end of change_q_table_pts ###
 
     def update_q_table(self, new_chess_moves: Union[str, List[str]]) -> None:
         if isinstance(new_chess_moves, str):
@@ -63,6 +58,3 @@ class Agent:
         )
 
         self.q_table = pd.concat([self.q_table, q_table_new_values])
-    ### update_q_table ###
-
-
