@@ -34,7 +34,6 @@ def train_rl_agents(chess_data, est_q_val_table, white_q_table, black_q_table) -
     b_agent.is_trained = True
 
     return w_agent, b_agent
-### end of train_rl_agents
 
 def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ, engine) -> None:
     num_moves: int = chess_data.at[game_number, 'PlyCount']
@@ -42,7 +41,7 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
 
     while curr_state['turn_index'] < num_moves:
         ##################### WHITE'S TURN ####################
-        w_next_q_value, w_est_q_value = handle_agent_turn(
+        w_next_q_value = handle_agent_turn(
             agent=w_agent,
             chess_data=chess_data,
             curr_state=curr_state,
@@ -59,7 +58,7 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
             break
 
         ##################### BLACK'S TURN ####################
-        b_next_q_value, b_est_q_value = handle_agent_turn(
+        b_next_q_value = handle_agent_turn(
             agent=b_agent,
             chess_data=chess_data,
             curr_state=curr_state,
@@ -74,81 +73,61 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
 
         if environ.board.is_game_over():
             break
-### end of train_one_game
 
-def generate_q_est_df(chess_data) -> pd.DataFrame:
+def generate_q_est_df(chess_data: pd.DataFrame) -> pd.DataFrame:
     """
-        Generates a DataFrame containing the estimated Q-values for each chess move.
-
-        Args:
-            chess_data (pd.DataFrame): DataFrame containing chess games.
-
-        Returns:
-            estimated_q_values (pd.DataFrame): DataFrame with estimated Q-values.
+    Generates a DataFrame containing the estimated Q-values for each chess move.
+    Args:
+        chess_data (pd.DataFrame): DataFrame containing chess games.
+    Returns:
+        estimated_q_values (pd.DataFrame): DataFrame with estimated Q-values.
     """
     game_indices = list(chess_data.index)
     results = process_games_in_parallel(game_indices, worker_generate_q_est, chess_data)
-
+    
     # Combine estimated Q-values from all processes
-    estimated_q_values_list = results  # Each process returns a DataFrame
-
-    estimated_q_values = pd.concat(estimated_q_values_list)
+    estimated_q_values_list = results  # Each process returns a list of DataFrames
+    
+    # Since each process returns a list of DataFrames, flatten the list
+    estimated_q_values_flat = [df for sublist in estimated_q_values_list for df in sublist]
+    
+    # Concatenate all DataFrames
+    estimated_q_values = pd.concat(estimated_q_values_flat)
     estimated_q_values.sort_index(inplace=True)
-
     return estimated_q_values
-# end of generate_q_est_df
 
 def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.DataFrame:
     """
-        Generates the estimated Q-values for each move in a single game.
-
-        Args:
-            chess_data (pd.DataFrame): DataFrame containing chess games.
-            game_number (str): The identifier for the current game.
-            environ (Environ): The environment object.
-            engine: The chess engine object.
-
-        Returns:
-            pd.DataFrame: Estimated Q-values for this game.
+    Generates the estimated Q-values for each move in a single game.
+    Args:
+        chess_data (pd.DataFrame): DataFrame containing chess games.
+        game_number (str): The identifier for the current game.
+        environ (Environ): The environment object.
+        engine: The chess engine object.
+    Returns:
+        pd.DataFrame: Estimated Q-values for this game.
     """
-    num_moves: int = chess_data.at[game_number, 'PlyCount']
+    num_moves = chess_data.at[game_number, 'PlyCount']
     estimated_q_values_game = pd.DataFrame(index=[game_number], columns=chess_data.columns)
     estimated_q_values_game.iloc[0] = 0  # Initialize Q-values to zero
 
     curr_state = environ.get_curr_state()
 
     while curr_state['turn_index'] < num_moves:
-        # White's turn
         curr_turn = curr_state['curr_turn']
-        if curr_turn.startswith('W'):
-            # Get move from chess_data
-            w_chess_move = chess_data.at[game_number, curr_turn]
-            apply_move_and_update_state(w_chess_move, game_number, environ)
-            curr_state = environ.get_curr_state()
+        chess_move = chess_data.at[game_number, curr_turn]
+        apply_move_and_update_state(chess_move, game_number, environ)
+        curr_state = environ.get_curr_state()
 
-            # Estimate Q-value
-            est_qval = find_estimated_q_value(environ, engine)
-            estimated_q_values_game.at[game_number, curr_turn] = est_qval
+        # Estimate Q-value
+        est_qval = find_estimated_q_value(environ, engine)
+        estimated_q_values_game.at[game_number, curr_turn] = est_qval
 
-        # Black's turn
-        elif curr_turn.startswith('B'):
-            b_chess_move = chess_data.at[game_number, curr_turn]
-            apply_move_and_update_state(b_chess_move, game_number, environ)
-            curr_state = environ.get_curr_state()
-
-            # Estimate Q-value
-            est_qval = find_estimated_q_value(environ, engine)
-            estimated_q_values_game.at[game_number, curr_turn] = est_qval
-
-        else:
-            # Handle unexpected turn label
-            break
-
-        # Check for game over
         if environ.board.is_game_over() or not curr_state['legal_moves']:
             break
 
     return estimated_q_values_game
+
 
 def find_estimated_q_value(environ, engine) -> int:
     """
@@ -192,7 +171,6 @@ def find_estimated_q_value(environ, engine) -> int:
     # playing a move.
     environ.board.pop()
     return est_qval
-# end of find_estimated_q_value
 
 def find_next_q_value(curr_qval: int, learn_rate: float, reward: int, discount_factor: float, est_qval: int) -> int:
     """
@@ -213,7 +191,6 @@ def find_next_q_value(curr_qval: int, learn_rate: float, reward: int, discount_f
             int: The next q-value, calculated using the SARSA algorithm.
     """
     return int(curr_qval + learn_rate * (reward + ((discount_factor * est_qval) - curr_qval)))
-# end of find_next_q_value
 
 def analyze_board_state(board, engine) -> dict:
     """
@@ -249,12 +226,10 @@ def analyze_board_state(board, engine) -> dict:
         'centipawn_score': centipawn_score,
         'anticipated_next_move': anticipated_next_move
     }
-### end of analyze_board_state
 
 def apply_move_and_update_state(chess_move: str, game_number: str, environ) -> None:
     environ.board.push_san(chess_move)
     environ.update_curr_state()
-# end of apply_move_and_update_state
 
 def get_reward(chess_move: str) -> int:
     """
@@ -278,17 +253,14 @@ def get_reward(chess_move: str) -> int:
         if '=Q' in chess_move:
             total_reward += constants.CHESS_MOVE_VALUES['promotion_queen']
     return total_reward
-## end of get_reward
 
 def start_chess_engine(): 
     chess_engine = chess.engine.SimpleEngine.popen_uci(game_settings.stockfish_filepath)
     return chess_engine
-# end of start_chess_engine
 
 def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, chess_agent) -> None:
     chess_agent.update_q_table([chess_move])
     chess_agent.change_q_table_pts(chess_move, curr_turn, curr_q_val)
-# enf of assign_points_to_q_table 
 
 def chunkify(lst, n):
     # utility function to split the game indices into chunks.
@@ -325,17 +297,14 @@ def worker_train_games(game_indices_chunk, chess_data, est_q_val_table):
 
 def worker_generate_q_est(game_indices_chunk, chess_data):
     """
-        Worker function for generating estimated Q-values for a chunk of games.
-
-        Args:
-            game_indices_chunk (list): List of game indices for this process.
-            chess_data (pd.DataFrame): DataFrame containing chess games.
-
-        Returns:
-            pd.DataFrame: Estimated Q-values for the processed games.
+    Worker function for generating estimated Q-values for a chunk of games.
+    Args:
+        game_indices_chunk (list): List of game indices for this process.
+        chess_data (pd.DataFrame): DataFrame containing chess games.
+    Returns:
+        list: List of DataFrames with estimated Q-values for the processed games.
     """
     estimated_q_values_list = []
-
     environ = Environ()
     engine = start_chess_engine()
 
@@ -344,14 +313,12 @@ def worker_generate_q_est(game_indices_chunk, chess_data):
             estimated_q_values_game = generate_q_est_df_one_game(chess_data, game_number, environ, engine)
             estimated_q_values_list.append(estimated_q_values_game)
         except Exception as e:
+            # Handle exceptions appropriately
             continue
-
         environ.reset_environ()
 
     engine.quit()
-    # Combine estimated Q-values for this chunk
-    estimated_q_values_chunk = pd.concat(estimated_q_values_list)
-    return estimated_q_values_chunk
+    return estimated_q_values_list
 
 def merge_q_tables(q_tables_list):
     """
@@ -384,7 +351,7 @@ def handle_agent_turn(agent, chess_data, curr_state, game_number, environ, engin
         est_q_val_table (pd.DataFrame): DataFrame containing estimated Q-values.
 
     Returns:
-        tuple: (next_q_value, est_q_value)
+        next_q_value (int): The next Q-value for the agent.
     """
     curr_turn = curr_state['curr_turn']
     chess_move = agent.choose_action(chess_data, curr_state, game_number)
@@ -407,6 +374,4 @@ def handle_agent_turn(agent, chess_data, curr_state, game_number, environ, engin
         est_q_value = est_q_val_table.at[game_number, next_turn]
 
     # SARSA update
-    next_q_value = find_next_q_value(curr_q_value, agent.learn_rate, reward, agent.discount_factor, est_q_value)
-
-    return next_q_value, est_q_value
+    return find_next_q_value(curr_q_value, agent.learn_rate, reward, agent.discount_factor, est_q_value)
