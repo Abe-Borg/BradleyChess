@@ -228,12 +228,6 @@ def analyze_board_state(board, engine) -> dict:
             - 'mate_score': Number of moves to mate (None if not a mate position)
             - 'centipawn_score': Centipawn score (None if mate position)
             - 'anticipated_next_move': The best move suggested by the engine
-        Raises:
-            InvalidBoardStateError: If the board is in an invalid state.
-            EngineAnalysisError: If an error occurs during the Stockfish analysis.
-            ScoreExtractionError: If an error occurs while extracting scores from the analysis.
-            MoveExtractionError: If an error occurs while extracting the anticipated next move.
-
         Side Effects:
             Writes to the errors file if an error occurs.
     """
