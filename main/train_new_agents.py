@@ -3,7 +3,6 @@ import pandas as pd
 import time
 from training import training_functions
 from agents import Agent
-from utils.logging_config import setup_logger
 
 if __name__ == '__main__':
     start_time = time.time()

@@ -142,7 +142,6 @@ def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.D
 
         else:
             # Handle unexpected turn label
-            training_functions_logger.error(f'Unexpected turn label: {curr_turn}')
             break
 
         # Check for game over
@@ -351,7 +350,6 @@ def worker_generate_q_est(game_indices_chunk, chess_data):
             estimated_q_values_game = generate_q_est_df_one_game(chess_data, game_number, environ, engine)
             estimated_q_values_list.append(estimated_q_values_game)
         except Exception as e:
-            training_functions_logger.error(f'An error occurred at generate_q_est_df_one_game: {e}\nat game: {game_number}')
             continue
 
         environ.reset_environ()
