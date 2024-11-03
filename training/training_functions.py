@@ -23,25 +23,21 @@ def train_rl_agents(chess_data, est_q_val_table, white_q_table, black_q_table) -
     # Collect and merge Q-tables from all processes
     w_agent_q_tables = [result[0] for result in results]
     b_agent_q_tables = [result[1] for result in results]
-
-    w_agent = Agent.Agent('W')
-    b_agent = Agent.Agent('B')
-
+    w_agent = Agent('W')
+    b_agent = Agent('B')
     w_agent.q_table = merge_q_tables(w_agent_q_tables)
     b_agent.q_table = merge_q_tables(b_agent_q_tables)
-
     w_agent.is_trained = True
     b_agent.is_trained = True
-
     return w_agent, b_agent
 
-def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ, engine) -> None:
-    num_moves: int = chess_data.at[game_number, 'PlyCount']
+def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ, engine):
+    num_moves = chess_data.at[game_number, 'PlyCount']
     curr_state = environ.get_curr_state()
 
     while curr_state['turn_index'] < num_moves:
-        ##################### WHITE'S TURN ####################
-        w_next_q_value = handle_agent_turn(
+        # WHITE'S TURN
+        w_next_q_value, w_est_q_value = handle_agent_turn(
             agent=w_agent,
             chess_data=chess_data,
             curr_state=curr_state,
@@ -57,8 +53,8 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
         if environ.board.is_game_over():
             break
 
-        ##################### BLACK'S TURN ####################
-        b_next_q_value = handle_agent_turn(
+        # BLACK'S TURN
+        b_next_q_value, b_est_q_value = handle_agent_turn(
             agent=b_agent,
             chess_data=chess_data,
             curr_state=curr_state,
@@ -110,7 +106,6 @@ def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.D
     num_moves = chess_data.at[game_number, 'PlyCount']
     estimated_q_values_game = pd.DataFrame(index=[game_number], columns=chess_data.columns)
     estimated_q_values_game.iloc[0] = 0  # Initialize Q-values to zero
-
     curr_state = environ.get_curr_state()
 
     while curr_state['turn_index'] < num_moves:
@@ -127,7 +122,6 @@ def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.D
             break
 
     return estimated_q_values_game
-
 
 def find_estimated_q_value(environ, engine) -> int:
     """
@@ -266,20 +260,20 @@ def chunkify(lst, n):
     # utility function to split the game indices into chunks.
     return [lst[i::n] for i in range(n)]
 
-def worker_train_games(game_indices_chunk, chess_data, est_q_val_table):
+def worker_train_games(game_indices_chunk, chess_data, est_q_val_table, white_q_table, black_q_table):
     """
-        Worker function for training agents on a chunk of games.
-
-        Args:
-            game_indices_chunk (list): List of game indices for this process.
-            chess_data (pd.DataFrame): DataFrame containing chess games.
-            est_q_val_table (pd.DataFrame): DataFrame containing estimated Q-values.
-
-        Returns:
-            tuple: (w_agent.q_table, b_agent.q_table)
+    Worker function for training agents on a chunk of games.
+    Args:
+        game_indices_chunk (list): List of game indices for this process.
+        chess_data (pd.DataFrame): DataFrame containing chess games.
+        est_q_val_table (pd.DataFrame): DataFrame containing estimated Q-values.
+        white_q_table (pd.DataFrame): The initial Q-table for the white agent.
+        black_q_table (pd.DataFrame): The initial Q-table for the black agent.
+    Returns:
+        tuple: (w_agent.q_table, b_agent.q_table)
     """
-    w_agent = Agent.Agent('W')
-    b_agent = Agent.Agent('B')
+    w_agent = Agent('W', q_table=white_q_table.copy())
+    b_agent = Agent('B', q_table=black_q_table.copy())
     environ = Environ()
     engine = start_chess_engine()
 
@@ -289,11 +283,13 @@ def worker_train_games(game_indices_chunk, chess_data, est_q_val_table):
             b_curr_q_value = constants.initial_q_val
             train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ, engine)
         except Exception as e:
+            # Handle exceptions appropriately
             continue
-
         environ.reset_environ()
+
     engine.quit()
     return w_agent.q_table, b_agent.q_table
+
 
 def worker_generate_q_est(game_indices_chunk, chess_data):
     """
@@ -322,42 +318,25 @@ def worker_generate_q_est(game_indices_chunk, chess_data):
 
 def merge_q_tables(q_tables_list):
     """
-        Merges Q-tables from multiple processes, handling unique moves and duplicates.
-
-        Args:
-            q_tables_list (list): List of Q-tables to merge.
-
-        Returns:
-            pd.DataFrame: Merged Q-table.
+    Merges Q-tables from multiple processes, handling unique moves and duplicates.
+    Args:
+        q_tables_list (list): List of Q-tables to merge.
+    Returns:
+        pd.DataFrame: Merged Q-table.
     """
     merged_q_table = pd.concat(q_tables_list, axis=0)
     merged_q_table = merged_q_table.groupby(merged_q_table.index).sum(min_count=1)
-    # Fill NaN values with zeros
     merged_q_table.fillna(0, inplace=True)
     return merged_q_table
 
 def handle_agent_turn(agent, chess_data, curr_state, game_number, environ, engine, curr_q_value, est_q_val_table):
     """
     Handles a single agent's turn during training.
-
-    Args:
-        agent (Agent): The agent (white or black).
-        chess_data (pd.DataFrame): DataFrame containing chess games.
-        curr_state (dict): Current state of the environment.
-        game_number (str): The identifier for the current game.
-        environ (Environ): The environment object.
-        engine: The chess engine object.
-        curr_q_value (int): The current Q-value.
-        est_q_val_table (pd.DataFrame): DataFrame containing estimated Q-values.
-
     Returns:
-        next_q_value (int): The next Q-value for the agent.
+        tuple: (next_q_value, est_q_value)
     """
     curr_turn = curr_state['curr_turn']
     chess_move = agent.choose_action(chess_data, curr_state, game_number)
-
-    # Assign current Q-value to Q-table
-    assign_points_to_q_table(chess_move, curr_turn, curr_q_value, agent)
 
     # Apply move and update environment
     apply_move_and_update_state(chess_move, game_number, environ)
@@ -374,4 +353,10 @@ def handle_agent_turn(agent, chess_data, curr_state, game_number, environ, engin
         est_q_value = est_q_val_table.at[game_number, next_turn]
 
     # SARSA update
-    return find_next_q_value(curr_q_value, agent.learn_rate, reward, agent.discount_factor, est_q_value)
+    next_q_value = find_next_q_value(curr_q_value, agent.learn_rate, reward, agent.discount_factor, est_q_value)
+
+    # Update agent's Q-table with next_q_value
+    agent.change_q_table_pts(chess_move, curr_turn, next_q_value - curr_q_value)
+
+    return next_q_value, est_q_value
+
