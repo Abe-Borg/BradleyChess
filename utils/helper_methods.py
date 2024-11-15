@@ -4,15 +4,6 @@ import random
 from agents import Agent
 
 def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
-    """
-        The Agent selects a chess move and loads it onto the chessboard. It is used 
-        during actual gameplay between the computer and the user, not during training. 
-        Returns:
-            str: A string representing the selected chess move.
-        Side Effects:
-            Modifies the chessboard and the current state of the environment by loading the chess move and updating 
-            the current state.
-    """
     curr_state = environ.get_curr_state() 
     chess_move: str = chess_agent.choose_action(curr_state)
     environ.load_chessboard(chess_move)
@@ -30,12 +21,6 @@ def bootstrap_agent(chess_agent, existing_q_table_path: str):
     return chess_agent
 
 def get_number_with_probability(probability: float) -> int:
-    """Generate a random number with a given probability.
-    Args:
-        probability (float): A float representing the probability of generating a 1.
-    Returns:
-        int: A random integer value of either 0 or 1.
-    """
     if random.random() < probability:
         return 1
     else:

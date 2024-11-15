@@ -16,22 +16,18 @@ search_limit = chess.engine.Limit(depth = constants.chess_engine_depth_limit, ti
 
 stockfish_filepath = base_directory / ".." / "stockfish_15_win_x64_avx2" / "stockfish_15_x64_avx2.exe"
 absolute_stockfish_filepath = stockfish_filepath.resolve()
-
 bradley_agent_q_table_path = base_directory / ".." / "Q_Tables" / "bradley_agent_q_table.pkl"
 imman_agent_q_table_path = base_directory / ".." / "Q_Tables" / "imman_agent_q_table.pkl"
 unique_chess_moves_list_path = base_directory / ".." / "Q_Tables" / "unique_chess_moves_list.pkl"
-
 helper_methods_logger_filepath = base_directory / ".." / "debug" / "helper_methods_logger_file.txt"
 agent_logger_filepath = base_directory / ".." / "debug" / "agent_logger_file.txt"
 environ_logger_filepath = base_directory / ".." / "debug" / "environ_logger_file.txt"
 training_functions_logger_filepath = base_directory / ".." / "debug" / "training_functions_logger_file.txt"
 agent_vs_agent_logger_filepath = base_directory / ".." / "debug" / "agent_vs_agent_logger_file.txt"
-
 initial_training_results_filepath = base_directory / ".." / "training_results" / "initial_training_results.txt"
 additional_training_results_filepath = base_directory / ".." / "training_results" / "additional_training_results.txt"
 agent_vs_agent_filepath = base_directory / ".." / "training_results" / "agent_vs_agent_games.txt"
 agent_vs_human_logger_filepath = base_directory / ".." / "training_results" / "agent_vs_human_logger_file.txt"
-
 chess_games_pgn_filepath_part_32 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_32.pgn"
 chess_games_pgn_filepath_part_33 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_33.pgn"
 chess_games_pgn_filepath_part_34 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_34.pgn"
@@ -41,7 +37,6 @@ chess_games_pgn_filepath_part_37 = base_directory / ".." / "chess_data" / "Chess
 chess_games_pgn_filepath_part_38 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_38.pgn"
 chess_games_pgn_filepath_part_39 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_39.pgn"
 chess_games_pgn_filepath_part_40 = base_directory / ".." / "chess_data" / "Chess_Games_DB_Part_40.pgn"
-
 est_q_vals_filepath_part_1 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_1.txt"
 est_q_vals_filepath_part_2 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_2.txt"
 est_q_vals_filepath_part_3 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_3.txt"
@@ -52,7 +47,6 @@ est_q_vals_filepath_part_7 = base_directory / ".." / "Q_Tables" / "Estimated_Q_V
 est_q_vals_filepath_part_8 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_8.txt"
 est_q_vals_filepath_part_9 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_9.txt"
 est_q_vals_filepath_part_10 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_10.txt"
-
 est_q_vals_filepath_part_11 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_11.txt"
 est_q_vals_filepath_part_12 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_12.txt"
 est_q_vals_filepath_part_13 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_13.txt"
@@ -63,7 +57,6 @@ est_q_vals_filepath_part_17 = base_directory / ".." / "Q_Tables" / "Estimated_Q_
 est_q_vals_filepath_part_18 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_18.txt"
 est_q_vals_filepath_part_19 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_19.txt"
 est_q_vals_filepath_part_20 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_20.txt"
-
 est_q_vals_filepath_part_21 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_21.txt"
 est_q_vals_filepath_part_22 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_22.txt"
 est_q_vals_filepath_part_23 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_23.txt"
@@ -74,7 +67,6 @@ est_q_vals_filepath_part_27 = base_directory / ".." / "Q_Tables" / "Estimated_Q_
 est_q_vals_filepath_part_28 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_28.txt"
 est_q_vals_filepath_part_29 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_29.txt"
 est_q_vals_filepath_part_30 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_30.txt"
-
 est_q_vals_filepath_part_31 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_31.txt"
 est_q_vals_filepath_part_32 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_32.txt"
 est_q_vals_filepath_part_33 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_33.txt"
@@ -85,7 +77,6 @@ est_q_vals_filepath_part_37 = base_directory / ".." / "Q_Tables" / "Estimated_Q_
 est_q_vals_filepath_part_38 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_38.txt"
 est_q_vals_filepath_part_39 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_39.txt"
 est_q_vals_filepath_part_40 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_40.txt"
-
 est_q_vals_filepath_part_41 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_41.txt"
 est_q_vals_filepath_part_42 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_42.txt"
 est_q_vals_filepath_part_43 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_43.txt"
@@ -96,7 +87,6 @@ est_q_vals_filepath_part_47 = base_directory / ".." / "Q_Tables" / "Estimated_Q_
 est_q_vals_filepath_part_48 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_48.txt"
 est_q_vals_filepath_part_49 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_49.txt"
 est_q_vals_filepath_part_50 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_50.txt"
-
 est_q_vals_filepath_part_51 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_51.txt"
 est_q_vals_filepath_part_52 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_52.txt"
 est_q_vals_filepath_part_53 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_53.txt"
@@ -107,7 +97,6 @@ est_q_vals_filepath_part_57 = base_directory / ".." / "Q_Tables" / "Estimated_Q_
 est_q_vals_filepath_part_58 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_58.txt"
 est_q_vals_filepath_part_59 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_59.txt"
 est_q_vals_filepath_part_60 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_60.txt"
-
 est_q_vals_filepath_part_61 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_61.txt"
 est_q_vals_filepath_part_62 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_62.txt"
 est_q_vals_filepath_part_63 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_63.txt"
@@ -118,7 +107,6 @@ est_q_vals_filepath_part_67 = base_directory / ".." / "Q_Tables" / "Estimated_Q_
 est_q_vals_filepath_part_68 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_68.txt"
 est_q_vals_filepath_part_69 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_69.txt"
 est_q_vals_filepath_part_70 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_70.txt"
-
 est_q_vals_filepath_part_71 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_71.txt"
 est_q_vals_filepath_part_72 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_72.txt"
 est_q_vals_filepath_part_73 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_73.txt"
@@ -129,7 +117,6 @@ est_q_vals_filepath_part_77 = base_directory / ".." / "Q_Tables" / "Estimated_Q_
 est_q_vals_filepath_part_78 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_78.txt"
 est_q_vals_filepath_part_79 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_79.txt"
 est_q_vals_filepath_part_80 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_80.txt"
-
 est_q_vals_filepath_part_81 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_81.txt"
 est_q_vals_filepath_part_82 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_82.txt"
 est_q_vals_filepath_part_83 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_83.txt"
@@ -140,7 +127,6 @@ est_q_vals_filepath_part_87 = base_directory / ".." / "Q_Tables" / "Estimated_Q_
 est_q_vals_filepath_part_88 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_88.txt"
 est_q_vals_filepath_part_89 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_89.txt"
 est_q_vals_filepath_part_90 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_90.txt"
-
 est_q_vals_filepath_part_91 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_91.txt"
 est_q_vals_filepath_part_92 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_92.txt"
 est_q_vals_filepath_part_93 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_93.txt"
@@ -151,7 +137,6 @@ est_q_vals_filepath_part_97 = base_directory / ".." / "Q_Tables" / "Estimated_Q_
 est_q_vals_filepath_part_98 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_98.txt"
 est_q_vals_filepath_part_99 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_99.txt"
 est_q_vals_filepath_part_100 = base_directory / ".." / "Q_Tables" / "Estimated_Q_Values" / "est_q_vals_part_100.txt"
-
 chess_games_filepath_part_1 = base_directory / ".." / "chess_data" / "chess_games_part_1.pkl"
 chess_games_filepath_part_2 = base_directory / ".." / "chess_data" / "chess_games_part_2.pkl"
 chess_games_filepath_part_3 = base_directory / ".." / "chess_data" / "chess_games_part_3.pkl"
@@ -162,7 +147,6 @@ chess_games_filepath_part_7 = base_directory / ".." / "chess_data" / "chess_game
 chess_games_filepath_part_8 = base_directory / ".." / "chess_data" / "chess_games_part_8.pkl"
 chess_games_filepath_part_9 = base_directory / ".." / "chess_data" / "chess_games_part_9.pkl"
 chess_games_filepath_part_10 = base_directory / ".." / "chess_data" / "chess_games_part_10.pkl"
-
 chess_games_filepath_part_11 = base_directory / ".." / "chess_data" / "chess_games_part_11.pkl"
 chess_games_filepath_part_12 = base_directory / ".." / "chess_data" / "chess_games_part_12.pkl"
 chess_games_filepath_part_13 = base_directory / ".." / "chess_data" / "chess_games_part_13.pkl"
@@ -173,7 +157,6 @@ chess_games_filepath_part_17 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_18 = base_directory / ".." / "chess_data" / "chess_games_part_18.pkl"
 chess_games_filepath_part_19 = base_directory / ".." / "chess_data" / "chess_games_part_19.pkl"
 chess_games_filepath_part_20 = base_directory / ".." / "chess_data" / "chess_games_part_20.pkl"
-
 chess_games_filepath_part_21 = base_directory / ".." / "chess_data" / "chess_games_part_21.pkl"
 chess_games_filepath_part_22 = base_directory / ".." / "chess_data" / "chess_games_part_22.pkl"
 chess_games_filepath_part_23 = base_directory / ".." / "chess_data" / "chess_games_part_23.pkl"
@@ -184,7 +167,6 @@ chess_games_filepath_part_27 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_28 = base_directory / ".." / "chess_data" / "chess_games_part_28.pkl"
 chess_games_filepath_part_29 = base_directory / ".." / "chess_data" / "chess_games_part_29.pkl"
 chess_games_filepath_part_30 = base_directory / ".." / "chess_data" / "chess_games_part_30.pkl"
-
 chess_games_filepath_part_31 = base_directory / ".." / "chess_data" / "chess_games_part_31.pkl"
 chess_games_filepath_part_32 = base_directory / ".." / "chess_data" / "chess_games_part_32.pkl"
 chess_games_filepath_part_33 = base_directory / ".." / "chess_data" / "chess_games_part_33.pkl"
@@ -195,7 +177,6 @@ chess_games_filepath_part_37 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_38 = base_directory / ".." / "chess_data" / "chess_games_part_38.pkl"
 chess_games_filepath_part_39 = base_directory / ".." / "chess_data" / "chess_games_part_39.pkl"
 chess_games_filepath_part_40 = base_directory / ".." / "chess_data" / "chess_games_part_40.pkl"
-
 chess_games_filepath_part_41 = base_directory / ".." / "chess_data" / "chess_games_part_41.pkl"
 chess_games_filepath_part_42 = base_directory / ".." / "chess_data" / "chess_games_part_42.pkl"
 chess_games_filepath_part_43 = base_directory / ".." / "chess_data" / "chess_games_part_43.pkl"
@@ -206,7 +187,6 @@ chess_games_filepath_part_47 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_48 = base_directory / ".." / "chess_data" / "chess_games_part_48.pkl"
 chess_games_filepath_part_49 = base_directory / ".." / "chess_data" / "chess_games_part_49.pkl"
 chess_games_filepath_part_50 = base_directory / ".." / "chess_data" / "chess_games_part_50.pkl"
-
 chess_games_filepath_part_51 = base_directory / ".." / "chess_data" / "chess_games_part_51.pkl"
 chess_games_filepath_part_52 = base_directory / ".." / "chess_data" / "chess_games_part_52.pkl"
 chess_games_filepath_part_53 = base_directory / ".." / "chess_data" / "chess_games_part_53.pkl"
@@ -217,7 +197,6 @@ chess_games_filepath_part_57 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_58 = base_directory / ".." / "chess_data" / "chess_games_part_58.pkl"
 chess_games_filepath_part_59 = base_directory / ".." / "chess_data" / "chess_games_part_59.pkl"
 chess_games_filepath_part_60 = base_directory / ".." / "chess_data" / "chess_games_part_60.pkl"
-
 chess_games_filepath_part_61 = base_directory / ".." / "chess_data" / "chess_games_part_61.pkl"
 chess_games_filepath_part_62 = base_directory / ".." / "chess_data" / "chess_games_part_62.pkl"
 chess_games_filepath_part_63 = base_directory / ".." / "chess_data" / "chess_games_part_63.pkl"
@@ -228,7 +207,6 @@ chess_games_filepath_part_67 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_68 = base_directory / ".." / "chess_data" / "chess_games_part_68.pkl"
 chess_games_filepath_part_69 = base_directory / ".." / "chess_data" / "chess_games_part_69.pkl"
 chess_games_filepath_part_70 = base_directory / ".." / "chess_data" / "chess_games_part_70.pkl"
-
 chess_games_filepath_part_71 = base_directory / ".." / "chess_data" / "chess_games_part_71.pkl"
 chess_games_filepath_part_72 = base_directory / ".." / "chess_data" / "chess_games_part_72.pkl"
 chess_games_filepath_part_73 = base_directory / ".." / "chess_data" / "chess_games_part_73.pkl"
@@ -239,7 +217,6 @@ chess_games_filepath_part_77 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_78 = base_directory / ".." / "chess_data" / "chess_games_part_78.pkl"
 chess_games_filepath_part_79 = base_directory / ".." / "chess_data" / "chess_games_part_79.pkl"
 chess_games_filepath_part_80 = base_directory / ".." / "chess_data" / "chess_games_part_80.pkl"
-
 chess_games_filepath_part_81 = base_directory / ".." / "chess_data" / "chess_games_part_81.pkl"
 chess_games_filepath_part_82 = base_directory / ".." / "chess_data" / "chess_games_part_82.pkl"
 chess_games_filepath_part_83 = base_directory / ".." / "chess_data" / "chess_games_part_83.pkl"
@@ -250,7 +227,6 @@ chess_games_filepath_part_87 = base_directory / ".." / "chess_data" / "chess_gam
 chess_games_filepath_part_88 = base_directory / ".." / "chess_data" / "chess_games_part_88.pkl"
 chess_games_filepath_part_89 = base_directory / ".." / "chess_data" / "chess_games_part_89.pkl"
 chess_games_filepath_part_90 = base_directory / ".." / "chess_data" / "chess_games_part_90.pkl"
-
 chess_games_filepath_part_91 = base_directory / ".." / "chess_data" / "chess_games_part_91.pkl"
 chess_games_filepath_part_92 = base_directory / ".." / "chess_data" / "chess_games_part_92.pkl"
 chess_games_filepath_part_93 = base_directory / ".." / "chess_data" / "chess_games_part_93.pkl"
