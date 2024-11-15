@@ -1,10 +1,9 @@
-from typing import Tuple
-from agents.Agent import Agent
+# print("hi from training_functions.py")
+import pandas as pd
+from agents import Agent
 import chess
 from utils import game_settings, constants
-from environment import Environ
-import pandas as pd
-import copy
+from environment.Environ import Environ
 import re
 from multiprocessing import Pool, cpu_count
 
@@ -16,7 +15,7 @@ def process_games_in_parallel(game_indices, worker_function, *args):
         results = pool.starmap(worker_function, [(chunk, *args) for chunk in chunks])
     return results
 
-def train_rl_agents(chess_data, est_q_val_table, white_q_table, black_q_table) -> Tuple[Agent, Agent]:
+def train_rl_agents(chess_data, est_q_val_table, white_q_table, black_q_table):
     game_indices = list(chess_data.index)
     results = process_games_in_parallel(game_indices, worker_train_games, chess_data, est_q_val_table, white_q_table, black_q_table)
 
@@ -79,14 +78,22 @@ def generate_q_est_df(chess_data: pd.DataFrame) -> pd.DataFrame:
         estimated_q_values (pd.DataFrame): DataFrame with estimated Q-values.
     """
     game_indices = list(chess_data.index)
+    print(f'starting processing with {len(game_indices)} games')
+
     results = process_games_in_parallel(game_indices, worker_generate_q_est, chess_data)
-    
+    print(f'received {len(results)} results from parallel processing')
+
     # Combine estimated Q-values from all processes
     estimated_q_values_list = results  # Each process returns a list of DataFrames
+    print(f"Number of result lists: {len(estimated_q_values_list)}")
     
     # Since each process returns a list of DataFrames, flatten the list
     estimated_q_values_flat = [df for sublist in estimated_q_values_list for df in sublist]
-    
+    print(f"Number of DataFrames after flattening: {len(estimated_q_values_flat)}")
+
+    if not estimated_q_values_flat:
+        raise ValueError("No DataFrames were generated during processing")
+
     # Concatenate all DataFrames
     estimated_q_values = pd.concat(estimated_q_values_flat)
     estimated_q_values.sort_index(inplace=True)
@@ -300,6 +307,8 @@ def worker_generate_q_est(game_indices_chunk, chess_data):
     Returns:
         list: List of DataFrames with estimated Q-values for the processed games.
     """
+    print(f"Worker starting with {len(game_indices_chunk)} games")
+
     estimated_q_values_list = []
     environ = Environ()
     engine = start_chess_engine()
@@ -308,12 +317,15 @@ def worker_generate_q_est(game_indices_chunk, chess_data):
         try:
             estimated_q_values_game = generate_q_est_df_one_game(chess_data, game_number, environ, engine)
             estimated_q_values_list.append(estimated_q_values_game)
+            print(f"Successfully processed game {game_number}")
         except Exception as e:
             # Handle exceptions appropriately
+            print(f"Error processing game {game_number}: {str(e)}")
             continue
-        environ.reset_environ()
 
+        environ.reset_environ()
     engine.quit()
+    print(f"Worker finished, processed {len(estimated_q_values_list)} games")
     return estimated_q_values_list
 
 def merge_q_tables(q_tables_list):

@@ -30,7 +30,7 @@ class Environ:
             self.turn_index -= 1
     ### end of undo_move
 
-    def load_chessboard_for_Q_est(self, analysis_results: list[dict]) -> None:
+    def load_chessboard_for_q_est(self, analysis_results) -> None:
         """
             Updates the chessboard state using the anticipated next move from the analysis results during training.
             This method is designed to work in conjunction with the Stockfish analysis during training. It extracts the 
@@ -45,8 +45,7 @@ class Environ:
         """
         # this is the anticipated chess move due to opponent's previous chess move. so if White plays Ne4, 
         # what is Black likely to play according to the engine?
-        anticipated_chess_move = analysis_results['anticipated_next_move']  # this has the form like this, Move.from_uci('e4f6')
-        move = chess.Move.from_uci(anticipated_chess_move)
+        move = analysis_results['anticipated_next_move']
         self.board.push(move)
     ### end of load_chessboard_for_Q_est
 

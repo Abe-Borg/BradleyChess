@@ -24,7 +24,7 @@ def receive_opponent_move(chess_move: str, environ) -> bool:
     environ.update_curr_state()
     return True
 
-def bootstrap_agent(chess_agent, existing_q_table_path: str) -> Agent.Agent:
+def bootstrap_agent(chess_agent, existing_q_table_path: str):
     chess_agent.q_table = pd.read_pickle(existing_q_table_path, compression = 'zip')
     chess_agent.is_trained = True
     return chess_agent
