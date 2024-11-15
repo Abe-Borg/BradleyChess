@@ -1,5 +1,5 @@
 from typing import Tuple
-from agents import Agent
+from agents.Agent import Agent
 import chess
 from utils import game_settings, constants
 from environment import Environ
