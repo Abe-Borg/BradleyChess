@@ -23,7 +23,7 @@ if __name__ == '__main__':
         print(traceback.format_exc())  # This will print the full traceback
         exit(1)
 
-    print(estimated_q_values.iloc[0, :5])
+    print(estimated_q_values.iloc[:, :10])
 
     # estimated_q_values.to_pickle(game_settings.est_q_vals_filepath_part_1, compression = 'zip')
     
