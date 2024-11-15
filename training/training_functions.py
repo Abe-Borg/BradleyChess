@@ -102,10 +102,10 @@ def generate_q_est_df(chess_data: pd.DataFrame) -> pd.DataFrame:
 
 def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.DataFrame:
     num_moves = chess_data.at[game_number, 'PlyCount']
-    # move_columns = [col for col in chess_data.columns if re.match(r'^[WB]\d+$', col)]
     estimated_q_values_game = pd.DataFrame(
         index=[game_number], columns=chess_data.columns,
-        dtype=float)
+        dtype=float
+    )
 
     estimated_q_values_game.iloc[0] = float('nan')
     
@@ -114,10 +114,7 @@ def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.D
 
     while moves_processed < num_moves:  
         curr_turn = curr_state['curr_turn']
-    
-        # if curr_turn not in move_columns:
-        #     print(f'invalid turn identifier: {curr_turn} for game {game_number}, skipping.')
-        #     break
+
         try:    
             chess_move = chess_data.at[game_number, curr_turn]
 
@@ -127,26 +124,30 @@ def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.D
                 environ.update_curr_state()
                 continue
 
-            apply_move_and_update_state(chess_move, game_number, environ)
-            
-            if moves_processed == num_moves - 1:
-                if environ.board.is_checkmate():
-                    est_qval = constants.CHESS_MOVE_VALUES['mate_score']
-                else:
-                    est_qval = find_estimated_q_value(environ, engine)
-            else:
-                est_qval = find_estimated_q_value(environ, engine)
-
-            estimated_q_values_game.at[game_number, curr_turn] = est_qval
-            moves_processed += 1
-            curr_state = environ.get_curr_state()
-
-            if environ.board.is_game_over() or not curr_state['legal_moves']:
+            if chess_move.endswith('#'):
+                estimated_q_values_game.at[game_number, curr_turn] = constants.CHESS_MOVE_VALUES['mate_score']
                 break
-        except chess.IllegalMoveError:
-            print(f"Invalid move '{chess_move}' for game {game_number}, turn {curr_turn}. Skipping.")
-            environ.update_curr_state()
-            continue
+            
+
+            try:
+                apply_move_and_update_state(chess_move, game_number, environ)
+                est_qval = find_estimated_q_value(environ, engine)
+                estimated_q_values_game.at[game_number, curr_turn] = est_qval
+                moves_processed += 1
+                
+                curr_state = environ.get_curr_state()
+                if environ.board.is_game_over() or not curr_state['legal_moves']:
+                    break
+                    
+            except chess.IllegalMoveError:
+                # Log error and continue to next move
+                print(f"Invalid move '{chess_move}' for game {game_number}, turn {curr_turn}")
+                est_qval = 0  # or some default value
+                estimated_q_values_game.at[game_number, curr_turn] = est_qval
+                
+        except Exception as e:
+            print(f"Error processing game {game_number}, turn {curr_turn}: {str(e)}")
+            break
     return estimated_q_values_game
 
 def find_estimated_q_value(environ, engine) -> int:
