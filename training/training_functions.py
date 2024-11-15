@@ -9,21 +9,25 @@ from multiprocessing import Pool, cpu_count
 def process_games_in_parallel(game_indices, worker_function, *args):
     num_processes = min(cpu_count(), len(game_indices))
     chunks = chunkify(game_indices, num_processes)
-
-    # Track which chunks were processed
-    processed_chunks = set()
-
+    
+    print(f"Creating {len(chunks)} chunks for parallel processing")
+    for i, chunk in enumerate(chunks):
+        print(f"Chunk {i} size: {len(chunk)}")
+    
     with Pool(processes=num_processes) as pool:
-        try:
-            results = pool.starmap(worker_function, [(chunk, *args) for chunk in chunks])
-            for i, result in enumerate(results):
-                processed_chunks.add(i)
-        except Exception as e:
-            print(f"Error in parallel processing: {str(e)}")
-            # Return processed results so far
-            return results, len(processed_chunks) == len(chunks)
+        results = pool.starmap(worker_function, [(chunk, *args) for chunk in chunks])
+    
+    # Verify results
+    print("Verifying results...")
+    valid_results = []
+    for i, result in enumerate(results):
+        if isinstance(result, pd.DataFrame):
+            valid_results.append(result)
+            print(f"Result {i} is valid DataFrame with shape {result.shape}")
+        else:
+            print(f"Result {i} is invalid: {type(result)}")
             
-    return results, True
+    return valid_results
 
 def train_rl_agents(chess_data, est_q_val_table, white_q_table, black_q_table):
     game_indices = list(chess_data.index)
@@ -72,84 +76,93 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
             break
 
 def generate_q_est_df(chess_data: pd.DataFrame) -> pd.DataFrame:
-    game_indices = list(chess_data.index)
+    print("\nInitial Validation:")
+    print(f"Chess data shape: {chess_data.shape}")
+    print(f"First few indices: {list(chess_data.index[:5])}")
+    print(f"Index type: {type(chess_data.index[0])}")
+    
+    # Ensure all indices are strings and properly formatted
+    game_indices = [str(idx) for idx in chess_data.index]
     print(f'Starting processing with {len(game_indices)} games')
     
-    results, is_complete = process_games_in_parallel(game_indices, worker_generate_q_est, chess_data)
+    # Create master DataFrame with exact structure
+    master_df = pd.DataFrame(
+        index=chess_data.index,  # Use original index
+        columns=chess_data.columns,
+        dtype=object
+    )
+    master_df['PlyCount'] = chess_data['PlyCount']
+    move_cols = [col for col in chess_data.columns if col.startswith(('W', 'B'))]
+    master_df[move_cols] = 0.0
     
-    if not results:
-        raise ValueError("No results generated during processing")
-        
-    # Flatten results maintaining order
-    estimated_q_values_list = []
-    for chunk_result in results:
-        estimated_q_values_list.extend(chunk_result)
-        
-    # Concatenate while preserving order
-    estimated_q_values = pd.concat(estimated_q_values_list)
-    estimated_q_values.sort_index(inplace=True)
+    # Split work into chunks
+    num_processes = min(cpu_count(), len(game_indices))
+    chunks = chunkify(game_indices, num_processes)
+    print(f"\nCreated {len(chunks)} chunks")
     
-    # Validate structure
-    if not validate_dataframe_alignment(chess_data, estimated_q_values):
-        print("Warning: DataFrames do not match in structure")
-        raise ValueError("Generated Q-value estimates do not match chess data structure")
+    # Process chunks in parallel
+    with Pool(processes=num_processes) as pool:
+        results = pool.starmap(
+            worker_generate_q_est, 
+            [(chunk, chess_data.loc[chunk]) for chunk in chunks]
+        )
         
-    # Check for completeness
-    if not is_complete:
-        print("Warning: Some games may not have been processed")
-        
-    return estimated_q_values
+    print(f'\nReceived {len(results)} results from parallel processing')
+    
+    # Combine results
+    for chunk_df in results:
+        if isinstance(chunk_df, pd.DataFrame):
+            # Update only move columns for games in this chunk
+            for game_idx in chunk_df.index:
+                if game_idx in master_df.index:
+                    master_df.loc[game_idx, move_cols] = chunk_df.loc[game_idx, move_cols]
+    
+    return master_df
 
 def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.DataFrame:
-    num_moves = chess_data.at[game_number, 'PlyCount']
-    estimated_q_values_game = pd.DataFrame(
-        index=[game_number], columns=chess_data.columns,
+    # Create DataFrame with same structure for this game
+    game_df = pd.DataFrame(
+        index=[game_number],
+        columns=chess_data.columns,
         dtype=float
     )
-
-    estimated_q_values_game.iloc[0] = float('nan')
+    game_df.fillna(0.0, inplace=True)
     
+    num_moves = chess_data.at[game_number, 'PlyCount']
     curr_state = environ.get_curr_state()
     moves_processed = 0
-
-    while moves_processed < num_moves:  
+    
+    while moves_processed < num_moves:
         curr_turn = curr_state['curr_turn']
-
-        try:    
+        try:
             chess_move = chess_data.at[game_number, curr_turn]
-
-            # Handle possible NaN or missing moves
-            if pd.isna(chess_move) or not isinstance(chess_move, str):
-                print(f"Missing or invalid move '{chess_move}' for turn '{curr_turn}' in game {game_number}. Skipping turn.")
-                environ.update_curr_state()
-                continue
-
+            if pd.isna(chess_move):
+                break
+                
+            # Special handling for checkmate moves
             if chess_move.endswith('#'):
-                estimated_q_values_game.at[game_number, curr_turn] = constants.CHESS_MOVE_VALUES['mate_score']
+                game_df.at[game_number, curr_turn] = constants.CHESS_MOVE_VALUES['mate_score']
                 break
             
-
             try:
                 apply_move_and_update_state(chess_move, game_number, environ)
                 est_qval = find_estimated_q_value(environ, engine)
-                estimated_q_values_game.at[game_number, curr_turn] = est_qval
+                game_df.at[game_number, curr_turn] = est_qval
                 moves_processed += 1
                 
                 curr_state = environ.get_curr_state()
                 if environ.board.is_game_over() or not curr_state['legal_moves']:
                     break
                     
-            except chess.IllegalMoveError:
-                # Log error and continue to next move
+            except chess.IllegalMoveError as e:
                 print(f"Invalid move '{chess_move}' for game {game_number}, turn {curr_turn}")
-                est_qval = 0  # or some default value
-                estimated_q_values_game.at[game_number, curr_turn] = est_qval
+                game_df.at[game_number, curr_turn] = 0  # or some default value
                 
         except Exception as e:
             print(f"Error processing game {game_number}, turn {curr_turn}: {str(e)}")
             break
-    return estimated_q_values_game
-
+            
+    return game_df
 def find_estimated_q_value(environ, engine) -> int:
     anticipated_next_move = analyze_board_state(environ.board, engine)
     environ.load_chessboard_for_q_est(anticipated_next_move)
@@ -211,7 +224,22 @@ def assign_points_to_q_table(chess_move: str, curr_turn: str, curr_q_val: int, c
     chess_agent.change_q_table_pts(chess_move, curr_turn, curr_q_val)
 
 def chunkify(lst, n):
-    return [lst[i::n] for i in range(n)]
+    size = len(lst) // n
+    remainder = len(lst) % n
+    chunks = []
+    start = 0
+    
+    for i in range(n):
+        end = start + size + (1 if i < remainder else 0)
+        chunks.append(lst[start:end])
+        start = end
+        
+    # Debug print
+    print("\nChunk sizes:")
+    for i, chunk in enumerate(chunks):
+        print(f"Chunk {i}: {len(chunk)} games")
+        
+    return chunks
 
 def worker_train_games(game_indices_chunk, chess_data, est_q_val_table, white_q_table, black_q_table):
     w_agent = Agent('W', q_table=white_q_table.copy())
@@ -229,20 +257,72 @@ def worker_train_games(game_indices_chunk, chess_data, est_q_val_table, white_q_
     engine.quit()
     return w_agent.q_table, b_agent.q_table
 
-def worker_generate_q_est(game_indices_chunk, chess_data):
-    estimated_q_values_list = []
+def worker_generate_q_est(game_indices_chunk, chunk_data):
+    print(f"Starting worker for {len(game_indices_chunk)} games")
+    
+    # Create DataFrame for this chunk
+    chunk_df = pd.DataFrame(
+        index=game_indices_chunk,
+        columns=chunk_data.columns,
+        dtype=object
+    )
+    # Copy PlyCount
+    chunk_df['PlyCount'] = chunk_data['PlyCount']
+    # Initialize move columns
+    move_cols = [col for col in chunk_data.columns if col.startswith(('W', 'B'))]
+    chunk_df[move_cols] = 0.0
+    
     environ = Environ()
     engine = start_chess_engine()
-    for game_number in game_indices_chunk:
-        try:
-            estimated_q_values_game = generate_q_est_df_one_game(chess_data, game_number, environ, engine)
-            estimated_q_values_list.append(estimated_q_values_game)
-        except Exception as e:
-            print(f"Error processing game {game_number}: {str(e)}")
-            continue
-        environ.reset_environ()
-    engine.quit()
-    return estimated_q_values_list
+    
+    try:
+        for game_number in game_indices_chunk:
+            try:
+                # Process one game
+                ply_count = chunk_data.at[game_number, 'PlyCount']
+                curr_state = environ.get_curr_state()
+                move_count = 0
+                
+                while move_count < ply_count:
+                    curr_turn = curr_state['curr_turn']
+                    chess_move = chunk_data.at[game_number, curr_turn]
+                    
+                    # Handle checkmate moves
+                    if isinstance(chess_move, str) and chess_move.endswith('#'):
+                        chunk_df.at[game_number, curr_turn] = constants.CHESS_MOVE_VALUES['mate_score']
+                        break
+                        
+                    try:
+                        # Make the move
+                        environ.board.push_san(chess_move)
+                        environ.update_curr_state()
+                        
+                        # Calculate position value
+                        est_qval = find_estimated_q_value(environ, engine)
+                        chunk_df.at[game_number, curr_turn] = est_qval
+                        
+                        move_count += 1
+                        curr_state = environ.get_curr_state()
+                        
+                        if environ.board.is_game_over():
+                            break
+                            
+                    except chess.IllegalMoveError:
+                        print(f"Invalid move '{chess_move}' in game {game_number}, turn {curr_turn}")
+                        chunk_df.at[game_number, curr_turn] = 0
+                        break
+                        
+            except Exception as e:
+                print(f"Error processing game {game_number}: {str(e)}")
+                continue
+            finally:
+                environ.reset_environ()
+                
+    finally:
+        engine.quit()
+        
+    print(f"Completed chunk processing for {len(game_indices_chunk)} games")
+    return chunk_df
 
 def merge_q_tables(q_tables_list):
     merged_q_table = pd.concat(q_tables_list, axis=0)
@@ -273,14 +353,14 @@ def handle_agent_turn(agent, chess_data, curr_state, game_number, environ, engin
 def validate_dataframe_alignment(chess_df: pd.DataFrame, q_est_df: pd.DataFrame) -> bool:
     """Validate that two DataFrames have identical structure"""
     
-    # Check index alignment
     if not chess_df.index.equals(q_est_df.index):
         print("Index mismatch between chess data and Q-value estimates")
         return False
         
-    # Check column alignment
     if not chess_df.columns.equals(q_est_df.columns):
         print("Column mismatch between chess data and Q-value estimates")
+        print(f"Missing columns in Q-est: {set(chess_df.columns) - set(q_est_df.columns)}")
+        print(f"Extra columns in Q-est: {set(q_est_df.columns) - set(chess_df.columns)}")
         return False
         
     # Check move columns specifically
@@ -291,3 +371,14 @@ def validate_dataframe_alignment(chess_df: pd.DataFrame, q_est_df: pd.DataFrame)
             return False
             
     return True
+
+def print_dataframe_differences(df1: pd.DataFrame, df2: pd.DataFrame):
+    """Print detailed differences between two DataFrames"""
+    print("\nDataFrame Comparison:")
+    print(f"DF1 shape: {df1.shape}, DF2 shape: {df2.shape}")
+    print(f"DF1 index: {df1.index[:5]}")
+    print(f"DF2 index: {df2.index[:5]}")
+    print(f"DF1 columns: {df1.columns[:5]}")
+    print(f"DF2 columns: {df2.columns[:5]}")
+    print(f"DF1 dtypes:\n{df1.dtypes[:5]}")
+    print(f"DF2 dtypes:\n{df2.dtypes[:5]}")
