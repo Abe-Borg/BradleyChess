@@ -3,11 +3,12 @@ import pandas as pd
 import time
 import sys
 import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import traceback
 from utils import game_settings
 import logging
 from training.training_functions import generate_q_est_df
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 logger = logging.getLogger("generate_q_est_df")
 logger.setLevel(logging.CRITICAL)

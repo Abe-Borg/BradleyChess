@@ -22,20 +22,13 @@ def process_games_in_parallel(game_indices: str, worker_function: Callable[..., 
     num_processes = min(cpu_count(), len(game_indices))
     chunks = chunkify(game_indices, num_processes)
     
-    logger.critical(f"Creating {len(chunks)} chunks for parallel processing")
-    for i, chunk in enumerate(chunks):
-        logger.critical(f"Chunk {i} size: {len(chunk)}")
-    
     with Pool(processes=num_processes) as pool:
         results = pool.starmap(worker_function, [(chunk, *args) for chunk in chunks])
     
-    # Verify results
-    logger.critical("Verifying results...")
     valid_results = []
     for i, result in enumerate(results):
         if isinstance(result, pd.DataFrame) or isinstance(result, tuple):
             valid_results.append(result)
-            logger.critical(f"Result {i} is valid DataFrame with shape {result.shape}")
         else:
             logger.critical(f"Result {i} is invalid: {type(result)}")
             
@@ -100,14 +93,8 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
             break
 
 def generate_q_est_df(chess_data: pd.DataFrame) -> pd.DataFrame:
-    logger.critical("\nInitial Validation:")
-    logger.critical(f"Chess data shape: {chess_data.shape}")
-    logger.critical(f"First few indices: {list(chess_data.index[:5])}")
-    logger.critical(f"Index type: {type(chess_data.index[0])}")
-    
     # Ensure all indices are strings and properly formatted
     game_indices = [str(idx) for idx in chess_data.index]
-    logger.critical(f'Starting processing with {len(game_indices)} games')
     
     # Create master DataFrame with exact structure
     master_df = pd.DataFrame(
@@ -121,16 +108,13 @@ def generate_q_est_df(chess_data: pd.DataFrame) -> pd.DataFrame:
     master_df[move_cols] = 0.0
     
     num_processes = min(cpu_count(), len(game_indices))
-    chunks = chunkify(game_indices, num_processes)
-    logger.critical(f"\nCreated {len(chunks)} chunks")    
+    chunks = chunkify(game_indices, num_processes)   
 
     with Pool(processes=num_processes) as pool:
         results = pool.starmap(
             worker_generate_q_est, 
             [(chunk, chess_data.loc[chunk]) for chunk in chunks]
-        )
-        
-    logger.critical(f'\nReceived {len(results)} results from parallel processing')   
+        )  
 
     for chunk_df in results:
         if isinstance(chunk_df, pd.DataFrame):
@@ -257,7 +241,6 @@ def chunkify(lst, n):
         chunks.append(lst[start:end])
         start = end
         
-    logger.critical("Chunk sizes: " + ", ".join([f"Chunk {i}: {len(chunk)} games" for i, chunk in enumerate(chunks)]))
     return chunks
 
 def worker_train_games(game_indices_chunk, chess_data, est_q_val_table, white_q_table, black_q_table):
@@ -278,8 +261,6 @@ def worker_train_games(game_indices_chunk, chess_data, est_q_val_table, white_q_
     return w_agent.q_table, b_agent.q_table
 
 def worker_generate_q_est(game_indices_chunk, chunk_data):
-    logger.critical(f"Starting worker for {len(game_indices_chunk)} games")
-    
     chunk_df = pd.DataFrame(
         index=game_indices_chunk,
         columns=chunk_data.columns,
@@ -333,8 +314,6 @@ def worker_generate_q_est(game_indices_chunk, chunk_data):
                 
     finally:
         engine.quit()
-        
-    logger.critical(f"Completed chunk processing for {len(game_indices_chunk)} games")
     return chunk_df
 
 def merge_q_tables(q_tables_list):

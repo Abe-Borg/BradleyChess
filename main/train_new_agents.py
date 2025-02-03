@@ -3,7 +3,6 @@ import pandas as pd
 import time
 from training import training_functions
 import logging
-from agents import Agent
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
