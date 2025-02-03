@@ -56,12 +56,12 @@ def train_rl_agents(chess_data, est_q_val_table, white_q_table, black_q_table):
     b_agent.is_trained = True
     return w_agent, b_agent
 
-def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ, engine):
+def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ):
     num_moves = chess_data.at[game_number, 'PlyCount']
     curr_state = environ.get_curr_state()
     while curr_state['turn_index'] < num_moves:
         try:
-            w_next_q_value, w_est_q_value = handle_agent_turn(
+            w_next_q_value = handle_agent_turn(
                 agent=w_agent,
                 chess_data=chess_data,
                 curr_state=curr_state,
@@ -80,7 +80,7 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
             break
 
         try:
-            b_next_q_value, b_est_q_value = handle_agent_turn(
+            b_next_q_value = handle_agent_turn(
                 agent=b_agent,
                 chess_data=chess_data,
                 curr_state=curr_state,
@@ -264,19 +264,17 @@ def worker_train_games(game_indices_chunk, chess_data, est_q_val_table, white_q_
     w_agent = Agent('W', q_table=white_q_table.copy())
     b_agent = Agent('B', q_table=black_q_table.copy())
     environ = Environ()
-    engine = start_chess_engine()
 
     for game_number in game_indices_chunk:
         try:
             w_curr_q_value = constants.initial_q_val
             b_curr_q_value = constants.initial_q_val
-            train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ, engine)
+            train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ)
         except Exception as e:
             logger.critical(f"Error processing game {game_number} in worker_train_games: {str(e)}")
             continue
 
         environ.reset_environ()
-    engine.quit()
     return w_agent.q_table, b_agent.q_table
 
 def worker_generate_q_est(game_indices_chunk, chunk_data):
@@ -365,7 +363,7 @@ def handle_agent_turn(agent, chess_data, curr_state, game_number, environ, curr_
     
     next_q_value = find_next_q_value(curr_q_value, agent.learn_rate, reward, agent.discount_factor, est_q_value)
     agent.change_q_table_pts(chess_move, curr_turn, next_q_value - curr_q_value)
-    return next_q_value, est_q_value
+    return next_q_value
 
 def validate_dataframe_alignment(chess_df: pd.DataFrame, q_est_df: pd.DataFrame) -> bool:
     """Validate that two DataFrames have identical structure"""

@@ -1,10 +1,12 @@
-from utils import game_settings, constants, helper_methods
+from utils import game_settings, constants
 import pandas as pd
 import time
 from training import training_functions
 import logging
-import sys
 from agents import Agent
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 logger = logging.getLogger("train_new_agents")
 logger.setLevel(logging.CRITICAL)
