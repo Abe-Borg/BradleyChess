@@ -1,7 +1,20 @@
-from utils import game_settings, constants
+from utils import game_settings, constants, helper_methods
 import pandas as pd
 import time
 from training import training_functions
+import logging
+import sys
+from agents import Agent
+
+logger = logging.getLogger("train_new_agents")
+logger.setLevel(logging.CRITICAL)
+if not logger.handlers:
+    fh = logging.FileHandler(game_settings.training_functions_logger_filepath)
+    fh.setLevel(logging.CRITICAL)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -18,7 +31,7 @@ if __name__ == '__main__':
     try:
         Bradley, Imman = training_functions.train_rl_agents(chess_data, estimated_q_values_table, white_q_table, black_q_table)
     except Exception as e:
-        print(f'training interrupted because of:  {e}')
+        logger.critical(f'training interrupted because of:  {e}')
         exit(1)
     
     white_q_table.to_pickle(game_settings.bradley_agent_q_table_path, compression = 'zip')
