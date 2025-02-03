@@ -168,13 +168,16 @@ def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.D
     return game_df
 
 def find_estimated_q_value(environ, engine) -> int:
-    anticipated_next_move = analyze_board_state(environ.board, engine)
+    # create temp board to avoid sending null move to chess engine
+    temp_board = chess.Board(environ.board.fen())
+    anticipated_next_move = analyze_board_state(temp_board, engine)
     environ.load_chessboard_for_q_est(anticipated_next_move)
 
     if environ.board.is_game_over() or not environ.get_legal_moves():
         environ.board.pop()
 
-    est_qval_analysis = analyze_board_state(environ.board, engine)
+    temp_board = chess.Board(environ.board.fen())
+    est_qval_analysis = analyze_board_state(temp_board, engine)
 
     if est_qval_analysis['mate_score'] is None:
         est_qval = est_qval_analysis['centipawn_score']

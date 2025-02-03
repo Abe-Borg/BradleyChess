@@ -24,7 +24,7 @@ if __name__ == '__main__':
     start_time = time.time()
     
     # !!!!!!!!!!!!!!!!! change this each time for new section of the database  !!!!!!!!!!!!!!!!!
-    chess_data = pd.read_pickle(game_settings.chess_games_filepath_part_1, compression='zip').head(20)
+    chess_data = pd.read_pickle(game_settings.chess_games_filepath_part_1, compression='zip')
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     try:
