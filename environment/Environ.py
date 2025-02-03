@@ -1,5 +1,5 @@
 import chess
-from utils import game_settings, constants
+from utils import constants
 from typing import Union, Dict, List
 
 class Environ:

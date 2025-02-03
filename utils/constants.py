@@ -1,4 +1,5 @@
 agent_vs_agent_num_games = 100
+
 CHESS_MOVE_VALUES: dict[str, int] = {
         'new_move': 100,
         'capture': 150,

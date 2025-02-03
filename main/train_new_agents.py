@@ -1,8 +1,7 @@
-from utils import helper_methods, game_settings, constants
+from utils import game_settings, constants
 import pandas as pd
 import time
 from training import training_functions
-from agents import Agent
 
 if __name__ == '__main__':
     start_time = time.time()

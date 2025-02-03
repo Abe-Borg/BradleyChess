@@ -1,7 +1,6 @@
 import pandas as pd
-from utils import game_settings, constants
+from utils import constants
 import random
-from agents import Agent
 
 def agent_selects_and_plays_chess_move(chess_agent, environ) -> str:
     curr_state = environ.get_curr_state() 
