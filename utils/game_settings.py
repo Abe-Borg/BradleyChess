@@ -23,6 +23,7 @@ helper_methods_logger_filepath = base_directory / ".." / "debug" / "helper_metho
 agent_logger_filepath = base_directory / ".." / "debug" / "agent_logger_file.txt"
 environ_logger_filepath = base_directory / ".." / "debug" / "environ_logger_file.txt"
 training_functions_logger_filepath = base_directory / ".." / "debug" / "training_functions_logger_file.txt"
+generate_q_est_logger_filepath = base_directory / ".." / "debug" / "generate_q_est_logger_file.txt"
 agent_vs_agent_logger_filepath = base_directory / ".." / "debug" / "agent_vs_agent_logger_file.txt"
 initial_training_results_filepath = base_directory / ".." / "training_results" / "initial_training_results.txt"
 additional_training_results_filepath = base_directory / ".." / "training_results" / "additional_training_results.txt"

@@ -4,10 +4,20 @@ import time
 import sys
 import os
 import traceback
+from utils import game_settings
+import logging
+from training.training_functions import generate_q_est_df
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from training.training_functions import generate_q_est_df
-from utils import game_settings, constants
+logger = logging.getLogger("generate_q_est_df")
+logger.setLevel(logging.CRITICAL)
+if not logger.handlers:
+    fh = logging.FileHandler(game_settings.generate_q_est_logger_filepath)
+    fh.setLevel(logging.CRITICAL)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -19,8 +29,8 @@ if __name__ == '__main__':
     try:
         estimated_q_values = generate_q_est_df(chess_data)
     except Exception as e:
-        print(f'q table generation interrupted because of:  {e}')
-        print(traceback.format_exc())  # This will print the full traceback
+        logger.critical(f'q table generation interrupted because of:  {e}')
+        logger.critical(traceback.format_exc())  # This will print the full traceback
         exit(1)
 
     print(estimated_q_values.iloc[:, :10])
