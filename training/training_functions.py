@@ -1,3 +1,4 @@
+from typing import Callable
 import pandas as pd
 from agents import Agent
 import chess
@@ -5,37 +6,50 @@ from utils import game_settings, constants
 from environment.Environ import Environ
 import re
 from multiprocessing import Pool, cpu_count
+import logging
 
-def process_games_in_parallel(game_indices, worker_function, *args):
+# Set up file-based logging (critical items only)
+logger = logging.getLogger("training_functions")
+logger.setLevel(logging.CRITICAL)
+if not logger.handlers:
+    fh = logging.FileHandler(str(game_settings.training_functions_logger_filepath))
+    fh.setLevel(logging.CRITICAL)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+def process_games_in_parallel(game_indices: str, worker_function: Callable[..., pd.DataFrame], *args):
     num_processes = min(cpu_count(), len(game_indices))
     chunks = chunkify(game_indices, num_processes)
     
-    print(f"Creating {len(chunks)} chunks for parallel processing")
+    logger.critical(f"Creating {len(chunks)} chunks for parallel processing")
     for i, chunk in enumerate(chunks):
-        print(f"Chunk {i} size: {len(chunk)}")
+        logger.critical(f"Chunk {i} size: {len(chunk)}")
     
     with Pool(processes=num_processes) as pool:
         results = pool.starmap(worker_function, [(chunk, *args) for chunk in chunks])
     
     # Verify results
-    print("Verifying results...")
+    logger.critical("Verifying results...")
     valid_results = []
     for i, result in enumerate(results):
-        if isinstance(result, pd.DataFrame):
+        if isinstance(result, pd.DataFrame) or isinstance(result, tuple):
             valid_results.append(result)
-            print(f"Result {i} is valid DataFrame with shape {result.shape}")
+            logger.critical(f"Result {i} is valid DataFrame with shape {result.shape}")
         else:
-            print(f"Result {i} is invalid: {type(result)}")
+            logger.critical(f"Result {i} is invalid: {type(result)}")
             
     return valid_results
 
 def train_rl_agents(chess_data, est_q_val_table, white_q_table, black_q_table):
     game_indices = list(chess_data.index)
+
     results = process_games_in_parallel(game_indices, worker_train_games, chess_data, est_q_val_table, white_q_table, black_q_table)
-    w_agent_q_tables = [result[0] for result in results]
-    b_agent_q_tables = [result[1] for result in results]
-    w_agent = Agent('W')
-    b_agent = Agent('B')
+    
+    w_agent_q_tables = [result[0] for result in results if isinstance(result, tuple)]
+    b_agent_q_tables = [result[1] for result in results if isinstance(result, tuple)]
+    w_agent = Agent('W', q_table=white_q_table.copy())
+    b_agent = Agent('B', q_table=black_q_table.copy())
     w_agent.q_table = merge_q_tables(w_agent_q_tables)
     b_agent.q_table = merge_q_tables(b_agent_q_tables)
     w_agent.is_trained = True
@@ -46,44 +60,54 @@ def train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w
     num_moves = chess_data.at[game_number, 'PlyCount']
     curr_state = environ.get_curr_state()
     while curr_state['turn_index'] < num_moves:
-        w_next_q_value, w_est_q_value = handle_agent_turn(
-            agent=w_agent,
-            chess_data=chess_data,
-            curr_state=curr_state,
-            game_number=game_number,
-            environ=environ,
-            engine=engine,
-            curr_q_value=w_curr_q_value,
-            est_q_val_table=est_q_val_table
-        )
-        w_curr_q_value = w_next_q_value
-        curr_state = environ.get_curr_state()
+        try:
+            w_next_q_value, w_est_q_value = handle_agent_turn(
+                agent=w_agent,
+                chess_data=chess_data,
+                curr_state=curr_state,
+                game_number=game_number,
+                environ=environ,
+                curr_q_value=w_curr_q_value,
+                est_q_val_table=est_q_val_table
+            )
+            w_curr_q_value = w_next_q_value
+            curr_state = environ.get_curr_state()
+        except Exception as e:
+            logger.critical(f'error during white agent turn in game {game_number}: {str(e)}')
+            break
+
         if environ.board.is_game_over():
             break
-        b_next_q_value, b_est_q_value = handle_agent_turn(
-            agent=b_agent,
-            chess_data=chess_data,
-            curr_state=curr_state,
-            game_number=game_number,
-            environ=environ,
-            engine=engine,
-            curr_q_value=b_curr_q_value,
-            est_q_val_table=est_q_val_table
-        )
-        b_curr_q_value = b_next_q_value
-        curr_state = environ.get_curr_state()
+
+        try:
+            b_next_q_value, b_est_q_value = handle_agent_turn(
+                agent=b_agent,
+                chess_data=chess_data,
+                curr_state=curr_state,
+                game_number=game_number,
+                environ=environ,
+                curr_q_value=b_curr_q_value,
+                est_q_val_table=est_q_val_table
+            )
+
+            b_curr_q_value = b_next_q_value
+            curr_state = environ.get_curr_state()
+        except Exception as e:
+            logger.critical(f'error during black agent turn in game {game_number}: {str(e)}')
+            break
+
         if environ.board.is_game_over():
             break
 
 def generate_q_est_df(chess_data: pd.DataFrame) -> pd.DataFrame:
-    print("\nInitial Validation:")
-    print(f"Chess data shape: {chess_data.shape}")
-    print(f"First few indices: {list(chess_data.index[:5])}")
-    print(f"Index type: {type(chess_data.index[0])}")
+    logger.critical("\nInitial Validation:")
+    logger.critical(f"Chess data shape: {chess_data.shape}")
+    logger.critical(f"First few indices: {list(chess_data.index[:5])}")
+    logger.critical(f"Index type: {type(chess_data.index[0])}")
     
     # Ensure all indices are strings and properly formatted
     game_indices = [str(idx) for idx in chess_data.index]
-    print(f'Starting processing with {len(game_indices)} games')
+    logger.critical(f'Starting processing with {len(game_indices)} games')
     
     # Create master DataFrame with exact structure
     master_df = pd.DataFrame(
@@ -91,28 +115,25 @@ def generate_q_est_df(chess_data: pd.DataFrame) -> pd.DataFrame:
         columns=chess_data.columns,
         dtype=object
     )
+
     master_df['PlyCount'] = chess_data['PlyCount']
     move_cols = [col for col in chess_data.columns if col.startswith(('W', 'B'))]
     master_df[move_cols] = 0.0
     
-    # Split work into chunks
     num_processes = min(cpu_count(), len(game_indices))
     chunks = chunkify(game_indices, num_processes)
-    print(f"\nCreated {len(chunks)} chunks")
-    
-    # Process chunks in parallel
+    logger.critical(f"\nCreated {len(chunks)} chunks")    
+
     with Pool(processes=num_processes) as pool:
         results = pool.starmap(
             worker_generate_q_est, 
             [(chunk, chess_data.loc[chunk]) for chunk in chunks]
         )
         
-    print(f'\nReceived {len(results)} results from parallel processing')
-    
-    # Combine results
+    logger.critical(f'\nReceived {len(results)} results from parallel processing')   
+
     for chunk_df in results:
         if isinstance(chunk_df, pd.DataFrame):
-            # Update only move columns for games in this chunk
             for game_idx in chunk_df.index:
                 if game_idx in master_df.index:
                     master_df.loc[game_idx, move_cols] = chunk_df.loc[game_idx, move_cols]
@@ -120,7 +141,6 @@ def generate_q_est_df(chess_data: pd.DataFrame) -> pd.DataFrame:
     return master_df
 
 def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.DataFrame:
-    # Create DataFrame with same structure for this game
     game_df = pd.DataFrame(
         index=[game_number],
         columns=chess_data.columns,
@@ -139,13 +159,12 @@ def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.D
             if pd.isna(chess_move):
                 break
                 
-            # Special handling for checkmate moves
             if chess_move.endswith('#'):
                 game_df.at[game_number, curr_turn] = constants.CHESS_MOVE_VALUES['mate_score']
                 break
             
             try:
-                apply_move_and_update_state(chess_move, game_number, environ)
+                apply_move_and_update_state(chess_move, environ)
                 est_qval = find_estimated_q_value(environ, engine)
                 game_df.at[game_number, curr_turn] = est_qval
                 moves_processed += 1
@@ -155,24 +174,29 @@ def generate_q_est_df_one_game(chess_data, game_number, environ, engine) -> pd.D
                     break
                     
             except chess.IllegalMoveError as e:
-                print(f"Invalid move '{chess_move}' for game {game_number}, turn {curr_turn}")
-                game_df.at[game_number, curr_turn] = 0  # or some default value
+                logger.critical(f"Invalid move '{chess_move}' for game {game_number}, turn {curr_turn}")
+                game_df.at[game_number, curr_turn] = 0
                 
         except Exception as e:
-            print(f"Error processing game {game_number}, turn {curr_turn}: {str(e)}")
+            logger.critical(f"Error processing game {game_number}, turn {curr_turn}: {str(e)}")
             break
             
     return game_df
+
 def find_estimated_q_value(environ, engine) -> int:
     anticipated_next_move = analyze_board_state(environ.board, engine)
     environ.load_chessboard_for_q_est(anticipated_next_move)
+
     if environ.board.is_game_over() or not environ.get_legal_moves():
         environ.board.pop()
+
     est_qval_analysis = analyze_board_state(environ.board, engine)
+
     if est_qval_analysis['mate_score'] is None:
         est_qval = est_qval_analysis['centipawn_score']
     else:
         est_qval = constants.CHESS_MOVE_VALUES['mate_score']
+
     environ.board.pop()
     return est_qval
 
@@ -185,10 +209,12 @@ def analyze_board_state(board, engine) -> dict:
     centipawn_score = None
     anticipated_next_move = None
     pov_score = analysis_result[0]['score'].white() if board.turn == chess.WHITE else analysis_result[0]['score'].black()
+    
     if pov_score.is_mate():
         mate_score = pov_score.mate()
     else:
         centipawn_score = pov_score.score()
+
     anticipated_next_move = analysis_result[0]['pv'][0]
     return {
         'mate_score': mate_score,
@@ -196,19 +222,16 @@ def analyze_board_state(board, engine) -> dict:
         'anticipated_next_move': anticipated_next_move
     }
 
-def apply_move_and_update_state(chess_move: str, game_number: str, environ) -> None:
+def apply_move_and_update_state(chess_move: str, environ) -> None:
     environ.board.push_san(chess_move)
     environ.update_curr_state()
 
 def get_reward(chess_move: str) -> int:
     total_reward = 0
-    # Check for piece development (N, R, B, Q)
     if re.search(r'[NRBQ]', chess_move):
         total_reward += constants.CHESS_MOVE_VALUES['piece_development']
-    # Check for capture
     if 'x' in chess_move:
         total_reward += constants.CHESS_MOVE_VALUES['capture']
-    # Check for promotion (with additional reward for queen promotion)
     if '=' in chess_move:
         total_reward += constants.CHESS_MOVE_VALUES['promotion']
         if '=Q' in chess_move:
@@ -234,11 +257,7 @@ def chunkify(lst, n):
         chunks.append(lst[start:end])
         start = end
         
-    # Debug print
-    print("\nChunk sizes:")
-    for i, chunk in enumerate(chunks):
-        print(f"Chunk {i}: {len(chunk)} games")
-        
+    logger.critical("Chunk sizes: " + ", ".join([f"Chunk {i}: {len(chunk)} games" for i, chunk in enumerate(chunks)]))
     return chunks
 
 def worker_train_games(game_indices_chunk, chess_data, est_q_val_table, white_q_table, black_q_table):
@@ -246,29 +265,30 @@ def worker_train_games(game_indices_chunk, chess_data, est_q_val_table, white_q_
     b_agent = Agent('B', q_table=black_q_table.copy())
     environ = Environ()
     engine = start_chess_engine()
+
     for game_number in game_indices_chunk:
         try:
             w_curr_q_value = constants.initial_q_val
             b_curr_q_value = constants.initial_q_val
             train_one_game(game_number, est_q_val_table, chess_data, w_agent, b_agent, w_curr_q_value, b_curr_q_value, environ, engine)
         except Exception as e:
+            logger.critical(f"Error processing game {game_number} in worker_train_games: {str(e)}")
             continue
+
         environ.reset_environ()
     engine.quit()
     return w_agent.q_table, b_agent.q_table
 
 def worker_generate_q_est(game_indices_chunk, chunk_data):
-    print(f"Starting worker for {len(game_indices_chunk)} games")
+    logger.critical(f"Starting worker for {len(game_indices_chunk)} games")
     
-    # Create DataFrame for this chunk
     chunk_df = pd.DataFrame(
         index=game_indices_chunk,
         columns=chunk_data.columns,
         dtype=object
     )
-    # Copy PlyCount
+
     chunk_df['PlyCount'] = chunk_data['PlyCount']
-    # Initialize move columns
     move_cols = [col for col in chunk_data.columns if col.startswith(('W', 'B'))]
     chunk_df[move_cols] = 0.0
     
@@ -287,20 +307,15 @@ def worker_generate_q_est(game_indices_chunk, chunk_data):
                     curr_turn = curr_state['curr_turn']
                     chess_move = chunk_data.at[game_number, curr_turn]
                     
-                    # Handle checkmate moves
                     if isinstance(chess_move, str) and chess_move.endswith('#'):
                         chunk_df.at[game_number, curr_turn] = constants.CHESS_MOVE_VALUES['mate_score']
                         break
                         
                     try:
-                        # Make the move
                         environ.board.push_san(chess_move)
                         environ.update_curr_state()
-                        
-                        # Calculate position value
                         est_qval = find_estimated_q_value(environ, engine)
                         chunk_df.at[game_number, curr_turn] = est_qval
-                        
                         move_count += 1
                         curr_state = environ.get_curr_state()
                         
@@ -308,12 +323,12 @@ def worker_generate_q_est(game_indices_chunk, chunk_data):
                             break
                             
                     except chess.IllegalMoveError:
-                        print(f"Invalid move '{chess_move}' in game {game_number}, turn {curr_turn}")
+                        logger.critical(f"Invalid move '{chess_move}' in game {game_number}, turn {curr_turn}")
                         chunk_df.at[game_number, curr_turn] = 0
                         break
                         
             except Exception as e:
-                print(f"Error processing game {game_number}: {str(e)}")
+                logger.critical(f"Error processing game {game_number} in worker_generate_q_est: {str(e)}")
                 continue
             finally:
                 environ.reset_environ()
@@ -321,7 +336,7 @@ def worker_generate_q_est(game_indices_chunk, chunk_data):
     finally:
         engine.quit()
         
-    print(f"Completed chunk processing for {len(game_indices_chunk)} games")
+    logger.critical(f"Completed chunk processing for {len(game_indices_chunk)} games")
     return chunk_df
 
 def merge_q_tables(q_tables_list):
@@ -330,22 +345,24 @@ def merge_q_tables(q_tables_list):
     merged_q_table.fillna(0, inplace=True)
     return merged_q_table
 
-def handle_agent_turn(agent, chess_data, curr_state, game_number, environ, engine, curr_q_value, est_q_val_table):
+def handle_agent_turn(agent, chess_data, curr_state, game_number, environ, curr_q_value, est_q_val_table):
     curr_turn = curr_state['curr_turn']
     chess_move = agent.choose_action(chess_data, curr_state, game_number)
     
     if chess_move not in environ.get_legal_moves():
-        print(f"Invalid move '{chess_move}' for game {game_number}, turn {curr_turn}. Skipping.")
+        logger.critical(f"Invalid move '{chess_move}' for game {game_number}, turn {curr_turn}. Skipping.")
         return curr_q_value, 0
 
-    apply_move_and_update_state(chess_move, game_number, environ)
+    apply_move_and_update_state(chess_move, environ)
     reward = get_reward(chess_move)
     curr_state = environ.get_curr_state()
+
     if environ.board.is_game_over() or not curr_state['legal_moves']:
         est_q_value = 0
     else:
         next_turn = curr_state['curr_turn']
         est_q_value = est_q_val_table.at[game_number, next_turn]
+    
     next_q_value = find_next_q_value(curr_q_value, agent.learn_rate, reward, agent.discount_factor, est_q_value)
     agent.change_q_table_pts(chess_move, curr_turn, next_q_value - curr_q_value)
     return next_q_value, est_q_value
