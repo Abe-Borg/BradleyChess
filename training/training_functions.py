@@ -1,4 +1,6 @@
-from typing import Callable
+# training_functions.py
+
+from typing import Callable, List
 import pandas as pd
 from agents import Agent
 import chess
@@ -18,7 +20,7 @@ if not logger.handlers:
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
-def process_games_in_parallel(game_indices: str, worker_function: Callable[..., pd.DataFrame], *args):
+def process_games_in_parallel(game_indices: List[str], worker_function: Callable[..., pd.DataFrame], *args):
     num_processes = min(cpu_count(), len(game_indices))
     chunks = chunkify(game_indices, num_processes)
     
@@ -188,7 +190,7 @@ def find_estimated_q_value(environ, engine) -> int:
     return est_qval
 
 def find_next_q_value(curr_qval: int, learn_rate: float, reward: int, discount_factor: float, est_qval: int) -> int:
-    return int(curr_qval + learn_rate * (reward + ((discount_factor * est_qval) - curr_qval)))
+    return curr_qval + learn_rate * (reward + ((discount_factor * est_qval) - curr_qval))
 
 def analyze_board_state(board, engine) -> dict:
     analysis_result = engine.analyse(board, game_settings.search_limit, multipv = constants.chess_engine_num_moves_to_return)

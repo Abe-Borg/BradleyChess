@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     try:
-        estimated_q_values = generate_q_est_df(chess_data)
+        estimated_q_values = generate_q_est_df(chess_data.head(1000))
     except Exception as e:
         logger.critical(f'q table generation interrupted because of:  {e}')
         logger.critical(traceback.format_exc())  # This will print the full traceback
