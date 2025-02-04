@@ -1,3 +1,5 @@
+# Agent.py
+
 from utils import helper_methods, constants
 import pandas as pd
 import numpy as np
@@ -12,9 +14,6 @@ class Agent:
         self.q_table = q_table if q_table is not None else pd.DataFrame()
 
     def choose_action(self, chess_data: pd.DataFrame, environ_state: Dict[str, Union[int, str, List[str]]], curr_game: str = 'Game 1') -> str:
-        if chess_data is None or chess_data.empty:
-            chess_data = {}
-
         legal_moves = environ_state['legal_moves']
         if not legal_moves:
             return ''

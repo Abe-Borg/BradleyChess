@@ -1,3 +1,5 @@
+# game_settings.py
+
 import chess.engine
 import pandas as pd
 from pathlib import Path
