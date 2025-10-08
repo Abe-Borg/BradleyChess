@@ -1,3 +1,4 @@
+# project name: BradleyChess
 # train_new_agents.py
 
 from utils import game_settings, constants

@@ -1,3 +1,4 @@
+# project name: BradleyChess
 # training_functions.py
 
 from typing import Callable, List
